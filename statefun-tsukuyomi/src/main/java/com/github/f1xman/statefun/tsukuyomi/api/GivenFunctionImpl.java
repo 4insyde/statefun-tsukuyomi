@@ -64,7 +64,7 @@ public class GivenFunctionImpl implements GivenFunction {
     @Override
     public void shutdown() {
         if (manager != null) {
-            // todo close manager
+            manager.stop();
         }
         if (tsukuyomi != null) {
             // todo close tsukuyomi

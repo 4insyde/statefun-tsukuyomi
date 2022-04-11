@@ -26,16 +26,16 @@ import static lombok.AccessLevel.PRIVATE;
 public class ModuleServer {
 
     private static final RequestReplyHandler EMPTY = new StatefulFunctions().requestReplyHandler();
+    private static Undertow server;
     private final HandlerSupplier handlerSupplier;
 
     public static ModuleServer start(int port) {
         HandlerSupplier handlerSupplier = new HandlerSupplier(EMPTY);
-        Undertow server =
-                Undertow.builder()
-                        .addHttpListener(port, "0.0.0.0")
-                        .setHandler(new UndertowHttpHandler(handlerSupplier))
-                        .setServerOption(ENABLE_HTTP2, true)
-                        .build();
+        server = Undertow.builder()
+                .addHttpListener(port, "0.0.0.0")
+                .setHandler(new UndertowHttpHandler(handlerSupplier))
+                .setServerOption(ENABLE_HTTP2, true)
+                .build();
         server.start();
         return new ModuleServer(handlerSupplier);
     }
@@ -48,6 +48,13 @@ public class ModuleServer {
     public void deployModule(ModuleDefinition moduleDefinition) {
         StatefulFunctions statefulFunctions = moduleDefinition.toStatefulFunctions();
         handlerSupplier.setHandler(statefulFunctions.requestReplyHandler());
+    }
+
+    public void stop() {
+        if (server != null) {
+            log.info("Stopping server");
+            server.stop();
+        }
     }
 
     @RequiredArgsConstructor

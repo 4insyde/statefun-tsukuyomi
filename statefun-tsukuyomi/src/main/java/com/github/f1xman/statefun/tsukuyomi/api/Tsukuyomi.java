@@ -23,8 +23,8 @@ public class Tsukuyomi {
         return StateSetterImpl.of(spec, value.get());
     }
 
-    public static ThenConfigurer when(GivenFunction givenFunction, Interactor... interactors) {
-        return ThenConfigurerImpl.of(givenFunction, interactors);
+    public static Then when(GivenFunction givenFunction, Interactor... interactors) {
+        return ThenImpl.of(givenFunction, interactors);
     }
 
     public static Interactor receives(Envelope envelope) {

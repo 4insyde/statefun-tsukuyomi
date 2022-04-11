@@ -7,7 +7,7 @@ import static lombok.AccessLevel.PRIVATE;
 
 @RequiredArgsConstructor(staticName = "of")
 @FieldDefaults(level = PRIVATE, makeFinal = true)
-public class ThenConfigurerImpl implements ThenConfigurer {
+public class ThenImpl implements Then {
 
     GivenFunction givenFunction;
     Interactor[] interactors;

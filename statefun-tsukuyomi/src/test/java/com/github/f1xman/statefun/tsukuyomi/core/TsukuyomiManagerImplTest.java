@@ -55,6 +55,8 @@ class TsukuyomiManagerImplTest {
             Collection<Envelope> received = client.getReceived();
             await().atMost(Duration.ofMinutes(1)).until(() -> !received.isEmpty());
             assertThat(received).containsOnly(expectedEnvelope);
+
+            tsukuyomiManager.stop();
         });
     }
 

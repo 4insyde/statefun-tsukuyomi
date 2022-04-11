@@ -12,15 +12,17 @@ public class TsukuyomiManagerImpl implements TsukuyomiManager {
     static final String FUNCTIONS_ENV = "FUNCTIONS";
     static final String ENDPOINT_ENV = "ENDPOINT";
     static final int ORIGINAL_DISPATCHER_PORT = 5555;
+    private ModuleServer server;
+    private DispatcherContainer dispatcher;
 
     @Override
     public TsukiyomiApi start(ModuleDefinition moduleDefinition) {
         int statefunPort = STATEFUN_PORT;
-        ModuleServer server = ModuleServer.start(statefunPort);
+        server = ModuleServer.start(statefunPort);
         server.deployModule(moduleDefinition);
 
         Testcontainers.exposeHostPorts(statefunPort);
-        DispatcherContainer dispatcher = DispatcherContainer.create();
+        dispatcher = DispatcherContainer.create();
         dispatcher.addEnv(FUNCTIONS_ENV, moduleDefinition.generateFunctionsString());
         dispatcher.addEnv(ENDPOINT_ENV, String.format("http://host.testcontainers.internal:%d", statefunPort));
         dispatcher.withLogConsumer(new Slf4jLogConsumer(log));
@@ -33,5 +35,15 @@ public class TsukuyomiManagerImpl implements TsukuyomiManager {
         DispatcherClient client = new DispatcherClient(host, dispatcherPort);
         client.connect();
         return client;
+    }
+
+    @Override
+    public void stop() {
+        if (server != null) {
+            server.stop();
+        }
+        if (dispatcher != null) {
+            dispatcher.stop();
+        }
     }
 }
