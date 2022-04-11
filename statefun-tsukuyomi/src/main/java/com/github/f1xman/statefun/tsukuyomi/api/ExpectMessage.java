@@ -13,7 +13,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 @RequiredArgsConstructor(staticName = "of")
 @FieldDefaults(level = PRIVATE, makeFinal = true)
-public class ExpectMessage implements ChangeMatcher {
+class ExpectMessage implements ChangeMatcher {
 
     Matcher<Envelope> matcher;
 

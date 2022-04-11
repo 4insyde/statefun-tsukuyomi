@@ -5,7 +5,7 @@ import org.apache.flink.statefun.sdk.java.TypeName;
 
 import java.util.Optional;
 
-public interface Interactor {
+interface Interactor {
 
     Optional<TypeName> getCollaborator();
 

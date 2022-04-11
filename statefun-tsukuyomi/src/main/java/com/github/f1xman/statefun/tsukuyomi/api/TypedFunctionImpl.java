@@ -11,7 +11,7 @@ import static lombok.AccessLevel.PRIVATE;
 @RequiredArgsConstructor(staticName = "of")
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 @Getter
-public class TypedFunctionImpl implements TypedFunction {
+class TypedFunctionImpl implements TypedFunction {
 
     TypeName typeName;
     StatefulFunction instance;

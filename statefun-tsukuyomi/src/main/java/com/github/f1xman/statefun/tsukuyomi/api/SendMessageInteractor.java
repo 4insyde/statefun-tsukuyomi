@@ -12,7 +12,7 @@ import static lombok.AccessLevel.PRIVATE;
 
 @RequiredArgsConstructor(staticName = "of")
 @FieldDefaults(level = PRIVATE, makeFinal = true)
-public class SendMessageInteractor implements Interactor {
+class SendMessageInteractor implements Interactor {
 
     Envelope envelope;
 

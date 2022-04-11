@@ -19,7 +19,7 @@ import static lombok.AccessLevel.PRIVATE;
 
 @RequiredArgsConstructor(staticName = "of")
 @FieldDefaults(level = PRIVATE, makeFinal = true)
-public class GivenFunctionImpl implements GivenFunction {
+class GivenFunctionImpl implements GivenFunction {
 
     TypedFunction typedFunction;
     StateSetter<?>[] stateSetters;
