@@ -2,7 +2,7 @@ package com.github.f1xman.statefun.tsukuyomi.api;
 
 import com.github.f1xman.statefun.tsukuyomi.core.ModuleDefinition;
 import com.github.f1xman.statefun.tsukuyomi.core.StateSetter;
-import com.github.f1xman.statefun.tsukuyomi.core.TsukiyomiApi;
+import com.github.f1xman.statefun.tsukuyomi.core.TsukuyomiApi;
 import com.github.f1xman.statefun.tsukuyomi.core.TsukuyomiManager;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -25,10 +25,13 @@ class GivenFunctionImpl implements GivenFunction {
     StateSetter<?>[] stateSetters;
     TsukuyomiManager manager;
     @NonFinal
-    TsukiyomiApi tsukuyomi;
+    TsukuyomiApi tsukuyomi;
 
     @Override
-    public void interact(Interactor[] interactors) {
+    public void interact(Interactor... interactors) {
+        if (tsukuyomi != null) {
+            throw new IllegalStateException("Already interacted. GivenFunction cannot be reused.");
+        }
         ModuleDefinition.FunctionDefinition functionDefinition = ModuleDefinition.FunctionDefinition.builder()
                 .typeName(typedFunction.getTypeName())
                 .instance(typedFunction.getInstance())
@@ -46,6 +49,9 @@ class GivenFunctionImpl implements GivenFunction {
 
     @Override
     public void expect(ChangeMatcher... matchers) {
+        if (tsukuyomi == null) {
+            throw new IllegalStateException("GivenFunction.interact(..) was not invoked");
+        }
         for (int order = 0; order < matchers.length; order++) {
             matchers[order].match(order, tsukuyomi::getReceived);
         }
@@ -65,9 +71,6 @@ class GivenFunctionImpl implements GivenFunction {
     public void shutdown() {
         if (manager != null) {
             manager.stop();
-        }
-        if (tsukuyomi != null) {
-            // todo close tsukuyomi
         }
     }
 }

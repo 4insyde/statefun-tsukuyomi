@@ -1,5 +1,6 @@
 package com.github.f1xman.statefun.tsukuyomi.core;
 
+import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.apache.flink.statefun.sdk.java.ValueSpec;
@@ -8,6 +9,7 @@ import static lombok.AccessLevel.PRIVATE;
 
 @RequiredArgsConstructor(staticName = "of")
 @FieldDefaults(level = PRIVATE, makeFinal = true)
+@EqualsAndHashCode
 public class StateSetterImpl<T> implements StateSetter<T> {
 
     ValueSpec<T> spec;

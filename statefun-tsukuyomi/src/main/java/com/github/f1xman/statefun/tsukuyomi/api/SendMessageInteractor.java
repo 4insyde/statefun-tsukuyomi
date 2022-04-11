@@ -1,6 +1,6 @@
 package com.github.f1xman.statefun.tsukuyomi.api;
 
-import com.github.f1xman.statefun.tsukuyomi.core.TsukiyomiApi;
+import com.github.f1xman.statefun.tsukuyomi.core.TsukuyomiApi;
 import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -24,7 +24,7 @@ class SendMessageInteractor implements Interactor {
     }
 
     @Override
-    public void interact(TsukiyomiApi tsukuyomi) {
+    public void interact(TsukuyomiApi tsukuyomi) {
         tsukuyomi.send(envelope);
     }
 }

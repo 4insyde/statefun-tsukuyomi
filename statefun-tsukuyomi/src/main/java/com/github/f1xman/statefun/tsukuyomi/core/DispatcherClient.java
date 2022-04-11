@@ -25,7 +25,7 @@ import static lombok.AccessLevel.PRIVATE;
 @Slf4j
 @RequiredArgsConstructor
 @FieldDefaults(level = PRIVATE, makeFinal = true)
-public class DispatcherClient implements TsukiyomiApi {
+public class DispatcherClient implements TsukuyomiApi {
 
     Queue<Envelope> received = new ConcurrentLinkedQueue<>();
 

@@ -34,7 +34,7 @@ class TsukuyomiManagerImplTest {
                     .functionUnderTest(ModuleDefinition.FunctionDefinition.of(Testee.TYPE, testee, List.of()))
                     .collaborator(COLLABORATOR)
                     .build();
-            TsukiyomiApi client = tsukuyomiManager.start(moduleDefinition);
+            TsukuyomiApi client = tsukuyomiManager.start(moduleDefinition);
             Envelope envelope = Envelope.builder()
                     .from(Envelope.NodeAddress.of(COLLABORATOR.asTypeNameString(), FUNCTION_ID))
                     .to(Envelope.NodeAddress.of(Testee.TYPE.asTypeNameString(), FUNCTION_ID))

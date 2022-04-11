@@ -1,10 +1,7 @@
 package com.github.f1xman.statefun.tsukuyomi.core;
 
 import com.github.f1xman.statefun.tsukuyomi.core.capture.MessageCaptureFunction;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Singular;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.apache.flink.statefun.sdk.java.*;
 
@@ -19,6 +16,7 @@ import static lombok.AccessLevel.PRIVATE;
 @Builder
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 @Getter
+@EqualsAndHashCode
 public class ModuleDefinition {
 
     FunctionDefinition functionUnderTest;
@@ -57,6 +55,7 @@ public class ModuleDefinition {
     @FieldDefaults(level = PRIVATE, makeFinal = true)
     @Getter
     @Builder
+    @EqualsAndHashCode
     public static class FunctionDefinition {
 
         TypeName typeName;

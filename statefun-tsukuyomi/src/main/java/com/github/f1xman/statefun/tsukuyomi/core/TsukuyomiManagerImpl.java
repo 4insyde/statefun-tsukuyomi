@@ -16,7 +16,7 @@ public class TsukuyomiManagerImpl implements TsukuyomiManager {
     private DispatcherContainer dispatcher;
 
     @Override
-    public TsukiyomiApi start(ModuleDefinition moduleDefinition) {
+    public TsukuyomiApi start(ModuleDefinition moduleDefinition) {
         int statefunPort = STATEFUN_PORT;
         server = ModuleServer.start(statefunPort);
         server.deployModule(moduleDefinition);
