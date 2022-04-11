@@ -1,13 +1,11 @@
 package com.github.f1xman.statefun.tsukuyomi;
 
 import com.github.f1xman.statefun.tsukuyomi.capture.MessageCaptureFunction;
-import org.apache.flink.statefun.sdk.java.Context;
-import org.apache.flink.statefun.sdk.java.StatefulFunction;
-import org.apache.flink.statefun.sdk.java.StatefulFunctions;
-import org.apache.flink.statefun.sdk.java.TypeName;
+import org.apache.flink.statefun.sdk.java.*;
 import org.apache.flink.statefun.sdk.java.message.Message;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -16,12 +14,18 @@ class ModuleDefinitionTest {
 
     static final TypeName COLLABORATOR_1 = TypeName.typeNameFromString("foo/collaborator-1");
     static final TypeName COLLABORATOR_2 = TypeName.typeNameFromString("foo/collaborator-2");
+    static final ValueSpec<String> VALUE_SPEC = ValueSpec.named("foo").withUtf8StringType();
 
     @Test
     void buildsStatefulFunctions() {
         StatefulFunction functionUnderTest = new FunctionUnderTest();
+        ModuleDefinition.FunctionDefinition functionDefinition = ModuleDefinition.FunctionDefinition.builder()
+                .typeName(FunctionUnderTest.TYPE)
+                .instance(functionUnderTest)
+                .stateSetters(List.of(StateSetterImpl.of(VALUE_SPEC, null)))
+                .build();
         ModuleDefinition moduleDefinition = ModuleDefinition.builder()
-                .functionUnderTest(ModuleDefinition.FunctionDefinition.of(FunctionUnderTest.TYPE, functionUnderTest))
+                .functionUnderTest(functionDefinition)
                 .collaborator(COLLABORATOR_1)
                 .collaborator(COLLABORATOR_2)
                 .build();
@@ -32,6 +36,7 @@ class ModuleDefinitionTest {
                 .hasEntrySatisfying(FunctionUnderTest.TYPE, s -> {
                     assertThat(s.typeName()).isEqualTo(FunctionUnderTest.TYPE);
                     assertThat(s.supplier().get()).isSameAs(functionUnderTest);
+                    assertThat(s.knownValues()).containsValue(VALUE_SPEC);
                 })
                 .hasEntrySatisfying(COLLABORATOR_1, s -> {
                     assertThat(s.typeName()).isEqualTo(COLLABORATOR_1);
@@ -46,7 +51,7 @@ class ModuleDefinitionTest {
     @Test
     void generatesStringOfFunctionTypesSeparatedBySemicolon() {
         ModuleDefinition moduleDefinition = ModuleDefinition.builder()
-                .functionUnderTest(ModuleDefinition.FunctionDefinition.of(FunctionUnderTest.TYPE, new FunctionUnderTest()))
+                .functionUnderTest(ModuleDefinition.FunctionDefinition.of(FunctionUnderTest.TYPE, new FunctionUnderTest(), List.of()))
                 .collaborator(COLLABORATOR_1)
                 .build();
         String expected = FunctionUnderTest.TYPE.asTypeNameString() + ";" + COLLABORATOR_1.asTypeNameString();

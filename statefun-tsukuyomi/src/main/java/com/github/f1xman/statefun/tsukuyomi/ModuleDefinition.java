@@ -6,11 +6,9 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Singular;
 import lombok.experimental.FieldDefaults;
-import org.apache.flink.statefun.sdk.java.StatefulFunction;
-import org.apache.flink.statefun.sdk.java.StatefulFunctionSpec;
-import org.apache.flink.statefun.sdk.java.StatefulFunctions;
-import org.apache.flink.statefun.sdk.java.TypeName;
+import org.apache.flink.statefun.sdk.java.*;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -31,6 +29,7 @@ public class ModuleDefinition {
         StatefulFunctionSpec functionUnderTestSpec = StatefulFunctionSpec
                 .builder(functionUnderTest.getTypeName())
                 .withSupplier(functionUnderTest::getInstance)
+                .withValueSpecs(functionUnderTest.getValueSpecs())
                 .build();
         Stream<StatefulFunctionSpec> collaboratorSpecs = getCollaborators().stream()
                 .map(t -> StatefulFunctionSpec
@@ -57,11 +56,18 @@ public class ModuleDefinition {
     @RequiredArgsConstructor(staticName = "of")
     @FieldDefaults(level = PRIVATE, makeFinal = true)
     @Getter
+    @Builder
     public static class FunctionDefinition {
 
         TypeName typeName;
         StatefulFunction instance;
+        List<StateSetter<?>> stateSetters;
 
+        public ValueSpec<?>[] getValueSpecs() {
+            return stateSetters.stream()
+                    .map(StateSetter::getValueSpec)
+                    .toArray(ValueSpec[]::new);
+        }
     }
 
 }

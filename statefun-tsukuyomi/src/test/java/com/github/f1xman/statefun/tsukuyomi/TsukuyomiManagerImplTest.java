@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import java.time.Duration;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,7 +31,7 @@ class TsukuyomiManagerImplTest {
             TsukuyomiManagerImpl tsukuyomiManager = new TsukuyomiManagerImpl();
             Testee testee = new Testee();
             ModuleDefinition moduleDefinition = ModuleDefinition.builder()
-                    .functionUnderTest(ModuleDefinition.FunctionDefinition.of(Testee.TYPE, testee))
+                    .functionUnderTest(ModuleDefinition.FunctionDefinition.of(Testee.TYPE, testee, List.of()))
                     .collaborator(COLLABORATOR)
                     .build();
             TsukiyomiApi client = tsukuyomiManager.start(moduleDefinition);
