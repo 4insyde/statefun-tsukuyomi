@@ -1,6 +1,9 @@
 package com.github.f1xman.statefun.tsukuyomi.api;
 
-import com.github.f1xman.statefun.tsukuyomi.*;
+import com.github.f1xman.statefun.tsukuyomi.core.ModuleDefinition;
+import com.github.f1xman.statefun.tsukuyomi.core.StateSetter;
+import com.github.f1xman.statefun.tsukuyomi.core.TsukiyomiApi;
+import com.github.f1xman.statefun.tsukuyomi.core.TsukuyomiManager;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;

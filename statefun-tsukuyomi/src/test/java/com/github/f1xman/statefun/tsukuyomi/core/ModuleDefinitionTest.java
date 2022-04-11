@@ -1,6 +1,8 @@
-package com.github.f1xman.statefun.tsukuyomi;
+package com.github.f1xman.statefun.tsukuyomi.core;
 
 import com.github.f1xman.statefun.tsukuyomi.capture.MessageCaptureFunction;
+import com.github.f1xman.statefun.tsukuyomi.core.ModuleDefinition;
+import com.github.f1xman.statefun.tsukuyomi.core.StateSetterImpl;
 import org.apache.flink.statefun.sdk.java.*;
 import org.apache.flink.statefun.sdk.java.message.Message;
 import org.junit.jupiter.api.Test;

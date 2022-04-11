@@ -1,4 +1,4 @@
-package com.github.f1xman.statefun.tsukuyomi;
+package com.github.f1xman.statefun.tsukuyomi.core;
 
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;

@@ -1,4 +1,4 @@
-package com.github.f1xman.statefun.tsukuyomi;
+package com.github.f1xman.statefun.tsukuyomi.core;
 
 import com.github.f1xman.statefun.tsukuyomi.capture.Envelope;
 import lombok.Cleanup;

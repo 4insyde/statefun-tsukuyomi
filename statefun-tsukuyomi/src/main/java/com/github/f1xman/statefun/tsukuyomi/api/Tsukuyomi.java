@@ -1,8 +1,8 @@
 package com.github.f1xman.statefun.tsukuyomi.api;
 
-import com.github.f1xman.statefun.tsukuyomi.StateSetter;
-import com.github.f1xman.statefun.tsukuyomi.StateSetterImpl;
-import com.github.f1xman.statefun.tsukuyomi.TsukuyomiManagerImpl;
+import com.github.f1xman.statefun.tsukuyomi.core.StateSetter;
+import com.github.f1xman.statefun.tsukuyomi.core.StateSetterImpl;
+import com.github.f1xman.statefun.tsukuyomi.core.TsukuyomiManagerImpl;
 import com.github.f1xman.statefun.tsukuyomi.capture.Envelope;
 import org.apache.flink.statefun.sdk.java.StatefulFunction;
 import org.apache.flink.statefun.sdk.java.TypeName;
