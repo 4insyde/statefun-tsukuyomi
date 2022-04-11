@@ -2,6 +2,7 @@ package com.github.f1xman.statefun.tsukuyomi.api;
 
 import com.github.f1xman.statefun.tsukuyomi.StateSetter;
 import com.github.f1xman.statefun.tsukuyomi.StateSetterImpl;
+import com.github.f1xman.statefun.tsukuyomi.TsukuyomiManagerImpl;
 import com.github.f1xman.statefun.tsukuyomi.capture.Envelope;
 import org.apache.flink.statefun.sdk.java.StatefulFunction;
 import org.apache.flink.statefun.sdk.java.TypeName;
@@ -11,7 +12,7 @@ import org.hamcrest.Matcher;
 public class Tsukuyomi {
 
     public static GivenFunction given(TypedFunction function, StateSetter<?>... states) {
-        return GivenFunctionImpl.of(function, states);
+        return GivenFunctionImpl.of(function, states, new TsukuyomiManagerImpl());
     }
 
     public static TypedFunction function(TypeName type, StatefulFunction instance) {

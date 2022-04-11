@@ -13,6 +13,7 @@ public class TsukuyomiManagerImpl implements TsukuyomiManager {
     static final String ENDPOINT_ENV = "ENDPOINT";
     static final int ORIGINAL_DISPATCHER_PORT = 5555;
 
+    @Override
     public TsukiyomiApi start(ModuleDefinition moduleDefinition) {
         int statefunPort = STATEFUN_PORT;
         ModuleServer server = ModuleServer.start(statefunPort);

@@ -1,9 +1,6 @@
 package com.github.f1xman.statefun.tsukuyomi.api;
 
-import com.github.f1xman.statefun.tsukuyomi.ModuleDefinition;
-import com.github.f1xman.statefun.tsukuyomi.StateSetter;
-import com.github.f1xman.statefun.tsukuyomi.TsukiyomiApi;
-import com.github.f1xman.statefun.tsukuyomi.TsukuyomiManagerImpl;
+import com.github.f1xman.statefun.tsukuyomi.*;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
@@ -23,8 +20,7 @@ public class GivenFunctionImpl implements GivenFunction {
 
     TypedFunction typedFunction;
     StateSetter<?>[] stateSetters;
-    @NonFinal
-    TsukuyomiManagerImpl manager;
+    TsukuyomiManager manager;
     @NonFinal
     TsukiyomiApi tsukuyomi;
 
@@ -39,7 +35,6 @@ public class GivenFunctionImpl implements GivenFunction {
                 .functionUnderTest(functionDefinition)
                 .collaborators(collectCollaborators(interactors))
                 .build();
-        manager = new TsukuyomiManagerImpl();
         tsukuyomi = manager.start(moduleDefinition);
         for (Interactor interactor : interactors) {
             interactor.interact(tsukuyomi);
