@@ -8,8 +8,6 @@ import org.apache.flink.statefun.sdk.java.TypeName;
 import org.apache.flink.statefun.sdk.java.ValueSpec;
 import org.hamcrest.Matcher;
 
-import java.util.function.Supplier;
-
 public class Tsukuyomi {
 
     public static GivenFunction given(TypedFunction function, StateSetter<?>... states) {
@@ -20,7 +18,7 @@ public class Tsukuyomi {
         return TypedFunctionImpl.of(type, instance);
     }
 
-    public static <T> StateSetter<T> withState(ValueSpec<T> spec, Supplier<T> value) {
+    public static <T> StateSetter<T> withState(ValueSpec<T> spec, StateValue<T> value) {
         return StateSetterImpl.of(spec, value.get());
     }
 

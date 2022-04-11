@@ -11,6 +11,7 @@ import java.util.Base64;
 import java.util.concurrent.CompletableFuture;
 
 import static com.github.f1xman.statefun.tsukuyomi.api.StateValue.empty;
+import static com.github.f1xman.statefun.tsukuyomi.api.StateValue.havingValue;
 import static com.github.f1xman.statefun.tsukuyomi.api.Tsukuyomi.*;
 import static org.hamcrest.Matchers.is;
 
@@ -26,7 +27,8 @@ class TsukuyomiTest {
         Envelope expected = outgoingEnvelope();
         GivenFunction testee = given(
                 function(Testee.TYPE, new Testee()),
-                withState(Testee.VALUE, empty())
+                withState(Testee.FOO, empty()),
+                withState(Testee.BAR, havingValue("bar"))
         );
 
         when(
@@ -62,12 +64,14 @@ class TsukuyomiTest {
     static class Testee implements StatefulFunction {
 
         static TypeName TYPE = TypeName.typeNameFromString("foo/testee");
-        static ValueSpec<String> VALUE = ValueSpec.named("value").withUtf8StringType();
+        static ValueSpec<String> FOO = ValueSpec.named("foo").withUtf8StringType();
+        static ValueSpec<String> BAR = ValueSpec.named("bar").withUtf8StringType();
 
         @Override
         public CompletableFuture<Void> apply(Context context, Message message) {
             AddressScopedStorage storage = context.storage();
-            storage.set(VALUE, "foo");
+            storage.set(FOO, "foo");
+            storage.set(BAR, "bar");
             Message outgoingMessage = MessageBuilder.fromMessage(message)
                     .withTargetAddress(COLLABORATOR, context.self().id())
                     .build();
