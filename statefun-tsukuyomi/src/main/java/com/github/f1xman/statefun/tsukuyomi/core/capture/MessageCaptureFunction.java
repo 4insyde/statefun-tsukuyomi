@@ -1,4 +1,4 @@
-package com.github.f1xman.statefun.tsukuyomi.capture;
+package com.github.f1xman.statefun.tsukuyomi.core.capture;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.flink.statefun.sdk.java.Address;

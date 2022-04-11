@@ -1,6 +1,6 @@
 package com.github.f1xman.statefun.tsukuyomi.core;
 
-import com.github.f1xman.statefun.tsukuyomi.capture.MessageCaptureFunction;
+import com.github.f1xman.statefun.tsukuyomi.core.capture.MessageCaptureFunction;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

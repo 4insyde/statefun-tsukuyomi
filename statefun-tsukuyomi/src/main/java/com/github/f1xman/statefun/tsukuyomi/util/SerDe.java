@@ -1,4 +1,4 @@
-package com.github.f1xman.statefun.tsukuyomi;
+package com.github.f1xman.statefun.tsukuyomi.util;
 
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import lombok.SneakyThrows;

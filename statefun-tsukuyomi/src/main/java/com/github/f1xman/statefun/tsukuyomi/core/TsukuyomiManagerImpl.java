@@ -1,6 +1,6 @@
 package com.github.f1xman.statefun.tsukuyomi.core;
 
-import com.github.f1xman.statefun.tsukuyomi.testcontainers.DispatcherContainer;
+import com.github.f1xman.statefun.tsukuyomi.core.testcontainers.DispatcherContainer;
 import lombok.extern.slf4j.Slf4j;
 import org.testcontainers.Testcontainers;
 import org.testcontainers.containers.output.Slf4jLogConsumer;

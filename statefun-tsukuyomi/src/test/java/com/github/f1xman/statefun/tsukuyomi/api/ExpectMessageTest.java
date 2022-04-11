@@ -1,6 +1,6 @@
 package com.github.f1xman.statefun.tsukuyomi.api;
 
-import com.github.f1xman.statefun.tsukuyomi.capture.Envelope;
+import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
 import lombok.val;
 import org.apache.flink.statefun.sdk.java.types.Type;
 import org.apache.flink.statefun.sdk.java.types.TypeSerializer;

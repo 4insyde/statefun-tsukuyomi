@@ -1,6 +1,6 @@
 package com.github.f1xman.statefun.tsukuyomi.api;
 
-import com.github.f1xman.statefun.tsukuyomi.capture.Envelope;
+import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
 import org.apache.flink.statefun.sdk.java.*;
 import org.apache.flink.statefun.sdk.java.message.Message;
 import org.apache.flink.statefun.sdk.java.message.MessageBuilder;

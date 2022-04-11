@@ -1,4 +1,4 @@
-package com.github.f1xman.statefun.tsukuyomi.testcontainers;
+package com.github.f1xman.statefun.tsukuyomi.core.testcontainers;
 
 import lombok.NonNull;
 import org.testcontainers.containers.GenericContainer;

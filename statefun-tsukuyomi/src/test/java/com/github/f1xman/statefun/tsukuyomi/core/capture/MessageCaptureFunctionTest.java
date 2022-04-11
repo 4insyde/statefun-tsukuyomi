@@ -1,11 +1,8 @@
-package com.github.f1xman.statefun.tsukuyomi.capture;
+package com.github.f1xman.statefun.tsukuyomi.core.capture;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.github.f1xman.statefun.tsukuyomi.SerDe;
-import com.github.f1xman.statefun.tsukuyomi.capture.Egresses;
-import com.github.f1xman.statefun.tsukuyomi.capture.Envelope;
-import com.github.f1xman.statefun.tsukuyomi.capture.MessageCaptureFunction;
+import com.github.f1xman.statefun.tsukuyomi.util.SerDe;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
