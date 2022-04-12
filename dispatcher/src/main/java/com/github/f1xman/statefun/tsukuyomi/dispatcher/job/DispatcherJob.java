@@ -53,7 +53,7 @@ public class DispatcherJob implements FlinkDispatcherJob {
                 .map(t -> Envelope.fromJson(new String(t.getValue().toByteArray(), StandardCharsets.UTF_8)))
                 .addSink(new DispatcherSocketSink());
 
-        return env.executeAsync("zorbility");
+        return env.executeAsync("statefun-tsukuyomi");
     }
 
     private void bindFunctions(DispatcherConfig config, StatefulFunctionDataStreamBuilder statefunBuilder) {
