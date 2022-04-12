@@ -6,12 +6,14 @@ import org.apache.flink.statefun.sdk.java.message.Message;
 import org.apache.flink.statefun.sdk.java.message.MessageBuilder;
 import org.apache.flink.statefun.sdk.java.types.Types;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import java.util.concurrent.CompletableFuture;
 
 import static com.github.f1xman.statefun.tsukuyomi.api.StateValue.empty;
 import static com.github.f1xman.statefun.tsukuyomi.api.StateValue.havingValue;
 import static com.github.f1xman.statefun.tsukuyomi.api.Tsukuyomi.*;
+import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.hamcrest.Matchers.is;
 
 class TsukuyomiTest {
@@ -22,6 +24,7 @@ class TsukuyomiTest {
     static final String BAR = "bar";
 
     @Test
+    @Timeout(value = 1, unit = MINUTES)
     void exchangesMessages() {
         Envelope envelope = incomingEnvelope();
         Envelope expected = outgoingEnvelope();
@@ -43,7 +46,7 @@ class TsukuyomiTest {
         return Envelope.builder()
                 .from(Testee.TYPE, FUNCTION_ID)
                 .to(COLLABORATOR, FUNCTION_ID)
-                .data(Types.stringType(), BAR)
+                .data(Types.stringType(), HELLO + BAR)
                 .build();
     }
 
@@ -64,9 +67,10 @@ class TsukuyomiTest {
         @Override
         public CompletableFuture<Void> apply(Context context, Message message) {
             AddressScopedStorage storage = context.storage();
+            String incomingData = message.asUtf8String();
             String bar = storage.get(BAR).orElse("");
             Message outgoingMessage = MessageBuilder.forAddress(COLLABORATOR, context.self().id())
-                    .withValue(bar)
+                    .withValue(incomingData + bar)
                     .build();
             context.send(outgoingMessage);
             return context.done();
