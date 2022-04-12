@@ -2,14 +2,12 @@ package com.github.f1xman.statefun.tsukuyomi.api;
 
 import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
 import lombok.val;
-import org.apache.flink.statefun.sdk.java.types.Type;
-import org.apache.flink.statefun.sdk.java.types.TypeSerializer;
+import org.apache.flink.statefun.sdk.java.TypeName;
 import org.apache.flink.statefun.sdk.java.types.Types;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
-import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -73,15 +71,10 @@ class ExpectMessageTest {
     }
 
     private Envelope envelope() {
-        Type<String> stringType = Types.stringType();
-        TypeSerializer<String> serializer = stringType.typeSerializer();
         return Envelope.builder()
-                .from(Envelope.NodeAddress.of("foo/bar", "foobar"))
-                .to(Envelope.NodeAddress.of("foo/baz", "foobaz"))
-                .data(Envelope.Data.of(
-                        stringType.typeName().asTypeNameString(),
-                        Base64.getEncoder().encodeToString(serializer.serialize("foobarbaz").toByteArray())
-                ))
+                .from(TypeName.typeNameFromString("foo/bar"), "foobar")
+                .to(TypeName.typeNameFromString("foo/baz"), "foobaz")
+                .data(Types.stringType(), "foobarbaz")
                 .build();
     }
 

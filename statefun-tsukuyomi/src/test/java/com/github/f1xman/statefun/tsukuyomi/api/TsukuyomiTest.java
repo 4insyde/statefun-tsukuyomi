@@ -7,7 +7,6 @@ import org.apache.flink.statefun.sdk.java.message.MessageBuilder;
 import org.apache.flink.statefun.sdk.java.types.Types;
 import org.junit.jupiter.api.Test;
 
-import java.util.Base64;
 import java.util.concurrent.CompletableFuture;
 
 import static com.github.f1xman.statefun.tsukuyomi.api.StateValue.empty;
@@ -42,23 +41,17 @@ class TsukuyomiTest {
 
     private Envelope outgoingEnvelope() {
         return Envelope.builder()
-                .from(Envelope.NodeAddress.of(Testee.TYPE.asTypeNameString(), FUNCTION_ID))
-                .to(Envelope.NodeAddress.of(COLLABORATOR.asTypeNameString(), FUNCTION_ID))
-                .data(Envelope.Data.of(
-                        Types.stringType().typeName().asTypeNameString(),
-                        Base64.getEncoder().encodeToString(Types.stringType().typeSerializer().serialize(BAR).toByteArray())
-                ))
+                .from(Testee.TYPE, FUNCTION_ID)
+                .to(COLLABORATOR, FUNCTION_ID)
+                .data(Types.stringType(), BAR)
                 .build();
     }
 
     private Envelope incomingEnvelope() {
         return Envelope.builder()
-                .from(Envelope.NodeAddress.of(COLLABORATOR.asTypeNameString(), FUNCTION_ID))
-                .to(Envelope.NodeAddress.of(Testee.TYPE.asTypeNameString(), FUNCTION_ID))
-                .data(Envelope.Data.of(
-                        Types.stringType().typeName().asTypeNameString(),
-                        Base64.getEncoder().encodeToString(Types.stringType().typeSerializer().serialize(HELLO).toByteArray())
-                ))
+                .from(COLLABORATOR, FUNCTION_ID)
+                .to(Testee.TYPE, FUNCTION_ID)
+                .data(Types.stringType(), HELLO)
                 .build();
     }
 
