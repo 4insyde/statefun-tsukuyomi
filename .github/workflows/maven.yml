@@ -26,6 +26,8 @@ jobs:
         run: mvn -pl dispatcher compile
       - name: Run Dispatcher unit tests
         run: mvn -pl dispatcher test
+      - name: Package Dispatcher
+        run: mvn -pl dispatcher package
       - name: Build Dispatcher Docker image
         run: mvn -pl dispatcher docker:build
       - name: Compile Tsukuyomi
