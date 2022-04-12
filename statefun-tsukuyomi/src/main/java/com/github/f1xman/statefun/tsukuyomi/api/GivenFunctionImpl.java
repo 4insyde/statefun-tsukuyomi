@@ -53,7 +53,7 @@ class GivenFunctionImpl implements GivenFunction {
             throw new IllegalStateException("GivenFunction.interact(..) was not invoked");
         }
         for (int order = 0; order < matchers.length; order++) {
-            matchers[order].match(order, tsukuyomi::getReceived);
+            matchers[order].match(order, tsukuyomi);
         }
     }
 

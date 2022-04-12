@@ -52,8 +52,12 @@ class ModuleDefinitionTest {
 
     @Test
     void generatesStringOfFunctionTypesSeparatedBySemicolon() {
+        ModuleDefinition.FunctionDefinition functionDefinition = ModuleDefinition.FunctionDefinition.builder()
+                .typeName(FunctionUnderTest.TYPE)
+                .instance(new FunctionUnderTest())
+                .build();
         ModuleDefinition moduleDefinition = ModuleDefinition.builder()
-                .functionUnderTest(ModuleDefinition.FunctionDefinition.of(FunctionUnderTest.TYPE, new FunctionUnderTest(), List.of()))
+                .functionUnderTest(functionDefinition)
                 .collaborator(COLLABORATOR_1)
                 .build();
         String expected = FunctionUnderTest.TYPE.asTypeNameString() + ";" + COLLABORATOR_1.asTypeNameString();
@@ -61,6 +65,26 @@ class ModuleDefinitionTest {
         String actual = moduleDefinition.generateFunctionsString();
 
         assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void returnsStateAccessor() {
+        StatefulFunction functionUnderTest = new FunctionUnderTest();
+        List<StateSetter<?>> stateSetters = List.of(StateSetterImpl.of(VALUE_SPEC, null));
+        ModuleDefinition.FunctionDefinition functionDefinition = ModuleDefinition.FunctionDefinition.builder()
+                .typeName(FunctionUnderTest.TYPE)
+                .instance(functionUnderTest)
+                .stateSetters(stateSetters)
+                .build();
+        ModuleDefinition moduleDefinition = ModuleDefinition.builder()
+                .functionUnderTest(functionDefinition)
+                .collaborator(COLLABORATOR_1)
+                .collaborator(COLLABORATOR_2)
+                .build();
+
+        ManagedStateAccessor stateAccessor = moduleDefinition.getStateAccessor();
+
+        assertThat(stateAccessor).isNotNull();
     }
 
     private static class FunctionUnderTest implements StatefulFunction {

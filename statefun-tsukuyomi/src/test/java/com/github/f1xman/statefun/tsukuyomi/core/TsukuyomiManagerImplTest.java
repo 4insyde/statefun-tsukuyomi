@@ -32,8 +32,13 @@ class TsukuyomiManagerImplTest {
         Assertions.assertTimeoutPreemptively(Duration.ofMinutes(1), () -> {
             TsukuyomiManagerImpl tsukuyomiManager = new TsukuyomiManagerImpl();
             Testee testee = new Testee();
+            ModuleDefinition.FunctionDefinition functionDefinition = ModuleDefinition.FunctionDefinition.builder()
+                    .typeName(Testee.TYPE)
+                    .instance(testee)
+                    .stateSetters(List.of())
+                    .build();
             ModuleDefinition moduleDefinition = ModuleDefinition.builder()
-                    .functionUnderTest(ModuleDefinition.FunctionDefinition.of(Testee.TYPE, testee, List.of()))
+                    .functionUnderTest(functionDefinition)
                     .collaborator(COLLABORATOR)
                     .build();
             TsukuyomiApi client = tsukuyomiManager.start(moduleDefinition);

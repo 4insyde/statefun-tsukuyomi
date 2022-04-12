@@ -1,5 +1,6 @@
 package com.github.f1xman.statefun.tsukuyomi.api;
 
+import com.github.f1xman.statefun.tsukuyomi.core.TsukuyomiApi;
 import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -18,8 +19,8 @@ class ExpectMessage implements ChangeMatcher {
     Matcher<Envelope> matcher;
 
     @Override
-    public void match(int order, Supplier<Collection<Envelope>> receivedSupplier) {
-        Envelope envelope = getEnvelope(order, receivedSupplier);
+    public void match(int order, TsukuyomiApi tsukuyomi) {
+        Envelope envelope = getEnvelope(order, tsukuyomi::getReceived);
         assertThat(envelope, matcher);
     }
 

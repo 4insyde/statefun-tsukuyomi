@@ -32,9 +32,9 @@ public class TsukuyomiManagerImpl implements TsukuyomiManager {
 
         String host = dispatcher.getHost();
         Integer dispatcherPort = dispatcher.getMappedPort(ORIGINAL_DISPATCHER_PORT);
-        DispatcherClient client = new DispatcherClient(host, dispatcherPort);
+        SocketDispatcherClient client = new SocketDispatcherClient(host, dispatcherPort);
         client.connect();
-        return client;
+        return DispatcherBasedTsukuyomi.of(client, moduleDefinition.getStateAccessor());
     }
 
     @Override

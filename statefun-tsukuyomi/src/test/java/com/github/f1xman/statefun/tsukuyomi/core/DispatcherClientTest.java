@@ -37,7 +37,7 @@ class DispatcherClientTest {
             ExecutorService executor = Executors.newCachedThreadPool();
             AssertableSocket assertableSocket = new AssertableSocket(serverSocket);
             executor.execute(assertableSocket);
-            DispatcherClient client = new DispatcherClient(serverSocket.getInetAddress().getHostAddress(), serverSocket.getLocalPort());
+            DispatcherClient client = new SocketDispatcherClient(serverSocket.getInetAddress().getHostAddress(), serverSocket.getLocalPort());
 
             client.connect();
             client.send(expected);
@@ -68,7 +68,7 @@ class DispatcherClientTest {
                 e.printStackTrace();
             }
         });
-        DispatcherClient client = new DispatcherClient(serverSocket.getInetAddress().getHostAddress(), serverSocket.getLocalPort());
+        DispatcherClient client = new SocketDispatcherClient(serverSocket.getInetAddress().getHostAddress(), serverSocket.getLocalPort());
 
         client.connect();
         Collection<Envelope> actual = client.getReceived();

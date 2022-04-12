@@ -35,4 +35,8 @@ public class Tsukuyomi {
         return ExpectMessage.of(matcher);
     }
 
+    public static <T> ChangeMatcher expectState(ValueSpec<T> spec, Matcher<T> matcher) {
+        return ExpectState.of(spec, matcher);
+    }
+
 }

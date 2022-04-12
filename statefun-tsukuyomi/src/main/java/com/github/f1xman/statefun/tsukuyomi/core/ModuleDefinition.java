@@ -3,6 +3,7 @@ package com.github.f1xman.statefun.tsukuyomi.core;
 import com.github.f1xman.statefun.tsukuyomi.core.capture.MessageCaptureFunction;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import org.apache.flink.statefun.sdk.java.*;
 
 import java.util.List;
@@ -51,9 +52,11 @@ public class ModuleDefinition {
                 .collect(Collectors.joining(";"));
     }
 
-    @RequiredArgsConstructor(staticName = "of")
+    public ManagedStateAccessor getStateAccessor() {
+        return functionUnderTest.getStateAccessor();
+    }
+
     @FieldDefaults(level = PRIVATE, makeFinal = true)
-    @Builder
     @EqualsAndHashCode
     public static class FunctionDefinition {
 
@@ -61,6 +64,15 @@ public class ModuleDefinition {
         TypeName typeName;
         StatefulFunction instance;
         List<StateSetter<?>> stateSetters;
+        @NonFinal
+        ManagedStateFunctionWrapper wrapper;
+
+        @Builder
+        private FunctionDefinition(TypeName typeName, StatefulFunction instance, List<StateSetter<?>> stateSetters) {
+            this.typeName = typeName;
+            this.instance = instance;
+            this.stateSetters = stateSetters;
+        }
 
         public ValueSpec<?>[] getValueSpecs() {
             return stateSetters.stream()
@@ -69,7 +81,18 @@ public class ModuleDefinition {
         }
 
         public StatefulFunction getInstance() {
-            return ManagedStateFunctionWrapper.of(instance, stateSetters);
+            return wrapper();
+        }
+
+        private ManagedStateFunctionWrapper wrapper() {
+            if (wrapper == null) {
+                wrapper = ManagedStateFunctionWrapper.of(instance, stateSetters);
+            }
+            return wrapper;
+        }
+
+        public ManagedStateAccessor getStateAccessor() {
+            return wrapper();
         }
     }
 

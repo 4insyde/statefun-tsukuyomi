@@ -1,11 +1,8 @@
 package com.github.f1xman.statefun.tsukuyomi.api;
 
-import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
-
-import java.util.Collection;
-import java.util.function.Supplier;
+import com.github.f1xman.statefun.tsukuyomi.core.TsukuyomiApi;
 
 public interface ChangeMatcher {
 
-    void match(int order, Supplier<Collection<Envelope>> receivedSupplier);
+    void match(int order, TsukuyomiApi tsukuyomi);
 }

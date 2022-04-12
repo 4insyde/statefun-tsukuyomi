@@ -40,7 +40,8 @@ class TsukuyomiTest {
                 testee,
                 receives(envelope)
         ).then(
-                expectMessage(is(expected))
+                expectMessage(is(expected)),
+                expectState(Testee.FOO, is("foo"))
         );
     }
 
@@ -71,6 +72,7 @@ class TsukuyomiTest {
             AddressScopedStorage storage = context.storage();
             String incomingData = message.asUtf8String();
             String bar = storage.get(BAR).orElse("");
+            storage.set(FOO, "foo");
             Message outgoingMessage = MessageBuilder.forAddress(COLLABORATOR, context.self().id())
                     .withValue(incomingData + bar)
                     .build();

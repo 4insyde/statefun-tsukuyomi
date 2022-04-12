@@ -8,4 +8,6 @@ public interface TsukuyomiApi {
     void send(Envelope envelope);
 
     Collection<Envelope> getReceived();
+
+    ManagedStateAccessor getStateAccessor();
 }
