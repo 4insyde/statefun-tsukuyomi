@@ -94,7 +94,8 @@ import static org.hamcrest.Matchers.is;
             testee,
             receives(envelope)
         ).then(
-            expectMessage(is(expected))
+            expectMessage(is(expected)),
+            expectState(Testee.FOO, is("foo"))
         );
-    }
+   }
 ```
