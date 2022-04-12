@@ -36,19 +36,19 @@ import static org.hamcrest.Matchers.is;
 ### Have your function under test
 
 ```java
-    static class Testee implements StatefulFunction {
+static class Testee implements StatefulFunction {
 
     static TypeName TYPE = TypeName.typeNameFromString("foo/testee");
     static ValueSpec<String> FOO = ValueSpec.named("foo").withUtf8StringType();
-    static ValueSpec<String> BAR = ValueSpec.named(TsukuyomiTest.BAR).withUtf8StringType();
+    static ValueSpec<String> BAR = ValueSpec.named("bar").withUtf8StringType();
 
     @Override
     public CompletableFuture<Void> apply(Context context, Message message) {
         AddressScopedStorage storage = context.storage();
-        String incomingData = message.asUtf8String();
         String bar = storage.get(BAR).orElse("");
+        storage.set(FOO, "foo");
         Message outgoingMessage = MessageBuilder.forAddress(COLLABORATOR, context.self().id())
-                .withValue(incomingData + bar)
+                .withValue(message.asUtf8String() + bar)
                 .build();
         context.send(outgoingMessage);
         return context.done();
