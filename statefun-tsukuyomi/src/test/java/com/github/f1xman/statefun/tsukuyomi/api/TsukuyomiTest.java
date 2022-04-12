@@ -19,7 +19,8 @@ class TsukuyomiTest {
 
     static final TypeName COLLABORATOR = TypeName.typeNameFromString("foo/collaborator");
     static final String HELLO = "hello";
-    static final String FUNCTION_ID = "bar";
+    static final String FUNCTION_ID = "functionId";
+    static final String BAR = "bar";
 
     @Test
     void exchangesMessages() {
@@ -28,7 +29,7 @@ class TsukuyomiTest {
         GivenFunction testee = given(
                 function(Testee.TYPE, new Testee()),
                 withState(Testee.FOO, empty()),
-                withState(Testee.BAR, havingValue("bar"))
+                withState(Testee.BAR, havingValue(BAR))
         );
 
         when(
@@ -45,7 +46,7 @@ class TsukuyomiTest {
                 .to(Envelope.NodeAddress.of(COLLABORATOR.asTypeNameString(), FUNCTION_ID))
                 .data(Envelope.Data.of(
                         Types.stringType().typeName().asTypeNameString(),
-                        Base64.getEncoder().encodeToString(Types.stringType().typeSerializer().serialize(HELLO).toByteArray())
+                        Base64.getEncoder().encodeToString(Types.stringType().typeSerializer().serialize(BAR).toByteArray())
                 ))
                 .build();
     }
@@ -65,15 +66,14 @@ class TsukuyomiTest {
 
         static TypeName TYPE = TypeName.typeNameFromString("foo/testee");
         static ValueSpec<String> FOO = ValueSpec.named("foo").withUtf8StringType();
-        static ValueSpec<String> BAR = ValueSpec.named("bar").withUtf8StringType();
+        static ValueSpec<String> BAR = ValueSpec.named(TsukuyomiTest.BAR).withUtf8StringType();
 
         @Override
         public CompletableFuture<Void> apply(Context context, Message message) {
             AddressScopedStorage storage = context.storage();
-            storage.set(FOO, "foo");
-            storage.set(BAR, "bar");
-            Message outgoingMessage = MessageBuilder.fromMessage(message)
-                    .withTargetAddress(COLLABORATOR, context.self().id())
+            String bar = storage.get(BAR).orElse("");
+            Message outgoingMessage = MessageBuilder.forAddress(COLLABORATOR, context.self().id())
+                    .withValue(bar)
                     .build();
             context.send(outgoingMessage);
             return context.done();

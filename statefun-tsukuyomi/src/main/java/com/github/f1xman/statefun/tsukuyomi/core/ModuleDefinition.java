@@ -53,11 +53,11 @@ public class ModuleDefinition {
 
     @RequiredArgsConstructor(staticName = "of")
     @FieldDefaults(level = PRIVATE, makeFinal = true)
-    @Getter
     @Builder
     @EqualsAndHashCode
     public static class FunctionDefinition {
 
+        @Getter
         TypeName typeName;
         StatefulFunction instance;
         List<StateSetter<?>> stateSetters;
@@ -66,6 +66,10 @@ public class ModuleDefinition {
             return stateSetters.stream()
                     .map(StateSetter::getValueSpec)
                     .toArray(ValueSpec[]::new);
+        }
+
+        public StatefulFunction getInstance() {
+            return ManagedStateFunctionWrapper.of(instance, stateSetters);
         }
     }
 

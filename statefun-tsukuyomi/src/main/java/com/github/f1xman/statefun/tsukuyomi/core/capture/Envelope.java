@@ -3,10 +3,7 @@ package com.github.f1xman.statefun.tsukuyomi.core.capture;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.f1xman.statefun.tsukuyomi.util.SerDe;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.apache.flink.statefun.sdk.java.TypeName;
 import org.apache.flink.statefun.sdk.java.types.SimpleType;
@@ -21,6 +18,7 @@ import static lombok.AccessLevel.PRIVATE;
 @Builder(toBuilder = true)
 @Getter
 @EqualsAndHashCode
+@ToString
 public class Envelope implements Serializable {
 
     public static final Type<Envelope> TYPE = SimpleType.simpleImmutableTypeFrom(
@@ -54,6 +52,7 @@ public class Envelope implements Serializable {
     @FieldDefaults(level = PRIVATE, makeFinal = true)
     @Getter
     @EqualsAndHashCode
+    @ToString
     public static class NodeAddress implements Serializable {
 
         @JsonProperty("type")
@@ -67,6 +66,7 @@ public class Envelope implements Serializable {
     @FieldDefaults(level = PRIVATE, makeFinal = true)
     @Getter
     @EqualsAndHashCode
+    @ToString
     public static class Data implements Serializable {
 
         @JsonProperty("type")

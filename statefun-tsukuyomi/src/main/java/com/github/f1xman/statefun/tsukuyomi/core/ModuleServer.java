@@ -75,7 +75,7 @@ public class ModuleServer {
 
         private void onComplete(HttpServerExchange exchange, Slice responseBytes, Throwable ex) {
             if (ex != null) {
-                ex.printStackTrace(System.out);
+                log.error("Function invocation failed", ex);
                 exchange.getResponseHeaders().put(Headers.STATUS, 500);
                 exchange.endExchange();
                 return;

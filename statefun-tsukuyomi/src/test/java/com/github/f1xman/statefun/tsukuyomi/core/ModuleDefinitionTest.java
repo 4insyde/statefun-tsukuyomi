@@ -19,10 +19,12 @@ class ModuleDefinitionTest {
     @Test
     void buildsStatefulFunctions() {
         StatefulFunction functionUnderTest = new FunctionUnderTest();
+        List<StateSetter<?>> stateSetters = List.of(StateSetterImpl.of(VALUE_SPEC, null));
+        ManagedStateFunctionWrapper expectedManagedStateWrapper = ManagedStateFunctionWrapper.of(functionUnderTest, stateSetters);
         ModuleDefinition.FunctionDefinition functionDefinition = ModuleDefinition.FunctionDefinition.builder()
                 .typeName(FunctionUnderTest.TYPE)
                 .instance(functionUnderTest)
-                .stateSetters(List.of(StateSetterImpl.of(VALUE_SPEC, null)))
+                .stateSetters(stateSetters)
                 .build();
         ModuleDefinition moduleDefinition = ModuleDefinition.builder()
                 .functionUnderTest(functionDefinition)
@@ -35,7 +37,7 @@ class ModuleDefinitionTest {
         assertThat(statefulFunctions.functionSpecs())
                 .hasEntrySatisfying(FunctionUnderTest.TYPE, s -> {
                     assertThat(s.typeName()).isEqualTo(FunctionUnderTest.TYPE);
-                    assertThat(s.supplier().get()).isSameAs(functionUnderTest);
+                    assertThat(s.supplier().get()).isEqualTo(expectedManagedStateWrapper);
                     assertThat(s.knownValues()).containsValue(VALUE_SPEC);
                 })
                 .hasEntrySatisfying(COLLABORATOR_1, s -> {
