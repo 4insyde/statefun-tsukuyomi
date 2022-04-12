@@ -12,7 +12,7 @@ public class DispatcherContainer extends GenericContainer<DispatcherContainer> {
     }
 
     public static DispatcherContainer create() {
-        return new DispatcherContainer(DockerImageName.parse("statefun-tsukuyomi-dispatcher"))
+        return new DispatcherContainer(DockerImageName.parse("f1xman/statefun-tsukuyomi-dispatcher"))
                 .withExposedPorts(5005, 5555)
                 .waitingFor(Wait.forLogMessage(".*Job status is RUNNING.*", 1));
     }
