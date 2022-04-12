@@ -14,9 +14,12 @@ class ThenImpl implements Then {
 
     @Override
     public void then(ChangeMatcher... matchers) {
-        givenFunction.interact(interactors);
-        givenFunction.expect(matchers);
-        givenFunction.shutdown();
+        try {
+            givenFunction.interact(interactors);
+            givenFunction.expect(matchers);
+        } finally {
+            givenFunction.shutdown();
+        }
     }
 
 }
