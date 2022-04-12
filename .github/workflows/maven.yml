@@ -22,11 +22,15 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
           cache: maven
-      - name: Package Dispatcher
-        run: mvn -pl dispatcher package
+      - name: Compile Dispatcher
+        run: mvn -pl dispatcher compile
+      - name: Run Dispatcher unit tests
+        run: mvn -pl dispatcher test
       - name: Build Dispatcher Docker image
         run: mvn -pl dispatcher docker:build
-      - name: Unit test Statefun Dispatcher
-        run: mvn -pl statefun-dispatcher test --file pom.xml
-      - name: Integration test Statefun Dispatcher
-        run: mvn -P integration -pl statefun-dispatcher test --file pom.xml
+      - name: Compile Tsukuyomi
+        run: mvn -pl statefun-tsukuyomi compile
+      - name: Run Tsukuyomi unit tests
+        run: mvn -pl statefun-tsukuyomi test
+      - name: Run Tsukuyomi integration tests
+        run: mvn -P integration -pl tsukuyomi test
