@@ -94,7 +94,7 @@
                     <filter>${*}</filter>
                     <images>
                         <image>
-                            <name>f1xxan/statefun-tsukuyomi-dispatcher:${project.version}</name>
+                            <name>f1xman/statefun-tsukuyomi-dispatcher:${project.version}</name>
                         </image>
                     </images>
                 </configuration>
