@@ -22,5 +22,9 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
         cache: maven
-    - name: Build with Maven
+    - name: Unit test with Maven
+      run: mvn -B test --file pom.xml
+    - name: Integration test with Maven
+      run: mvn -P integration -B test --file pom.xml
+    - name: Package with Maven
       run: mvn -B package --file pom.xml
