@@ -1,6 +1,7 @@
 package com.github.f1xman.statefun.tsukuyomi.core;
 
 import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
+import com.github.f1xman.statefun.tsukuyomi.testutil.IntegrationTest;
 import org.apache.flink.statefun.sdk.java.Context;
 import org.apache.flink.statefun.sdk.java.StatefulFunction;
 import org.apache.flink.statefun.sdk.java.TypeName;
@@ -19,6 +20,7 @@ import java.util.concurrent.CompletableFuture;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
+@IntegrationTest
 class TsukuyomiManagerImplTest {
 
     static final TypeName COLLABORATOR = TypeName.typeNameFromString("foo/collaborator");

@@ -1,6 +1,7 @@
 package com.github.f1xman.statefun.tsukuyomi.api;
 
 import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
+import com.github.f1xman.statefun.tsukuyomi.testutil.IntegrationTest;
 import org.apache.flink.statefun.sdk.java.*;
 import org.apache.flink.statefun.sdk.java.message.Message;
 import org.apache.flink.statefun.sdk.java.message.MessageBuilder;
@@ -16,6 +17,7 @@ import static com.github.f1xman.statefun.tsukuyomi.api.Tsukuyomi.*;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.hamcrest.Matchers.is;
 
+@IntegrationTest
 class TsukuyomiTest {
 
     static final TypeName COLLABORATOR = TypeName.typeNameFromString("foo/collaborator");
