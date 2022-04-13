@@ -1,6 +1,5 @@
 package com.github.f1xman.statefun.tsukuyomi.dispatcher.job;
 
-import com.github.f1xman.statefun.tsukuyomi.dispatcher.config.StatefunModule;
 import com.github.f1xman.statefun.tsukuyomi.dispatcher.config.DispatcherConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -46,21 +45,35 @@ public class DispatcherJob implements FlinkDispatcherJob {
                 .withEgressId(CAPTURED_MESSAGES)
                 .withConfiguration(statefunConfig);
         bindFunctions(config, statefunBuilder);
+
+        Set<EgressIdentifier<TypedValue>> egressIdentifiers = config.getEgressIdentifiers();
+        egressIdentifiers.forEach(statefunBuilder::withEgressId);
+
         StatefulFunctionEgressStreams statefunStreams = statefunBuilder.build(env);
+
+        DispatcherSocketSink sink = new DispatcherSocketSink();
+        egressIdentifiers.forEach(e -> {
+            statefunStreams.getDataStreamForEgressId(e)
+                    .map(t -> Envelope.builder()
+                            .to(e.namespace(), e.name())
+                            .data(t)
+                            .build()
+                    )
+                    .addSink(sink);
+        });
 
         statefunStreams
                 .getDataStreamForEgressId(CAPTURED_MESSAGES)
                 .map(t -> Envelope.fromJson(new String(t.getValue().toByteArray(), StandardCharsets.UTF_8)))
-                .addSink(new DispatcherSocketSink());
+                .addSink(sink);
 
         return env.executeAsync("statefun-tsukuyomi");
     }
 
     private void bindFunctions(DispatcherConfig config, StatefulFunctionDataStreamBuilder statefunBuilder) {
-        StatefunModule module = config.getModule();
-        Set<FunctionType> functionTypes = module.getFunctionTypes();
+        Set<FunctionType> functionTypes = config.getFunctionTypes();
         for (FunctionType type : functionTypes) {
-            statefunBuilder.withRequestReplyRemoteFunction(requestReplyFunctionBuilder(type, module.getEndpoint()));
+            statefunBuilder.withRequestReplyRemoteFunction(requestReplyFunctionBuilder(type, config.getEndpoint()));
         }
     }
 

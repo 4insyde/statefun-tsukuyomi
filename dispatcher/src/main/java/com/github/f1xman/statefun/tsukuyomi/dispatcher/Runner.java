@@ -7,21 +7,27 @@ import com.github.f1xman.statefun.tsukuyomi.dispatcher.job.DispatcherJob;
 import com.github.f1xman.statefun.tsukuyomi.dispatcher.socket.DispatcherSocket;
 import com.github.f1xman.statefun.tsukuyomi.dispatcher.socket.DispatcherSocketImpl;
 import lombok.SneakyThrows;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.core.execution.JobClient;
 
 import java.net.URI;
 
+import static lombok.AccessLevel.PRIVATE;
+
 @Slf4j
+@FieldDefaults(level = PRIVATE, makeFinal = true)
 public class Runner {
 
-    static final String FUNCTIONS_ENV = "FUNCTIONS";
-    static final String ENDPOINT_ENV = "ENDPOINT";
+    static String FUNCTIONS_ENV = "FUNCTIONS";
+    static String ENDPOINT_ENV = "ENDPOINT";
+    static String EGRESSES_ENV = "EGRESSES";
 
     public static void main(String[] args) {
         String functions = System.getenv(FUNCTIONS_ENV);
         String endpoint = System.getenv(ENDPOINT_ENV);
-        StatefunModule module = StatefunModule.of(functions, URI.create(endpoint));
+        String egresses = System.getenv(EGRESSES_ENV);
+        StatefunModule module = StatefunModule.of(functions, URI.create(endpoint), egresses);
 
         DispatcherConfig config = DispatcherConfig.of(module);
         DispatcherSocket socket = DispatcherSocketImpl.start(Server.getDefaultInputServer().getPort());

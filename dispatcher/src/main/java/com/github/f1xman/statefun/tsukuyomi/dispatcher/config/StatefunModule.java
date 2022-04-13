@@ -16,20 +16,29 @@ import static lombok.AccessLevel.PRIVATE;
 @FieldDefaults(makeFinal = true, level = PRIVATE)
 public class StatefunModule {
 
-    static final String FUNCTION_TYPES_DELIMITER = ";";
-    static final String FUNCTION_NAMESPACE_DELIMITER = "/";
+    static String DELIMITER = ";";
+    static String FUNCTION_NAMESPACE_DELIMITER = "/";
     String functions;
     @Getter
     URI endpoint;
+    String egresses;
 
     public Set<FunctionType> getFunctionTypes() {
-        return Arrays.stream(functions.split(FUNCTION_TYPES_DELIMITER))
+        return Arrays.stream(functions.split(DELIMITER))
                 .map(f -> {
                     String[] parts = f.split(FUNCTION_NAMESPACE_DELIMITER);
                     String namespace = parts[0];
                     String type = parts[1];
                     return new FunctionType(namespace, type);
                 })
+                .collect(toSet());
+    }
+
+    public Set<String> getEgressIds() {
+        if (egresses == null) {
+            return Set.of();
+        }
+        return Arrays.stream(egresses.split(DELIMITER))
                 .collect(toSet());
     }
 }

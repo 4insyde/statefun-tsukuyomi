@@ -14,8 +14,10 @@ class DispatcherSocketSink extends RichSinkFunction<Envelope> implements Seriali
 
     @Override
     public void open(Configuration parameters) throws Exception {
-        DispatcherSocket socket = DispatcherSocketHolder.getSocket();
-        writer = socket.getWriter().get();
+        if (writer == null) {
+            DispatcherSocket socket = DispatcherSocketHolder.getSocket();
+            writer = socket.getWriter().get();
+        }
     }
 
     @Override

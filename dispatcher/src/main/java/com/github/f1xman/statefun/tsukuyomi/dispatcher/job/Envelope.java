@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.f1xman.statefun.tsukuyomi.dispatcher.SerDe;
 import com.google.protobuf.ByteString;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import static lombok.AccessLevel.PRIVATE;
 @FieldDefaults(makeFinal = true, level = PRIVATE)
 @Getter
 @EqualsAndHashCode
+@Builder
 public class Envelope {
 
     @JsonProperty("from")
@@ -40,6 +42,29 @@ public class Envelope {
         return SerDe.deserialize(json, Envelope.class);
     }
 
+    public static class EnvelopeBuilder {
+
+        NodeAddress from;
+        NodeAddress to;
+        Data data;
+
+        public EnvelopeBuilder from(String namespace, String name) {
+            this.from = NodeAddress.ofType(namespace, name);
+            return this;
+        }
+
+        public EnvelopeBuilder to(String namespace, String name) {
+            this.to = NodeAddress.ofType(namespace, name);
+            return this;
+        }
+
+        public EnvelopeBuilder data(TypedValue typedValue) {
+            this.data = Data.from(typedValue);
+            return this;
+        }
+
+    }
+
     @RequiredArgsConstructor(onConstructor_ = @JsonCreator)
     @FieldDefaults(makeFinal = true, level = PRIVATE)
     @Getter
@@ -50,6 +75,15 @@ public class Envelope {
         String type;
         @JsonProperty("id")
         String id;
+
+        public static NodeAddress of(String typeName) {
+            String[] parts = typeName.split(";");
+            return new NodeAddress(parts[0], parts[1]);
+        }
+
+        public static NodeAddress ofType(String namespace, String name) {
+            return new NodeAddress(namespace + "/" + name, null);
+        }
 
         public Address toAddress() {
             String[] parts = type.split("/");
@@ -70,6 +104,12 @@ public class Envelope {
         String type;
         @JsonProperty("value")
         String value;
+
+        public static Data from(TypedValue typedValue) {
+            byte[] value = typedValue.getValue().toByteArray();
+            String base64Value = Base64.getEncoder().encodeToString(value);
+            return new Data(typedValue.getTypename(), base64Value);
+        }
 
         public TypedValue toTypedValue() {
             return TypedValue.newBuilder()
