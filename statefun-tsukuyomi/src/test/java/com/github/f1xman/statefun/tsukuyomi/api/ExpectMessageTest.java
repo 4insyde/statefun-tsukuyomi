@@ -28,7 +28,7 @@ class ExpectMessageTest {
     @Test
     void throwsExceptionIfEnvelopeDoesNotMatch() {
         Envelope envelope = envelope();
-        Envelope notMatchingEnvelope = swap(envelope);
+        Envelope notMatchingEnvelope = copyFromOfTo(envelope);
         ExpectMessage expectMessage = ExpectMessage.of(notMatchingEnvelope, Target.Type.FUNCTION);
         when(tsukuyomi.getReceived()).thenReturn(List.of(envelope));
 
@@ -96,9 +96,8 @@ class ExpectMessageTest {
                 .build();
     }
 
-    private Envelope swap(Envelope originalEnvelope) {
+    private Envelope copyFromOfTo(Envelope originalEnvelope) {
         return originalEnvelope.toBuilder()
-                .to(originalEnvelope.getFrom())
                 .from(originalEnvelope.getTo())
                 .build();
     }
