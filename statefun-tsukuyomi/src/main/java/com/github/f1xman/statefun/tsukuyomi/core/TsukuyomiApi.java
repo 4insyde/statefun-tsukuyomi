@@ -10,4 +10,6 @@ public interface TsukuyomiApi {
     Collection<Envelope> getReceived();
 
     ManagedStateAccessor getStateAccessor();
+
+    boolean isStateUpdated();
 }

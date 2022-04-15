@@ -4,6 +4,7 @@ import com.github.f1xman.statefun.tsukuyomi.dispatcher.config.DispatcherConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.core.execution.JobClient;
 import org.apache.flink.statefun.flink.core.StatefulFunctionsConfig;
 import org.apache.flink.statefun.flink.core.message.RoutableMessage;
@@ -24,6 +25,7 @@ import static org.apache.flink.statefun.flink.datastream.RequestReplyFunctionBui
 
 @RequiredArgsConstructor(staticName = "of")
 @FieldDefaults(level = PRIVATE, makeFinal = true)
+@Slf4j
 public class DispatcherJob implements FlinkDispatcherJob {
 
     static final EgressIdentifier<TypedValue> CAPTURED_MESSAGES = new EgressIdentifier<>(
@@ -52,20 +54,25 @@ public class DispatcherJob implements FlinkDispatcherJob {
         StatefulFunctionEgressStreams statefunStreams = statefunBuilder.build(env);
 
         DispatcherSocketSink sink = new DispatcherSocketSink();
-        egressIdentifiers.forEach(e -> {
-            statefunStreams.getDataStreamForEgressId(e)
-                    .map(t -> Envelope.builder()
-                            .to(e.namespace(), e.name())
-                            .data(t)
-                            .build()
-                    )
-                    .addSink(sink);
-        });
-
-        statefunStreams
+        DataStream<Envelope> toFunctionEnvelopes = statefunStreams
                 .getDataStreamForEgressId(CAPTURED_MESSAGES)
-                .map(t -> Envelope.fromJson(new String(t.getValue().toByteArray(), StandardCharsets.UTF_8)))
-                .addSink(sink);
+                .map(t -> Envelope.fromJson(new String(t.getValue().toByteArray(), StandardCharsets.UTF_8)));
+
+        DataStream<Envelope> envelopes = egressIdentifiers.stream()
+                .peek(e -> log.info("Configuring custom egress {}/{}", e.namespace(), e.name()))
+                .map(e -> statefunStreams.getDataStreamForEgressId(e)
+                        .map(t -> {
+                                    log.info("Captured a message sent to egress {}/{}", e.namespace(), e.name());
+                                    return Envelope.builder()
+                                            .createdAt(System.nanoTime())
+                                            .to(e.namespace(), e.name())
+                                            .data(t)
+                                            .build();
+                                }
+                        ))
+                .map(s -> (DataStream<Envelope>) s)
+                .reduce(toFunctionEnvelopes, DataStream::union);
+        envelopes.addSink(sink);
 
         return env.executeAsync("statefun-tsukuyomi");
     }

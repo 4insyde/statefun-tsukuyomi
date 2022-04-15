@@ -6,4 +6,6 @@ import java.util.Optional;
 
 public interface ManagedStateAccessor {
     <T> Optional<T> getStateValue(ValueSpec<T> spec);
+
+    boolean isStateUpdated();
 }

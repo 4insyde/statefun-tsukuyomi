@@ -16,35 +16,46 @@ import org.apache.flink.statefun.sdk.java.testing.TestContext;
 import org.apache.flink.statefun.sdk.java.types.SimpleType;
 import org.apache.flink.statefun.sdk.java.types.Type;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Base64;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
 
 import static lombok.AccessLevel.PRIVATE;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
 
+@ExtendWith(MockitoExtension.class)
 class MessageCaptureFunctionTest {
 
     static final Address FROM = new Address(TypeName.typeNameFromString("foo/from"), "bar");
     static final Address TO = new Address(TypeName.typeNameFromString("foo/to"), "bar");
 
+    @Mock
+    TimestampProvider timestampProvider;
+
     @Test
     void wrapsIncomingMessageIntoEnvelopeAndSendsToEgress() throws Throwable {
         TestContext context = TestContext.forTargetWithCaller(TO, FROM);
-        MessageCaptureFunction testee = MessageCaptureFunction.INSTANCE;
+        MessageCaptureFunction testee = new MessageCaptureFunction(timestampProvider);
         Greeting greeting = new Greeting("Naruto");
+        long timestamp = System.nanoTime();
         Message message = MessageBuilder.forAddress(TO)
                 .withCustomType(Greeting.TYPE, greeting)
                 .build();
-        EgressMessage expected = EgressMessageBuilder.forEgress(Egresses.CAPTURED_MESSAGES)
-                .withCustomType(Envelope.TYPE, new Envelope(
-                        Envelope.NodeAddress.of(FROM.type().asTypeNameString(), FROM.id()),
-                        Envelope.NodeAddress.of(TO.type().asTypeNameString(), TO.id()),
-                        Envelope.Data.of(
-                                Greeting.TYPE.typeName().asTypeNameString(),
-                                Base64.getEncoder().encodeToString(SerDe.serialize(greeting))
-                        )
-                ))
+        Envelope envelope = Envelope.builder()
+                .createdAt(timestamp)
+                .from(FROM.type(), FROM.id())
+                .to(TO.type(), TO.id())
+                .data(Greeting.TYPE, greeting)
                 .build();
+        EgressMessage expected = EgressMessageBuilder.forEgress(Egresses.CAPTURED_MESSAGES)
+                .withCustomType(Envelope.TYPE, envelope)
+                .build();
+        given(timestampProvider.currentTimestamp()).willReturn(timestamp);
 
         testee.apply(context, message);
 

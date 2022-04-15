@@ -24,7 +24,7 @@ import static lombok.AccessLevel.PRIVATE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-class DispatcherClientTest {
+class SocketDispatcherClientTest {
 
     @Test
     void sendsEnvelope() throws IOException {
@@ -47,11 +47,13 @@ class DispatcherClientTest {
     }
 
     @Test
-    void receivesEnvelopes() throws IOException {
+    void receivesEnvelopesInOrder() throws IOException {
         Envelope expectedEnvelopeFoo = Envelope.builder()
+                .createdAt(System.nanoTime())
                 .from(Envelope.NodeAddress.of("foo", "id"))
                 .build();
         Envelope expectedEnvelopeBar = Envelope.builder()
+                .createdAt(System.nanoTime())
                 .from(Envelope.NodeAddress.of("bar", "id"))
                 .build();
         Envelope[] expected = {expectedEnvelopeFoo, expectedEnvelopeBar};
@@ -62,8 +64,8 @@ class DispatcherClientTest {
             try {
                 Socket socket = serverSocket.accept();
                 PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
-                writer.println(expectedEnvelopeFoo.toJsonAsString());
                 writer.println(expectedEnvelopeBar.toJsonAsString());
+                writer.println(expectedEnvelopeFoo.toJsonAsString());
             } catch (IOException e) {
                 e.printStackTrace();
             }

@@ -4,6 +4,7 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import org.apache.flink.statefun.sdk.java.AddressScopedStorage;
 import org.apache.flink.statefun.sdk.java.Context;
 import org.apache.flink.statefun.sdk.java.StatefulFunction;
@@ -26,6 +27,8 @@ public class ManagedStateFunctionWrapper implements StatefulFunction, ManagedSta
     ConcurrentMap<ValueSpec<?>, Optional<?>> latestStateValues = new ConcurrentHashMap<>();
     StatefulFunction function;
     List<StateSetter<?>> stateSetters;
+    @NonFinal
+    volatile boolean stateUpdated;
 
     @Override
     @SneakyThrows
@@ -42,10 +45,16 @@ public class ManagedStateFunctionWrapper implements StatefulFunction, ManagedSta
             ValueSpec<?> spec = stateSetter.getValueSpec();
             latestStateValues.put(spec, storage.get(spec));
         }
+        stateUpdated = true;
     }
 
     @Override
     public <T> Optional<T> getStateValue(ValueSpec<T> spec) {
         return (Optional<T>) latestStateValues.get(spec);
+    }
+
+    @Override
+    public boolean isStateUpdated() {
+        return stateUpdated;
     }
 }

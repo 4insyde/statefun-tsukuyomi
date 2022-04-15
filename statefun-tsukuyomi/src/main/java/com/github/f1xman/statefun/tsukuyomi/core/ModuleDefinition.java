@@ -8,9 +8,9 @@ import org.apache.flink.statefun.sdk.java.*;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.joining;
 import static lombok.AccessLevel.PRIVATE;
 
 @RequiredArgsConstructor
@@ -18,11 +18,14 @@ import static lombok.AccessLevel.PRIVATE;
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 @Getter
 @EqualsAndHashCode
+@ToString
 public class ModuleDefinition {
 
     FunctionDefinition functionUnderTest;
     @Singular
     Set<TypeName> collaborators;
+    @Singular
+    Set<TypeName> egresses;
 
     public StatefulFunctions toStatefulFunctions() {
         StatefulFunctionSpec functionUnderTestSpec = StatefulFunctionSpec
@@ -49,11 +52,17 @@ public class ModuleDefinition {
                         collaborators.stream()
                 )
                 .map(TypeName::asTypeNameString)
-                .collect(Collectors.joining(";"));
+                .collect(joining(";"));
     }
 
     public ManagedStateAccessor getStateAccessor() {
         return functionUnderTest.getStateAccessor();
+    }
+
+    public String generateEgressesString() {
+        return egresses.stream()
+                .map(TypeName::asTypeNameString)
+                .collect(joining(";"));
     }
 
     @FieldDefaults(level = PRIVATE, makeFinal = true)

@@ -1,20 +1,21 @@
 package com.github.f1xman.statefun.tsukuyomi.api;
 
+import com.github.f1xman.statefun.tsukuyomi.api.Target.Type;
 import com.github.f1xman.statefun.tsukuyomi.core.ModuleDefinition;
 import com.github.f1xman.statefun.tsukuyomi.core.StateSetter;
 import com.github.f1xman.statefun.tsukuyomi.core.TsukuyomiApi;
 import com.github.f1xman.statefun.tsukuyomi.core.TsukuyomiManager;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import org.apache.flink.statefun.sdk.java.TypeName;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
-import static java.util.stream.Collectors.toList;
+import static com.github.f1xman.statefun.tsukuyomi.api.Target.Type.EGRESS;
+import static com.github.f1xman.statefun.tsukuyomi.api.Target.Type.FUNCTION;
+import static java.util.stream.Collectors.*;
 import static lombok.AccessLevel.PRIVATE;
 
 @RequiredArgsConstructor(staticName = "of")
@@ -25,23 +26,36 @@ class GivenFunctionImpl implements GivenFunction {
     StateSetter<?>[] stateSetters;
     TsukuyomiManager manager;
     @NonFinal
+    @Setter
     TsukuyomiApi tsukuyomi;
 
     @Override
-    public void interact(Interactor... interactors) {
-        if (tsukuyomi != null) {
-            throw new IllegalStateException("Already interacted. GivenFunction cannot be reused.");
-        }
+    public void start(ChangeMatcher[] matchers) {
         ModuleDefinition.FunctionDefinition functionDefinition = ModuleDefinition.FunctionDefinition.builder()
                 .typeName(typedFunction.getTypeName())
                 .instance(typedFunction.getInstance())
                 .stateSetters(List.of(stateSetters))
                 .build();
+        Set<Target> targets = Arrays.stream(matchers)
+                .map(ChangeMatcher::getTarget)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(toSet());
+        Map<Type, Set<TypeName>> targetsByType = targets.stream()
+                .collect(
+                        groupingBy(Target::getType,
+                                mapping(Target::getTypeName,
+                                        toSet())));
         ModuleDefinition moduleDefinition = ModuleDefinition.builder()
                 .functionUnderTest(functionDefinition)
-                .collaborators(collectCollaborators(interactors))
+                .collaborators(targetsByType.get(FUNCTION))
+                .egresses(targetsByType.get(EGRESS))
                 .build();
         tsukuyomi = manager.start(moduleDefinition);
+    }
+
+    @Override
+    public void interact(Interactor[] interactors) {
         for (Interactor interactor : interactors) {
             interactor.interact(tsukuyomi);
         }
@@ -49,28 +63,24 @@ class GivenFunctionImpl implements GivenFunction {
 
     @Override
     public void expect(ChangeMatcher... matchers) {
-        if (tsukuyomi == null) {
-            throw new IllegalStateException("GivenFunction.interact(..) was not invoked");
-        }
-        for (int order = 0; order < matchers.length; order++) {
-            matchers[order].match(order, tsukuyomi);
-        }
-    }
+        DefinitionOfReady definitionOfReady = DefinitionOfReady.of(tsukuyomi);
+        Arrays.stream(matchers).forEach(m -> m.adjustDefinitionOfReady(definitionOfReady));
+        definitionOfReady.await();
 
-
-    @NotNull
-    private List<TypeName> collectCollaborators(Interactor[] interactors) {
-        return Arrays.stream(interactors)
-                .map(Interactor::getCollaborator)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(toList());
+        Map<Optional<Target>, List<ChangeMatcher>> matchersByTarget = Arrays.stream(matchers)
+                .collect(
+                        groupingBy(ChangeMatcher::getTarget,
+                                toList()));
+        for (List<ChangeMatcher> sameTargetMatchers : matchersByTarget.values()) {
+            for (int order = 0; order < sameTargetMatchers.size(); order++) {
+                ChangeMatcher orderedMatcher = sameTargetMatchers.get(order);
+                orderedMatcher.match(order, tsukuyomi);
+            }
+        }
     }
 
     @Override
-    public void shutdown() {
-        if (manager != null) {
-            manager.stop();
-        }
+    public void stop() {
+        manager.stop();
     }
 }

@@ -1,6 +1,9 @@
 package com.github.f1xman.statefun.tsukuyomi.api;
 
-import com.github.f1xman.statefun.tsukuyomi.core.*;
+import com.github.f1xman.statefun.tsukuyomi.core.ModuleDefinition;
+import com.github.f1xman.statefun.tsukuyomi.core.StateSetter;
+import com.github.f1xman.statefun.tsukuyomi.core.TsukuyomiApi;
+import com.github.f1xman.statefun.tsukuyomi.core.TsukuyomiManager;
 import org.apache.flink.statefun.sdk.java.Context;
 import org.apache.flink.statefun.sdk.java.StatefulFunction;
 import org.apache.flink.statefun.sdk.java.TypeName;
@@ -15,9 +18,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
@@ -25,9 +25,12 @@ import static org.mockito.BDDMockito.then;
 class GivenFunctionImplTest {
 
     static final TypeName COLLABORATOR = TypeName.typeNameFromString("foo/collaborator");
+    static final TypeName EGRESS = TypeName.typeNameFromString("foo/egress");
 
     @Mock
     TsukuyomiManager mockedTsukuyomiManager;
+    @Mock
+    StateSetter<String> mockedStateSetter;
     @Mock
     TsukuyomiApi mockedTsukuyomiApi;
     @Mock
@@ -36,90 +39,85 @@ class GivenFunctionImplTest {
     ChangeMatcher mockedChangeMatcherA;
     @Mock
     ChangeMatcher mockedChangeMatcherB;
+    @Mock
+    ChangeMatcher mockedChangeMatcherC;
 
     @Test
-    void startsManagerAndInteractsWithTsukuyomiApi() {
-        FooBar fooBar = new FooBar();
-        GivenFunctionImpl givenFunction = GivenFunctionImpl.of(
-                TypedFunctionImpl.of(FooBar.TYPE_NAME, fooBar),
-                new StateSetter[]{StateSetterImpl.of(FooBar.BAZ, "baz")},
+    void startsTsukuyomi() {
+        FooBar instance = new FooBar();
+        GivenFunctionImpl function = GivenFunctionImpl.of(
+                TypedFunctionImpl.of(FooBar.TYPE_NAME, instance),
+                new StateSetter[]{mockedStateSetter},
                 mockedTsukuyomiManager
         );
-        ModuleDefinition moduleDefinition = ModuleDefinition.builder()
-                .functionUnderTest(ModuleDefinition.FunctionDefinition.builder()
-                        .typeName(FooBar.TYPE_NAME)
-                        .instance(fooBar)
-                        .stateSetters(List.of(StateSetterImpl.of(FooBar.BAZ, "baz")))
-                        .build())
-                .collaborators(List.of(COLLABORATOR))
+        ModuleDefinition.FunctionDefinition functionDefinition = ModuleDefinition.FunctionDefinition.builder()
+                .typeName(FooBar.TYPE_NAME)
+                .instance(instance)
+                .stateSetters(List.of(mockedStateSetter))
                 .build();
-        given(mockedTsukuyomiManager.start(moduleDefinition)).willReturn(mockedTsukuyomiApi);
-        given(mockedInteractor.getCollaborator()).willReturn(Optional.of(COLLABORATOR));
+        ModuleDefinition moduleDefinition = ModuleDefinition.builder()
+                .functionUnderTest(functionDefinition)
+                .collaborator(COLLABORATOR)
+                .egress(EGRESS)
+                .build();
+        given(mockedChangeMatcherA.getTarget())
+                .willReturn(Optional.of(Target.of(COLLABORATOR, Target.Type.FUNCTION)));
+        given(mockedChangeMatcherB.getTarget())
+                .willReturn(Optional.of(Target.of(EGRESS, Target.Type.EGRESS)));
 
-        givenFunction.interact(mockedInteractor);
+        function.start(new ChangeMatcher[]{mockedChangeMatcherA, mockedChangeMatcherB});
+
+        then(mockedTsukuyomiManager).should().start(moduleDefinition);
+    }
+
+    @Test
+    void interacts() {
+        FooBar instance = new FooBar();
+        GivenFunctionImpl function = GivenFunctionImpl.of(
+                TypedFunctionImpl.of(FooBar.TYPE_NAME, instance),
+                new StateSetter[]{mockedStateSetter},
+                mockedTsukuyomiManager
+        );
+        function.setTsukuyomi(mockedTsukuyomiApi);
+
+        function.interact(new Interactor[]{mockedInteractor});
 
         then(mockedInteractor).should().interact(mockedTsukuyomiApi);
     }
 
     @Test
-    void throwsIllegalStateExceptionIfInteractInvokedMoreThanOnce() {
-        FooBar fooBar = new FooBar();
-        GivenFunctionImpl givenFunction = GivenFunctionImpl.of(
-                TypedFunctionImpl.of(FooBar.TYPE_NAME, fooBar),
-                new StateSetter[]{StateSetterImpl.of(FooBar.BAZ, "baz")},
+    void validatesExpectations() {
+        FooBar instance = new FooBar();
+        GivenFunctionImpl function = GivenFunctionImpl.of(
+                TypedFunctionImpl.of(FooBar.TYPE_NAME, instance),
+                new StateSetter[]{mockedStateSetter},
                 mockedTsukuyomiManager
         );
-        given(mockedTsukuyomiManager.start(any())).willReturn(mockedTsukuyomiApi);
+        function.setTsukuyomi(mockedTsukuyomiApi);
+        given(mockedChangeMatcherA.getTarget())
+                .willReturn(Optional.of(Target.of(COLLABORATOR, Target.Type.FUNCTION)));
+        given(mockedChangeMatcherB.getTarget())
+                .willReturn(Optional.of(Target.of(EGRESS, Target.Type.EGRESS)));
+        given(mockedChangeMatcherC.getTarget())
+                .willReturn(Optional.of(Target.of(COLLABORATOR, Target.Type.FUNCTION)));
 
-        assertThatThrownBy(() -> {
-            givenFunction.interact();
-            givenFunction.interact();
-        })
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("Already interacted. GivenFunction cannot be reused.");
+        function.expect(mockedChangeMatcherA, mockedChangeMatcherB, mockedChangeMatcherC);
+
+        then(mockedChangeMatcherA).should().match(0, mockedTsukuyomiApi);
+        then(mockedChangeMatcherB).should().match(0, mockedTsukuyomiApi);
+        then(mockedChangeMatcherC).should().match(1, mockedTsukuyomiApi);
     }
 
     @Test
-    void throwsIllegalStateExceptionExpectInvokedBeforeInteract() {
-        FooBar fooBar = new FooBar();
-        GivenFunctionImpl givenFunction = GivenFunctionImpl.of(
-                TypedFunctionImpl.of(FooBar.TYPE_NAME, fooBar),
-                new StateSetter[]{StateSetterImpl.of(FooBar.BAZ, "baz")},
+    void stopsTsukuyomi() {
+        FooBar instance = new FooBar();
+        GivenFunctionImpl function = GivenFunctionImpl.of(
+                TypedFunctionImpl.of(FooBar.TYPE_NAME, instance),
+                new StateSetter[]{mockedStateSetter},
                 mockedTsukuyomiManager
         );
 
-        assertThatThrownBy(givenFunction::expect)
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("GivenFunction.interact(..) was not invoked");
-    }
-
-    @Test
-    void invokesMatchersInGivenOrder() {
-        FooBar fooBar = new FooBar();
-        GivenFunctionImpl givenFunction = GivenFunctionImpl.of(
-                TypedFunctionImpl.of(FooBar.TYPE_NAME, fooBar),
-                new StateSetter[]{StateSetterImpl.of(FooBar.BAZ, "baz")},
-                mockedTsukuyomiManager
-        );
-        given(mockedTsukuyomiManager.start(any(ModuleDefinition.class))).willReturn(mockedTsukuyomiApi);
-
-        givenFunction.interact(mockedInteractor);
-        givenFunction.expect(mockedChangeMatcherA, mockedChangeMatcherB);
-
-        then(mockedChangeMatcherA).should().match(eq(0), any());
-        then(mockedChangeMatcherB).should().match(eq(1), any());
-    }
-
-    @Test
-    void stopsTsukuyomiManager() {
-        FooBar fooBar = new FooBar();
-        GivenFunctionImpl givenFunction = GivenFunctionImpl.of(
-                TypedFunctionImpl.of(FooBar.TYPE_NAME, fooBar),
-                new StateSetter[]{StateSetterImpl.of(FooBar.BAZ, "baz")},
-                mockedTsukuyomiManager
-        );
-
-        givenFunction.shutdown();
+        function.stop();
 
         then(mockedTsukuyomiManager).should().stop();
     }

@@ -5,14 +5,16 @@ import com.github.f1xman.statefun.tsukuyomi.testutil.IntegrationTest;
 import org.apache.flink.statefun.sdk.java.Context;
 import org.apache.flink.statefun.sdk.java.StatefulFunction;
 import org.apache.flink.statefun.sdk.java.TypeName;
+import org.apache.flink.statefun.sdk.java.message.EgressMessage;
+import org.apache.flink.statefun.sdk.java.message.EgressMessageBuilder;
 import org.apache.flink.statefun.sdk.java.message.Message;
 import org.apache.flink.statefun.sdk.java.message.MessageBuilder;
 import org.apache.flink.statefun.sdk.java.types.Types;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import java.time.Duration;
-import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -24,10 +26,12 @@ import static org.awaitility.Awaitility.await;
 class TsukuyomiManagerImplTest {
 
     static final TypeName COLLABORATOR = TypeName.typeNameFromString("foo/collaborator");
+    static final TypeName EGRESS = TypeName.typeNameFromString("foo/egress");
     static final String HELLO = "hello";
     static final String FUNCTION_ID = "bar";
 
     @Test
+    @Timeout(60)
     void startsTsukuyomiAndExchangesMessages() {
         Assertions.assertTimeoutPreemptively(Duration.ofMinutes(1), () -> {
             TsukuyomiManagerImpl tsukuyomiManager = new TsukuyomiManagerImpl();
@@ -40,25 +44,27 @@ class TsukuyomiManagerImplTest {
             ModuleDefinition moduleDefinition = ModuleDefinition.builder()
                     .functionUnderTest(functionDefinition)
                     .collaborator(COLLABORATOR)
+                    .egress(EGRESS)
                     .build();
             TsukuyomiApi client = tsukuyomiManager.start(moduleDefinition);
             Envelope envelope = Envelope.builder()
-                    .from(Envelope.NodeAddress.of(COLLABORATOR.asTypeNameString(), FUNCTION_ID))
-                    .to(Envelope.NodeAddress.of(Testee.TYPE.asTypeNameString(), FUNCTION_ID))
-                    .data(Envelope.Data.of(
-                            Types.stringType().typeName().asTypeNameString(),
-                            Base64.getEncoder().encodeToString(Types.stringType().typeSerializer().serialize(HELLO).toByteArray())
-                    ))
+                    .from(COLLABORATOR, FUNCTION_ID)
+                    .to(Testee.TYPE, FUNCTION_ID)
+                    .data(Types.stringType(), HELLO)
                     .build();
-            Envelope expectedEnvelope = envelope.toBuilder()
-                    .from(Envelope.NodeAddress.of(Testee.TYPE.asTypeNameString(), FUNCTION_ID))
-                    .to(Envelope.NodeAddress.of(COLLABORATOR.asTypeNameString(), FUNCTION_ID))
+            Envelope expectedToFunction = envelope.toBuilder()
+                    .from(Testee.TYPE, FUNCTION_ID)
+                    .to(COLLABORATOR, FUNCTION_ID)
+                    .build();
+            Envelope expectedToEgress = envelope.toBuilder()
+                    .from(null)
+                    .to(EGRESS, null)
                     .build();
 
-            client.send(expectedEnvelope);
+            client.send(envelope);
             Collection<Envelope> received = client.getReceived();
-            await().atMost(Duration.ofMinutes(1)).until(() -> !received.isEmpty());
-            assertThat(received).containsOnly(expectedEnvelope);
+            await().atMost(Duration.ofMinutes(1)).until(() -> received.size() >= 2);
+            assertThat(received).contains(expectedToFunction, expectedToEgress);
 
             tsukuyomiManager.stop();
         });
@@ -69,13 +75,15 @@ class TsukuyomiManagerImplTest {
         static TypeName TYPE = TypeName.typeNameFromString("foo/testee");
 
         @Override
-        public CompletableFuture<Void> apply(Context context, Message message) throws Throwable {
-            assertThat(message.isUtf8String()).isTrue();
-            assertThat(message.asUtf8String()).isEqualTo(HELLO);
-            Message outgoingMessage = MessageBuilder.fromMessage(message)
+        public CompletableFuture<Void> apply(Context context, Message message) {
+            Message toFunction = MessageBuilder.fromMessage(message)
                     .withTargetAddress(COLLABORATOR, context.self().id())
                     .build();
-            context.send(outgoingMessage);
+            context.send(toFunction);
+            EgressMessage toEgress = EgressMessageBuilder.forEgress(EGRESS)
+                    .withValue(message.asUtf8String())
+                    .build();
+            context.send(toEgress);
             return context.done();
         }
     }

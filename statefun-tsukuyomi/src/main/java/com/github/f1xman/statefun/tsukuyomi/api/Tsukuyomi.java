@@ -31,8 +31,12 @@ public class Tsukuyomi {
         return SendMessageInteractor.of(envelope);
     }
 
-    public static ChangeMatcher expectMessage(Matcher<Envelope> matcher) {
-        return ExpectMessage.of(matcher);
+    public static ChangeMatcher expectMessageToFunction(Envelope expected) {
+        return ExpectMessage.of(expected, Target.Type.FUNCTION);
+    }
+
+    public static ChangeMatcher expectMessageToEgress(Envelope expected) {
+        return ExpectMessage.of(expected, Target.Type.EGRESS);
     }
 
     public static <T> ChangeMatcher expectState(ValueSpec<T> spec, Matcher<T> matcher) {

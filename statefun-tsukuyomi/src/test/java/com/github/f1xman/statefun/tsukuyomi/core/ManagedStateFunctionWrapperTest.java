@@ -14,6 +14,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.when;
 
@@ -58,5 +59,22 @@ class ManagedStateFunctionWrapperTest {
         Optional<String> actual = wrapper.getStateValue(FOO);
 
         assertThat(actual).contains(expected);
+    }
+
+    @Test
+    void returnsFalseIfStateIsNotUpdated() {
+        ManagedStateFunctionWrapper wrapper = ManagedStateFunctionWrapper.of(statefulFunction, List.of());
+
+        assertThat(wrapper.isStateUpdated()).isFalse();
+    }
+
+    @Test
+    void returnsTrueIfStateIsUpdated() throws Throwable {
+        ManagedStateFunctionWrapper wrapper = ManagedStateFunctionWrapper.of(statefulFunction, List.of());
+        given(statefulFunction.apply(context, message)).willReturn(CompletableFuture.completedFuture(null));
+
+        wrapper.apply(context, message);
+
+        assertThat(wrapper.isStateUpdated()).isTrue();
     }
 }

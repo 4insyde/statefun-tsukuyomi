@@ -27,6 +27,10 @@ public class Runner {
         String functions = System.getenv(FUNCTIONS_ENV);
         String endpoint = System.getenv(ENDPOINT_ENV);
         String egresses = System.getenv(EGRESSES_ENV);
+        log.info("Configuring dispatcher using the following configuration" +
+                "\nFUNCTIONS: {}" +
+                "\nENDPOINT: {}" +
+                "\nEGRESSES: {}", functions, endpoint, egresses);
         StatefunModule module = StatefunModule.of(functions, URI.create(endpoint), egresses);
 
         DispatcherConfig config = DispatcherConfig.of(module);

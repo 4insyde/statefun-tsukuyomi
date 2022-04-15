@@ -12,6 +12,7 @@ public class TsukuyomiManagerImpl implements TsukuyomiManager {
     static final String FUNCTIONS_ENV = "FUNCTIONS";
     static final String ENDPOINT_ENV = "ENDPOINT";
     static final int ORIGINAL_DISPATCHER_PORT = 5555;
+    static final String EGRESSES_ENV = "EGRESSES";
     private ModuleServer server;
     private DispatcherContainer dispatcher;
 
@@ -25,6 +26,7 @@ public class TsukuyomiManagerImpl implements TsukuyomiManager {
         dispatcher = DispatcherContainer.create();
         dispatcher.addEnv(FUNCTIONS_ENV, moduleDefinition.generateFunctionsString());
         dispatcher.addEnv(ENDPOINT_ENV, String.format("http://host.testcontainers.internal:%d", statefunPort));
+        dispatcher.addEnv(EGRESSES_ENV, moduleDefinition.generateEgressesString());
         dispatcher.withLogConsumer(new Slf4jLogConsumer(log));
         dispatcher.start();
 

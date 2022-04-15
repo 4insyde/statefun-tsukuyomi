@@ -2,7 +2,6 @@ package com.github.f1xman.statefun.tsukuyomi.api;
 
 import com.github.f1xman.statefun.tsukuyomi.core.TsukuyomiApi;
 import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
-import org.apache.flink.statefun.sdk.java.TypeName;
 import org.apache.flink.statefun.sdk.java.types.Type;
 import org.apache.flink.statefun.sdk.java.types.TypeSerializer;
 import org.apache.flink.statefun.sdk.java.types.Types;
@@ -12,9 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Base64;
-import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.then;
 
 @ExtendWith(MockitoExtension.class)
@@ -24,29 +21,6 @@ class SendMessageInteractorTest {
 
     @Mock
     TsukuyomiApi mockedTsukuyomiApi;
-
-    @Test
-    void extractsCollaboratorFromEnvelope() {
-        Envelope envelope = envelope();
-        SendMessageInteractor interactor = SendMessageInteractor.of(envelope);
-        TypeName expected = TypeName.typeNameFromString(FOO_BAR);
-
-        Optional<TypeName> actual = interactor.getCollaborator();
-
-        assertThat(actual).contains(expected);
-    }
-
-    @Test
-    void returnsEmptyCollaboratorIfFromIsNull() {
-        Envelope ingressEnvelope = envelope().toBuilder()
-                .from(null)
-                .build();
-        SendMessageInteractor interactor = SendMessageInteractor.of(ingressEnvelope);
-
-        Optional<TypeName> actual = interactor.getCollaborator();
-
-        assertThat(actual).isEmpty();
-    }
 
     @Test
     void sendsEnvelope() {

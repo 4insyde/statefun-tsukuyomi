@@ -1,11 +1,14 @@
 package com.github.f1xman.statefun.tsukuyomi.util;
 
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.SneakyThrows;
 
 public class SerDe {
 
-    private static final JsonMapper mapper = JsonMapper.builder().build();
+    private static final JsonMapper mapper = JsonMapper.builder()
+            .addModule(new JavaTimeModule())
+            .build();
 
     @SneakyThrows
     public static <T> byte[] serialize(T input) {

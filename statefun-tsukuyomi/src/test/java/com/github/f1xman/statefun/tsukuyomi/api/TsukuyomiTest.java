@@ -3,6 +3,8 @@ package com.github.f1xman.statefun.tsukuyomi.api;
 import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
 import com.github.f1xman.statefun.tsukuyomi.testutil.IntegrationTest;
 import org.apache.flink.statefun.sdk.java.*;
+import org.apache.flink.statefun.sdk.java.message.EgressMessage;
+import org.apache.flink.statefun.sdk.java.message.EgressMessageBuilder;
 import org.apache.flink.statefun.sdk.java.message.Message;
 import org.apache.flink.statefun.sdk.java.message.MessageBuilder;
 import org.apache.flink.statefun.sdk.java.types.Types;
@@ -20,7 +22,9 @@ import static org.hamcrest.Matchers.is;
 @IntegrationTest
 class TsukuyomiTest {
 
-    static final TypeName COLLABORATOR = TypeName.typeNameFromString("foo/collaborator");
+    static final TypeName COLLABORATOR_1 = TypeName.typeNameFromString("foo/collaborator-1");
+    static final TypeName COLLABORATOR_2 = TypeName.typeNameFromString("foo/collaborator-2");
+    static final TypeName EGRESS = TypeName.typeNameFromString("foo/egress");
     static final String HELLO = "hello";
     static final String FUNCTION_ID = "functionId";
     static final String BAR = "bar";
@@ -29,7 +33,11 @@ class TsukuyomiTest {
     @Timeout(value = 1, unit = MINUTES)
     void exchangesMessages() {
         Envelope envelope = incomingEnvelope();
-        Envelope expected = outgoingEnvelope();
+        Envelope expectedToFunction = outgoingEnvelope();
+        Envelope expectedToEgress = expectedToFunction.toBuilder()
+                .from(null)
+                .to(EGRESS, null)
+                .build();
         GivenFunction testee = given(
                 function(Testee.TYPE, new Testee()),
                 withState(Testee.FOO, empty()),
@@ -40,7 +48,8 @@ class TsukuyomiTest {
                 testee,
                 receives(envelope)
         ).then(
-                expectMessage(is(expected)),
+                expectMessageToFunction(expectedToFunction),
+                expectMessageToEgress(expectedToEgress),
                 expectState(Testee.FOO, is("foo"))
         );
     }
@@ -48,14 +57,14 @@ class TsukuyomiTest {
     private Envelope outgoingEnvelope() {
         return Envelope.builder()
                 .from(Testee.TYPE, FUNCTION_ID)
-                .to(COLLABORATOR, FUNCTION_ID)
+                .to(COLLABORATOR_2, FUNCTION_ID)
                 .data(Types.stringType(), HELLO + BAR)
                 .build();
     }
 
     private Envelope incomingEnvelope() {
         return Envelope.builder()
-                .from(COLLABORATOR, FUNCTION_ID)
+                .from(COLLABORATOR_1, FUNCTION_ID)
                 .to(Testee.TYPE, FUNCTION_ID)
                 .data(Types.stringType(), HELLO)
                 .build();
@@ -72,10 +81,15 @@ class TsukuyomiTest {
             AddressScopedStorage storage = context.storage();
             String bar = storage.get(BAR).orElse("");
             storage.set(FOO, "foo");
-            Message outgoingMessage = MessageBuilder.forAddress(COLLABORATOR, context.self().id())
-                    .withValue(message.asUtf8String() + bar)
+            String value = message.asUtf8String() + bar;
+            Message toFunction = MessageBuilder.forAddress(COLLABORATOR_2, context.self().id())
+                    .withValue(value)
                     .build();
-            context.send(outgoingMessage);
+            context.send(toFunction);
+            EgressMessage toEgress = EgressMessageBuilder.forEgress(EGRESS)
+                    .withValue(value)
+                    .build();
+            context.send(toEgress);
             return context.done();
         }
     }

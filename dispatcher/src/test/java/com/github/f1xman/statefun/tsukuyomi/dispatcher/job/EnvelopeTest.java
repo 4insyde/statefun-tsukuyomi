@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.github.f1xman.statefun.tsukuyomi.dispatcher.job.Envelope;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class EnvelopeTest {
@@ -12,6 +14,7 @@ class EnvelopeTest {
     @Test
     void serializes() throws JsonProcessingException {
         Envelope envelope = new Envelope(
+                System.nanoTime(),
                 new Envelope.NodeAddress("foo/from", "bar"),
                 new Envelope.NodeAddress("foo/to", "baz"),
                 new Envelope.Data("foo/data", "foobarbaz")
@@ -26,6 +29,7 @@ class EnvelopeTest {
     @Test
     void deserializes() throws JsonProcessingException {
         Envelope expected = new Envelope(
+                System.nanoTime(),
                 new Envelope.NodeAddress("foo/from", "bar"),
                 new Envelope.NodeAddress("foo/to", "baz"),
                 new Envelope.Data("foo/data", "foobarbaz")

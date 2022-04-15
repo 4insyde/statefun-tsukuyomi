@@ -19,20 +19,23 @@ class ThenImplTest {
     ChangeMatcher mockedChangeMatcher;
 
     @Test
-    void interactsWithGivenFunctionsThenMatchesResultsAndShutsDown() {
+    void startsFunctionThenInteractsThenExpectsThenStops() {
         ThenImpl then = ThenImpl.of(mockedGivenFunction, new Interactor[]{mockedInteractor});
 
         then.then(mockedChangeMatcher);
 
+        then(mockedGivenFunction).should().start(new ChangeMatcher[]{mockedChangeMatcher});
         then(mockedGivenFunction).should().interact(new Interactor[]{mockedInteractor});
         then(mockedGivenFunction).should().expect(mockedChangeMatcher);
-        then(mockedGivenFunction).should().shutdown();
+        then(mockedGivenFunction).should().stop();
     }
 
     @Test
     void shutsDownIfExceptionOccurredDuringInteraction() {
         ThenImpl then = ThenImpl.of(mockedGivenFunction, new Interactor[]{mockedInteractor});
-        willThrow(RuntimeException.class).given(mockedGivenFunction).interact(new Interactor[]{mockedInteractor});
+        willThrow(RuntimeException.class).given(mockedGivenFunction).start(
+                new ChangeMatcher[]{mockedChangeMatcher}
+        );
 
         try {
             then.then(mockedChangeMatcher);
@@ -40,20 +43,6 @@ class ThenImplTest {
             // noop
         }
 
-        then(mockedGivenFunction).should().shutdown();
-    }
-
-    @Test
-    void shutsDownIfExceptionOccurredDuringVerification() {
-        ThenImpl then = ThenImpl.of(mockedGivenFunction, new Interactor[]{mockedInteractor});
-        willThrow(RuntimeException.class).given(mockedGivenFunction).expect(mockedChangeMatcher);
-
-        try {
-            then.then(mockedChangeMatcher);
-        } catch (Exception ignore) {
-            // noop
-        }
-
-        then(mockedGivenFunction).should().shutdown();
+        then(mockedGivenFunction).should().stop();
     }
 }

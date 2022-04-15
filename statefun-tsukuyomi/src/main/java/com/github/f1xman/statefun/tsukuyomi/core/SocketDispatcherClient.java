@@ -15,8 +15,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -27,7 +26,7 @@ import static lombok.AccessLevel.PRIVATE;
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 public class SocketDispatcherClient implements DispatcherClient {
 
-    Queue<Envelope> received = new ConcurrentLinkedQueue<>();
+    Collection<Envelope> received = new ConcurrentSkipListSet<>();
 
     String host;
     int port;

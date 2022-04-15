@@ -4,10 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.f1xman.statefun.tsukuyomi.dispatcher.SerDe;
 import com.google.protobuf.ByteString;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.apache.flink.statefun.flink.core.message.RoutableMessage;
 import org.apache.flink.statefun.flink.core.message.RoutableMessageBuilder;
@@ -15,6 +12,7 @@ import org.apache.flink.statefun.sdk.Address;
 import org.apache.flink.statefun.sdk.FunctionType;
 import org.apache.flink.statefun.sdk.reqreply.generated.TypedValue;
 
+import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Optional;
 
@@ -25,8 +23,11 @@ import static lombok.AccessLevel.PRIVATE;
 @Getter
 @EqualsAndHashCode
 @Builder
+@ToString
 public class Envelope {
 
+    @JsonProperty("createdAt")
+    Long createdAt;
     @JsonProperty("from")
     NodeAddress from;
     @JsonProperty("to")
@@ -69,6 +70,7 @@ public class Envelope {
     @FieldDefaults(makeFinal = true, level = PRIVATE)
     @Getter
     @EqualsAndHashCode
+    @ToString
     public static class NodeAddress {
 
         @JsonProperty("type")
@@ -98,6 +100,7 @@ public class Envelope {
     @FieldDefaults(makeFinal = true, level = PRIVATE)
     @Getter
     @EqualsAndHashCode
+    @ToString
     public static class Data {
 
         @JsonProperty("type")

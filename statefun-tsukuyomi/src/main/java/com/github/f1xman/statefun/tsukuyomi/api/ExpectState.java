@@ -22,10 +22,17 @@ public class ExpectState<T> implements ChangeMatcher {
     @Override
     public void match(int order, TsukuyomiApi tsukuyomi) {
         ManagedStateAccessor stateAccessor = tsukuyomi.getStateAccessor();
-        Optional<T> value;
-        do {
-            value = stateAccessor.getStateValue(spec);
-        } while (!Thread.interrupted() && !matcher.matches(value.orElse(null)));
+        Optional<T> value = stateAccessor.getStateValue(spec);
         assertThat(value.orElse(null), matcher);
+    }
+
+    @Override
+    public Optional<Target> getTarget() {
+        return Optional.empty();
+    }
+
+    @Override
+    public void adjustDefinitionOfReady(DefinitionOfReady definitionOfReady) {
+        definitionOfReady.requireUpdatedState();
     }
 }

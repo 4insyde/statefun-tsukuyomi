@@ -8,13 +8,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.Duration;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
+import static org.mockito.BDDMockito.then;
 import static org.mockito.BDDMockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -26,25 +24,33 @@ class ExpectStateTest {
     TsukuyomiApi mockedTsukuyomi;
     @Mock
     ManagedStateAccessor mockedStateAccessor;
+    @Mock
+    DefinitionOfReady mockedDefinitionOfReady;
 
     @Test
-    void waitsUntilStateMatchesOrTimeoutAndThenAsserts() {
+    void throwsAssertionErrorIfStateDoesNotMatch() {
         ExpectState<String> expectState = ExpectState.of(FOO, is("foo"));
         when(mockedTsukuyomi.getStateAccessor()).thenReturn(mockedStateAccessor);
         when(mockedStateAccessor.getStateValue(FOO)).thenReturn(Optional.empty());
 
-        assertTimeoutPreemptively(Duration.ofSeconds(3), () -> {
-            Thread currentThread = Thread.currentThread();
-            Thread thread = new Thread(() -> {
-                try {
-                    TimeUnit.SECONDS.sleep(1);
-                    currentThread.interrupt();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            });
-            thread.start();
-            assertThrows(AssertionError.class, () -> expectState.match(0, mockedTsukuyomi));
-        });
+        assertThrows(AssertionError.class, () -> expectState.match(0, mockedTsukuyomi));
+    }
+
+    @Test
+    void throwsNothingIfStateMatches() {
+        ExpectState<String> expectState = ExpectState.of(FOO, is("foo"));
+        when(mockedTsukuyomi.getStateAccessor()).thenReturn(mockedStateAccessor);
+        when(mockedStateAccessor.getStateValue(FOO)).thenReturn(Optional.of("foo"));
+
+        expectState.match(0, mockedTsukuyomi);
+    }
+
+    @Test
+    void requiresStateToBeUpdated() {
+        ExpectState<String> expectState = ExpectState.of(FOO, is("foo"));
+
+        expectState.adjustDefinitionOfReady(mockedDefinitionOfReady);
+
+        then(mockedDefinitionOfReady).should().requireUpdatedState();
     }
 }

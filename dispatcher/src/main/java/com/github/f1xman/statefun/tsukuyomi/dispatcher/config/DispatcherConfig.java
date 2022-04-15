@@ -1,6 +1,7 @@
 package com.github.f1xman.statefun.tsukuyomi.dispatcher.config;
 
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 import org.apache.flink.statefun.sdk.FunctionType;
 import org.apache.flink.statefun.sdk.io.EgressIdentifier;
@@ -14,6 +15,7 @@ import static lombok.AccessLevel.PRIVATE;
 
 @RequiredArgsConstructor(staticName = "of")
 @FieldDefaults(makeFinal = true, level = PRIVATE)
+@ToString
 public class DispatcherConfig {
 
     StatefunModule module;

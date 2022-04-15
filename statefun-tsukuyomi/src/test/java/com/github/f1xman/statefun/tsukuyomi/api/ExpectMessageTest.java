@@ -2,24 +2,19 @@ package com.github.f1xman.statefun.tsukuyomi.api;
 
 import com.github.f1xman.statefun.tsukuyomi.core.TsukuyomiApi;
 import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
-import lombok.val;
 import org.apache.flink.statefun.sdk.java.TypeName;
 import org.apache.flink.statefun.sdk.java.types.Types;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.stubbing.Answer;
 
-import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.BDDMockito.then;
 import static org.mockito.BDDMockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -27,12 +22,14 @@ class ExpectMessageTest {
 
     @Mock
     TsukuyomiApi tsukuyomi;
+    @Mock
+    DefinitionOfReady mockedDefinitionOfReady;
 
     @Test
     void throwsExceptionIfEnvelopeDoesNotMatch() {
         Envelope envelope = envelope();
         Envelope notMatchingEnvelope = swap(envelope);
-        ExpectMessage expectMessage = ExpectMessage.of(is(notMatchingEnvelope));
+        ExpectMessage expectMessage = ExpectMessage.of(notMatchingEnvelope, Target.Type.FUNCTION);
         when(tsukuyomi.getReceived()).thenReturn(List.of(envelope));
 
         assertThatThrownBy(
@@ -43,45 +40,52 @@ class ExpectMessageTest {
     @Test
     void nothingThrownWhenEnvelopeMatches() {
         Envelope envelope = envelope();
-        ExpectMessage expectMessage = ExpectMessage.of(is(envelope));
+        ExpectMessage expectMessage = ExpectMessage.of(envelope, Target.Type.FUNCTION);
         when(tsukuyomi.getReceived()).thenReturn(List.of(envelope));
 
         expectMessage.match(0, tsukuyomi);
     }
 
     @Test
-    void waitsUntilExpectedByOrderEnvelopeReceivedAndThenAsserts() {
-        Envelope envelope = envelope();
-        ExpectMessage expectMessage = ExpectMessage.of(is(envelope));
-        AtomicInteger counter = new AtomicInteger();
-        when(tsukuyomi.getReceived()).thenAnswer((Answer<List<Envelope>>) invocationOnMock -> {
-            if (counter.getAndAdd(1) > 0) {
-                return List.of(envelope);
-            } else {
-                return List.of();
-            }
-        });
+    void matchesEnvelopesByOrderScopedToTarget() {
+        Envelope targetAEnvelopeA = envelope().toBuilder()
+                .to(TypeName.typeNameFromString("foo/a"), "foobaz")
+                .data(Types.stringType(), "a")
+                .build();
+        Envelope targetAEnvelopeB = envelope().toBuilder()
+                .to(TypeName.typeNameFromString("foo/a"), "foobaz")
+                .data(Types.stringType(), "b")
+                .build();
+        Envelope targetBEnvelopeB = envelope().toBuilder()
+                .to(TypeName.typeNameFromString("foo/b"), "foobaz")
+                .data(Types.stringType(), "b")
+                .build();
+        ExpectMessage expectMessage = ExpectMessage.of(targetAEnvelopeA, Target.Type.FUNCTION);
+        when(tsukuyomi.getReceived()).thenReturn(List.of(targetBEnvelopeB, targetAEnvelopeA, targetAEnvelopeB));
 
         expectMessage.match(0, tsukuyomi);
     }
 
     @Test
-    void interruptsAssertionIfThreadInterrupted() {
-        when(tsukuyomi.getReceived()).thenReturn(List.of());
-        Assertions.assertTimeoutPreemptively(Duration.ofSeconds(5), () -> {
-            val interruptableThread = Thread.currentThread();
-            Thread interrupterThread = new Thread(() -> {
-                try {
-                    TimeUnit.SECONDS.sleep(1);
-                    interruptableThread.interrupt();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-            interrupterThread.start();
-            ExpectMessage expectMessage = ExpectMessage.of(nullValue(Envelope.class));
-            expectMessage.match(0, tsukuyomi);
+    void targetIsFunctionThatHasTheSameTypeNameAsEnvelopeTo() {
+        Envelope envelope = envelope();
+        ExpectMessage expectMessage = ExpectMessage.of(envelope, Target.Type.FUNCTION);
+
+        Optional<Target> actual = expectMessage.getTarget();
+
+        assertThat(actual).hasValueSatisfying(t -> {
+            assertThat(t.getType()).isEqualTo(Target.Type.FUNCTION);
+            assertThat(t.getTypeName().asTypeNameString()).isEqualTo(envelope.getTo().getType());
         });
+    }
+
+    @Test
+    void incrementsExpectedEnvelopesOnDefinitionOfReady() {
+        ExpectMessage expectMessage = ExpectMessage.of(envelope(), Target.Type.FUNCTION);
+
+        expectMessage.adjustDefinitionOfReady(mockedDefinitionOfReady);
+
+        then(mockedDefinitionOfReady).should().incrementExpectedEnvelopes();
     }
 
     private Envelope envelope() {

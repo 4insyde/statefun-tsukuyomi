@@ -29,4 +29,9 @@ public class DispatcherBasedTsukuyomi implements TsukuyomiApi {
     public ManagedStateAccessor getStateAccessor() {
         return stateAccessor;
     }
+
+    @Override
+    public boolean isStateUpdated() {
+        return stateAccessor.isStateUpdated();
+    }
 }

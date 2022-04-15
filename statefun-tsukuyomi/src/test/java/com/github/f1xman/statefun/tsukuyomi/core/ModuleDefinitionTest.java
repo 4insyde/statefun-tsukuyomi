@@ -14,6 +14,8 @@ class ModuleDefinitionTest {
 
     static final TypeName COLLABORATOR_1 = TypeName.typeNameFromString("foo/collaborator-1");
     static final TypeName COLLABORATOR_2 = TypeName.typeNameFromString("foo/collaborator-2");
+    static final TypeName EGRESS_1 = TypeName.typeNameFromString("foo/egress-1");
+    static final TypeName EGRESS_2 = TypeName.typeNameFromString("foo/egress-2");
     static final ValueSpec<String> VALUE_SPEC = ValueSpec.named("foo").withUtf8StringType();
 
     @Test
@@ -63,6 +65,24 @@ class ModuleDefinitionTest {
         String expected = FunctionUnderTest.TYPE.asTypeNameString() + ";" + COLLABORATOR_1.asTypeNameString();
 
         String actual = moduleDefinition.generateFunctionsString();
+
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void generatesStringOfEgressesSeparatedBySemicolon() {
+        ModuleDefinition.FunctionDefinition functionDefinition = ModuleDefinition.FunctionDefinition.builder()
+                .typeName(FunctionUnderTest.TYPE)
+                .instance(new FunctionUnderTest())
+                .build();
+        ModuleDefinition moduleDefinition = ModuleDefinition.builder()
+                .functionUnderTest(functionDefinition)
+                .egress(EGRESS_1)
+                .egress(EGRESS_2)
+                .build();
+        String expected = EGRESS_1.asTypeNameString() + ";" + EGRESS_2.asTypeNameString();
+
+        String actual = moduleDefinition.generateEgressesString();
 
         assertThat(actual).isEqualTo(expected);
     }
