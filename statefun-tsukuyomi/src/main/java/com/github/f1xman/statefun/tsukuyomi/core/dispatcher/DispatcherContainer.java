@@ -18,6 +18,8 @@ import static lombok.AccessLevel.PRIVATE;
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 public class DispatcherContainer extends GenericContainer<DispatcherContainer> {
 
+    static final int DISPATCHER_PORT = 5555;
+    static final int DEBUGGER_PORT = 5005;
     static String FUNCTIONS_ENV = "FUNCTIONS";
     static String ENDPOINT_ENV = "ENDPOINT";
     static String EGRESSES_ENV = "EGRESSES";
@@ -27,11 +29,17 @@ public class DispatcherContainer extends GenericContainer<DispatcherContainer> {
     @NonNull
     ModuleDefinition moduleDefinition;
 
+    public DispatcherClient createClient() {
+        String host = this.getHost();
+        int dispatcherPort = this.getMappedPort(DISPATCHER_PORT);
+        return new SocketDispatcherClient(host, dispatcherPort);
+    }
+
     @Override
     protected void configure() {
         super.configure();
         Testcontainers.exposeHostPorts(statefunPort);
-        this.withExposedPorts(5005, 5555);
+        this.withExposedPorts(DEBUGGER_PORT, DISPATCHER_PORT);
         this.waitingFor(Wait.forLogMessage(".*Job status is RUNNING.*", 1));
         this.addEnv(FUNCTIONS_ENV, moduleDefinition.generateFunctionsString());
         this.addEnv(ENDPOINT_ENV, String.format("http://host.testcontainers.internal:%d", statefunPort));
