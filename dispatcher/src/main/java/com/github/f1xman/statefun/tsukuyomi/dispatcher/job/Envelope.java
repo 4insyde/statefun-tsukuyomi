@@ -12,7 +12,6 @@ import org.apache.flink.statefun.sdk.Address;
 import org.apache.flink.statefun.sdk.FunctionType;
 import org.apache.flink.statefun.sdk.reqreply.generated.TypedValue;
 
-import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Optional;
 
@@ -26,8 +25,6 @@ import static lombok.AccessLevel.PRIVATE;
 @ToString
 public class Envelope {
 
-    @JsonProperty("createdAt")
-    Long createdAt;
     @JsonProperty("from")
     NodeAddress from;
     @JsonProperty("to")

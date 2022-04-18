@@ -9,12 +9,10 @@ import org.apache.flink.statefun.sdk.java.TypeName;
 import org.apache.flink.statefun.sdk.java.types.SimpleType;
 import org.apache.flink.statefun.sdk.java.types.Type;
 import org.apache.flink.statefun.sdk.java.types.TypeSerializer;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
 import java.util.Base64;
 
-import static java.util.Comparator.comparingLong;
 import static lombok.AccessLevel.PRIVATE;
 
 @RequiredArgsConstructor(onConstructor_ = @JsonCreator)
@@ -23,15 +21,12 @@ import static lombok.AccessLevel.PRIVATE;
 @Getter
 @EqualsAndHashCode
 @ToString
-public class Envelope implements Comparable<Envelope>, Serializable {
+public class Envelope implements Serializable {
 
     public static final Type<Envelope> TYPE = SimpleType.simpleImmutableTypeFrom(
             TypeName.typeNameFromString("com.github.f1xman.statefun.tsukuyomi/envelope"),
             Envelope::toJson, Envelope::fromJson
     );
-    @JsonProperty("createdAt")
-    @EqualsAndHashCode.Exclude
-    Long createdAt;
     @JsonProperty("from")
     NodeAddress from;
     @JsonProperty("to")
@@ -53,11 +48,6 @@ public class Envelope implements Comparable<Envelope>, Serializable {
 
     public String toJsonAsString() {
         return SerDe.serializeAsString(this);
-    }
-
-    @Override
-    public int compareTo(@NotNull Envelope that) {
-        return comparingLong(Envelope::getCreatedAt).compare(this, that);
     }
 
     public static class EnvelopeBuilder {

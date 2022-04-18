@@ -1,7 +1,6 @@
 package com.github.f1xman.statefun.tsukuyomi.core.dispatcher;
 
 import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
-import com.github.f1xman.statefun.tsukuyomi.core.dispatcher.DispatcherClient;
 import lombok.Cleanup;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -14,12 +13,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static java.util.Collections.synchronizedList;
+import static java.util.Collections.unmodifiableCollection;
 import static lombok.AccessLevel.PRIVATE;
 
 @Slf4j
@@ -27,7 +27,7 @@ import static lombok.AccessLevel.PRIVATE;
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 public class SocketDispatcherClient implements DispatcherClient {
 
-    Collection<Envelope> received = new ConcurrentSkipListSet<>();
+    Collection<Envelope> received = synchronizedList(new ArrayList<>());
 
     String host;
     int port;
@@ -67,7 +67,7 @@ public class SocketDispatcherClient implements DispatcherClient {
 
     @Override
     public Collection<Envelope> getReceived() {
-        return Collections.unmodifiableCollection(received);
+        return unmodifiableCollection(received);
     }
 
 }

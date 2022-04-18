@@ -20,9 +20,7 @@ import static lombok.AccessLevel.PRIVATE;
 @Slf4j
 class MessageCaptureFunction implements StatefulFunction {
 
-    public static final MessageCaptureFunction INSTANCE = new MessageCaptureFunction(new SystemTimestampProvider());
-
-    TimestampProvider timestampProvider;
+    public static final MessageCaptureFunction INSTANCE = new MessageCaptureFunction();
 
     @Override
     public CompletableFuture<Void> apply(Context context, Message message) {
@@ -30,7 +28,6 @@ class MessageCaptureFunction implements StatefulFunction {
         Address self = context.self();
         log.info("Captured outgoing message {} from function {} to function {}", message.valueTypeName(), caller, self);
         Envelope envelope = Envelope.builder()
-                .createdAt(timestampProvider.currentTimestamp())
                 .from(caller.type(), caller.id())
                 .to(self.type(), self.id())
                 .data(Envelope.Data.of(

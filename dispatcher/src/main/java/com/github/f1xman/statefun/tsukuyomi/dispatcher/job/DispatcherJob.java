@@ -64,7 +64,6 @@ public class DispatcherJob implements FlinkDispatcherJob {
                         .map(t -> {
                                     log.info("Captured a message sent to egress {}/{}", e.namespace(), e.name());
                                     return Envelope.builder()
-                                            .createdAt(System.nanoTime())
                                             .to(e.namespace(), e.name())
                                             .data(t)
                                             .build();

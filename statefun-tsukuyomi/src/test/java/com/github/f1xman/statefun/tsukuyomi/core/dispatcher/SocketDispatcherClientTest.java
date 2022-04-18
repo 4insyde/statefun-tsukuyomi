@@ -1,8 +1,6 @@
 package com.github.f1xman.statefun.tsukuyomi.core.dispatcher;
 
 import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
-import com.github.f1xman.statefun.tsukuyomi.core.dispatcher.DispatcherClient;
-import com.github.f1xman.statefun.tsukuyomi.core.dispatcher.SocketDispatcherClient;
 import lombok.Cleanup;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -51,11 +49,9 @@ class SocketDispatcherClientTest {
     @Test
     void receivesEnvelopesInOrder() throws IOException {
         Envelope expectedEnvelopeFoo = Envelope.builder()
-                .createdAt(System.nanoTime())
                 .from(Envelope.NodeAddress.of("foo", "id"))
                 .build();
         Envelope expectedEnvelopeBar = Envelope.builder()
-                .createdAt(System.nanoTime())
                 .from(Envelope.NodeAddress.of("bar", "id"))
                 .build();
         Envelope[] expected = {expectedEnvelopeFoo, expectedEnvelopeBar};
