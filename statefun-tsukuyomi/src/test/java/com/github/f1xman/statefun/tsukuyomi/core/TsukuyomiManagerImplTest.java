@@ -1,6 +1,9 @@
 package com.github.f1xman.statefun.tsukuyomi.core;
 
 import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
+import com.github.f1xman.statefun.tsukuyomi.core.capture.ModuleDefinition;
+import com.github.f1xman.statefun.tsukuyomi.core.validation.TsukuyomiApi;
+import com.github.f1xman.statefun.tsukuyomi.core.validation.TsukuyomiManagerImpl;
 import com.github.f1xman.statefun.tsukuyomi.testutil.IntegrationTest;
 import org.apache.flink.statefun.sdk.java.Context;
 import org.apache.flink.statefun.sdk.java.StatefulFunction;

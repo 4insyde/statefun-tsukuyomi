@@ -18,7 +18,7 @@ import static lombok.AccessLevel.PRIVATE;
 @RequiredArgsConstructor
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 @Slf4j
-public class MessageCaptureFunction implements StatefulFunction {
+class MessageCaptureFunction implements StatefulFunction {
 
     public static final MessageCaptureFunction INSTANCE = new MessageCaptureFunction(new SystemTimestampProvider());
 

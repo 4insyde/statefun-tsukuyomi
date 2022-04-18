@@ -24,12 +24,9 @@ import org.apache.flink.statefun.sdk.java.types.Types;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
-import java.util.concurrent.CompletableFuture;
-
-import static com.github.f1xman.statefun.tsukuyomi.api.StateValue.empty;
-import static com.github.f1xman.statefun.tsukuyomi.api.StateValue.havingValue;
-import static com.github.f1xman.statefun.tsukuyomi.api.Tsukuyomi.*;
-import static java.util.concurrent.TimeUnit.MINUTES;
+import static com.github.f1xman.statefun.tsukuyomi.dsl.StateValue.empty;
+import static com.github.f1xman.statefun.tsukuyomi.dsl.StateValue.havingValue;
+import static com.github.f1xman.statefun.tsukuyomi.dsl.Tsukuyomi.*;
 import static org.hamcrest.Matchers.is;
 ```
 
