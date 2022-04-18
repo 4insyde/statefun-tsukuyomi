@@ -54,7 +54,7 @@ class SocketDispatcherClientTest {
         Envelope expectedEnvelopeBar = Envelope.builder()
                 .from(Envelope.NodeAddress.of("bar", "id"))
                 .build();
-        Envelope[] expected = {expectedEnvelopeFoo, expectedEnvelopeBar};
+        Envelope[] expected = {expectedEnvelopeBar, expectedEnvelopeFoo};
         @Cleanup
         ServerSocket serverSocket = new ServerSocket(0);
         ExecutorService executor = Executors.newCachedThreadPool();
