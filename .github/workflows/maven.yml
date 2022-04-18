@@ -39,8 +39,10 @@ jobs:
       - name: Prepare Docker properties
         id: prep
         run: |
+          DOCKER_IMAGE=statefun-tsukuyomi-dispatcher
           VERSION=$(mvn exec:exec -Dexec.executable='echo' -Dexec.args='${project.version}' --non-recursive -q)
-          echo ::set-output name=version::${VERSION}
+          TAG=${DOCKER_IMAGE}:${VERSION}
+          echo ::set-output name=tag::${TAG}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@master
         with:
@@ -62,4 +64,4 @@ jobs:
           file: ./Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ steps.prep.outputs.version }}
+          tags: ${{ steps.prep.outputs.tag }}
