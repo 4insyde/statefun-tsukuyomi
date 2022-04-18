@@ -20,6 +20,14 @@
         <version>${project.version}</version>
     </properties>
 
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub f1xman Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/f1xmAn/statefun-tsukuyomi</url>
+        </repository>
+    </distributionManagement>
+
     <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>
