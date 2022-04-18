@@ -18,11 +18,7 @@ public class Expectations {
         return ExpectState.of(spec, matcher);
     }
 
-    public static ChangeMatcher expectMessageToFunction(Envelope expected) {
-        return ExpectMessage.of(expected, Target.Type.FUNCTION);
-    }
-
-    public static ChangeMatcher expectMessageToEgress(Envelope expected) {
-        return ExpectMessage.of(expected, Target.Type.EGRESS);
+    public static ChangeMatcher expectMessage(Envelope expected, Target.Type targetType) {
+        return ExpectMessage.of(expected, targetType);
     }
 }

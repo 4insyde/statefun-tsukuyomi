@@ -2,6 +2,7 @@ package com.github.f1xman.statefun.tsukuyomi.dsl;
 
 import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
 import com.github.f1xman.statefun.tsukuyomi.core.validation.GivenFunction;
+import com.github.f1xman.statefun.tsukuyomi.core.validation.Target;
 import com.github.f1xman.statefun.tsukuyomi.testutil.IntegrationTest;
 import org.apache.flink.statefun.sdk.java.*;
 import org.apache.flink.statefun.sdk.java.message.EgressMessage;
@@ -17,6 +18,8 @@ import java.util.concurrent.CompletableFuture;
 import static com.github.f1xman.statefun.tsukuyomi.core.capture.StateValue.empty;
 import static com.github.f1xman.statefun.tsukuyomi.core.capture.StateValue.havingValue;
 import static com.github.f1xman.statefun.tsukuyomi.dsl.BddTsukuyomi.*;
+import static com.github.f1xman.statefun.tsukuyomi.dsl.Expectations.expectMessage;
+import static com.github.f1xman.statefun.tsukuyomi.dsl.Expectations.expectState;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.hamcrest.Matchers.is;
 
@@ -49,9 +52,9 @@ class BddTsukuyomiTest {
                 testee,
                 receives(envelope)
         ).then(
-                Expectations.expectMessageToFunction(expectedToFunction),
-                Expectations.expectMessageToEgress(expectedToEgress),
-                Expectations.expectState(Testee.FOO, is("foo"))
+                expectMessage(expectedToFunction, Target.Type.FUNCTION),
+                expectMessage(expectedToEgress, Target.Type.EGRESS),
+                expectState(Testee.FOO, is("foo"))
         );
     }
 
