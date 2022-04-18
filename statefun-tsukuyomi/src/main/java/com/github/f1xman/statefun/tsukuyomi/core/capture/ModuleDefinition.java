@@ -2,7 +2,6 @@ package com.github.f1xman.statefun.tsukuyomi.core.capture;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import lombok.experimental.NonFinal;
 import org.apache.flink.statefun.sdk.java.*;
 
 import java.util.List;
@@ -70,15 +69,13 @@ public class ModuleDefinition {
 
         @Getter
         TypeName typeName;
-        StatefulFunction instance;
-        List<StateSetter<?>> stateSetters;
-        @NonFinal
         ManagedStateFunctionWrapper wrapper;
+        List<StateSetter<?>> stateSetters;
 
         @Builder
         private FunctionDefinition(TypeName typeName, StatefulFunction instance, List<StateSetter<?>> stateSetters) {
             this.typeName = typeName;
-            this.instance = instance;
+            this.wrapper = ManagedStateFunctionWrapper.of(instance, stateSetters);
             this.stateSetters = stateSetters;
         }
 
@@ -89,18 +86,11 @@ public class ModuleDefinition {
         }
 
         public StatefulFunction getInstance() {
-            return wrapper();
-        }
-
-        private ManagedStateFunctionWrapper wrapper() {
-            if (wrapper == null) {
-                wrapper = ManagedStateFunctionWrapper.of(instance, stateSetters);
-            }
             return wrapper;
         }
 
         public ManagedStateAccessor getStateAccessor() {
-            return wrapper();
+            return wrapper;
         }
     }
 
