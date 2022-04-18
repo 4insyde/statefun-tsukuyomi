@@ -36,3 +36,5 @@ jobs:
         run: mvn -pl statefun-tsukuyomi test
       - name: Run Tsukuyomi integration tests
         run: mvn -P integration -pl statefun-tsukuyomi test
+      - name: Push Dispatcher Docker image
+        run: mvn -pl dispatcher docker:push -Ddocker.username=${{ secrets.DOCKER_USERNAME }} -Ddocker.password=${{ secrets.DOCKER_TOKEN }}
