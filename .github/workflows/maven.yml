@@ -40,6 +40,7 @@ jobs:
         id: prep
         run: |
           VERSION=$(mvn exec:exec -Dexec.executable='echo' -Dexec.args='${project.version}' --non-recursive -q)
+          echo ::set-output name=version::${VERSION}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@master
         with:
@@ -61,4 +62,4 @@ jobs:
           file: ./Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ VERSION }}
+          tags: ${{ steps.prep.outputs.version }}
