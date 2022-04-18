@@ -2,7 +2,6 @@ package com.github.f1xman.statefun.tsukuyomi.dsl;
 
 import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
 import com.github.f1xman.statefun.tsukuyomi.core.validation.GivenFunction;
-import com.github.f1xman.statefun.tsukuyomi.core.validation.Target;
 import com.github.f1xman.statefun.tsukuyomi.testutil.IntegrationTest;
 import org.apache.flink.statefun.sdk.java.*;
 import org.apache.flink.statefun.sdk.java.message.EgressMessage;
@@ -18,8 +17,7 @@ import java.util.concurrent.CompletableFuture;
 import static com.github.f1xman.statefun.tsukuyomi.core.capture.StateValue.empty;
 import static com.github.f1xman.statefun.tsukuyomi.core.capture.StateValue.havingValue;
 import static com.github.f1xman.statefun.tsukuyomi.dsl.BddTsukuyomi.*;
-import static com.github.f1xman.statefun.tsukuyomi.dsl.Expectations.expectMessage;
-import static com.github.f1xman.statefun.tsukuyomi.dsl.Expectations.expectState;
+import static com.github.f1xman.statefun.tsukuyomi.dsl.Expectations.*;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.hamcrest.Matchers.is;
 
@@ -37,11 +35,8 @@ class BddTsukuyomiTest {
     @Timeout(value = 1, unit = MINUTES)
     void exchangesMessages() {
         Envelope envelope = incomingEnvelope();
-        Envelope expectedToFunction = outgoingEnvelope();
-        Envelope expectedToEgress = expectedToFunction.toBuilder()
-                .from(null)
-                .to(EGRESS, null)
-                .build();
+        Envelope expectedToFunction = outgoingEnvelopeToFunction();
+        Envelope expectedToEgress = outgoingEnvelopeToEgress();
         GivenFunction testee = given(
                 function(Testee.TYPE, new Testee()),
                 withState(Testee.FOO, empty()),
@@ -52,13 +47,20 @@ class BddTsukuyomiTest {
                 testee,
                 receives(envelope)
         ).then(
-                expectMessage(expectedToFunction, Target.Type.FUNCTION),
-                expectMessage(expectedToEgress, Target.Type.EGRESS),
+                expectMessage(expectedToFunction, toFunction()),
+                expectMessage(expectedToEgress, toEgress()),
                 expectState(Testee.FOO, is("foo"))
         );
     }
 
-    private Envelope outgoingEnvelope() {
+    private Envelope outgoingEnvelopeToEgress() {
+        return Envelope.builder()
+                .to(EGRESS, null)
+                .data(Types.stringType(), HELLO + BAR)
+                .build();
+    }
+
+    private Envelope outgoingEnvelopeToFunction() {
         return Envelope.builder()
                 .from(Testee.TYPE, FUNCTION_ID)
                 .to(COLLABORATOR_2, FUNCTION_ID)

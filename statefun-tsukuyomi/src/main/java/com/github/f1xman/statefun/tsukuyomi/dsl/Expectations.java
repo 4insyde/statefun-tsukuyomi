@@ -21,4 +21,12 @@ public class Expectations {
     public static ChangeMatcher expectMessage(Envelope expected, Target.Type targetType) {
         return ExpectMessage.of(expected, targetType);
     }
+
+    public static Target.Type toFunction() {
+        return Target.Type.FUNCTION;
+    }
+
+    public static Target.Type toEgress() {
+        return Target.Type.EGRESS;
+    }
 }
