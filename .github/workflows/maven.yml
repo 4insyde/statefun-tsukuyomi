@@ -39,7 +39,7 @@ jobs:
       - name: Prepare Docker properties
         id: prep
         run: |
-          DOCKER_IMAGE=statefun-tsukuyomi-dispatcher
+          DOCKER_IMAGE=${{ secrets.DOCKER_USERNAME }}/statefun-tsukuyomi-dispatcher
           VERSION=$(mvn exec:exec -Dexec.executable='echo' -Dexec.args='${project.version}' --non-recursive -q)
           TAG=${DOCKER_IMAGE}:${VERSION}
           echo ::set-output name=tag::${TAG}
