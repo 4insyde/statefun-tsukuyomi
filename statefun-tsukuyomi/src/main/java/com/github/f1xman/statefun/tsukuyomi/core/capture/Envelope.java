@@ -86,7 +86,7 @@ public class Envelope implements Serializable {
             return this;
         }
 
-        public EnvelopeBuilder data(Data data) {
+        EnvelopeBuilder data(Data data) {
             this.data = data;
             return this;
         }
