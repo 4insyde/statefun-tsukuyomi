@@ -6,6 +6,7 @@ import org.apache.flink.statefun.sdk.java.types.TypeSerializer;
 import org.apache.flink.statefun.sdk.java.types.Types;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,6 +20,29 @@ class EnvelopeTest {
         Envelope actualEnvelope = buildEnvelopeViaShortcuts();
 
         assertThat(actualEnvelope).isEqualTo(expectedEnvelope);
+    }
+
+    @Test
+    void toStringHaveDeserializedValueIfTypeIsKnown() {
+        Envelope envelope = Envelope.builder()
+                .data(Types.stringType(), "Foo")
+                .build();
+
+        String actual = envelope.getData().toString();
+
+        assertThat(actual).contains("value='Foo'");
+    }
+
+    @Test
+    void toStringHaveBase64ValueIfTypeIsUnknown() {
+        String base64Value = Base64.getEncoder().encodeToString("Foo".getBytes(StandardCharsets.UTF_8));
+        Envelope envelope = Envelope.builder()
+                .data(Envelope.Data.of(Types.stringType().typeName().asTypeNameString(), base64Value))
+                .build();
+
+        String actual = envelope.getData().toString();
+
+        assertThat(actual).contains(String.format("value='%s'", base64Value));
     }
 
     private Envelope buildEnvelopeViaPureSetters() {

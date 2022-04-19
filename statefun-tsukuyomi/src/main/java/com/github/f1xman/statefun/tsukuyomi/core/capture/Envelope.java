@@ -6,12 +6,15 @@ import com.github.f1xman.statefun.tsukuyomi.util.SerDe;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.apache.flink.statefun.sdk.java.TypeName;
+import org.apache.flink.statefun.sdk.java.slice.Slices;
 import org.apache.flink.statefun.sdk.java.types.SimpleType;
 import org.apache.flink.statefun.sdk.java.types.Type;
 import org.apache.flink.statefun.sdk.java.types.TypeSerializer;
 
 import java.io.Serializable;
 import java.util.Base64;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static lombok.AccessLevel.PRIVATE;
 
@@ -22,6 +25,8 @@ import static lombok.AccessLevel.PRIVATE;
 @EqualsAndHashCode
 @ToString
 public class Envelope implements Serializable {
+
+    private static Map<String, ValueRenderer> renderersByType = new ConcurrentHashMap<>();
 
     public static final Type<Envelope> TYPE = SimpleType.simpleImmutableTypeFrom(
             TypeName.typeNameFromString("com.github.f1xman.statefun.tsukuyomi/envelope"),
@@ -89,8 +94,10 @@ public class Envelope implements Serializable {
         public <T> EnvelopeBuilder data(Type<T> type, T value) {
             Base64.Encoder encoder = Base64.getEncoder();
             TypeSerializer<T> serializer = type.typeSerializer();
+            String typeNameString = type.typeName().asTypeNameString();
+            renderersByType.put(typeNameString, TypeValueRenderer.of(type));
             this.data = Data.of(
-                    type.typeName().asTypeNameString(),
+                    typeNameString,
                     encoder.encodeToString(serializer.serialize(value).toByteArray())
             );
             return this;
@@ -116,7 +123,6 @@ public class Envelope implements Serializable {
     @FieldDefaults(level = PRIVATE, makeFinal = true)
     @Getter
     @EqualsAndHashCode
-    @ToString
     public static class Data implements Serializable {
 
         @JsonProperty("type")
@@ -124,5 +130,44 @@ public class Envelope implements Serializable {
         @JsonProperty("value")
         String value;
 
+        @Override
+        public String toString() {
+            ValueRenderer renderer = renderersByType.computeIfAbsent(type, t -> new NoOpValueRenderer());
+            return "Data{" +
+                    "type='" + type + '\'' +
+                    ", value='" + renderer.render(value) + '\'' +
+                    '}';
+        }
     }
+
+    private interface ValueRenderer {
+
+        String render(String value);
+
+    }
+
+    private static class NoOpValueRenderer implements ValueRenderer {
+
+        @Override
+        public String render(String value) {
+            return value;
+        }
+    }
+
+    @RequiredArgsConstructor(staticName = "of")
+    @FieldDefaults(level = PRIVATE, makeFinal = true)
+    private static class TypeValueRenderer implements ValueRenderer {
+
+        Type<?> type;
+
+        @Override
+        public String render(String value) {
+            Base64.Decoder decoder = Base64.getDecoder();
+            byte[] decodedValue = decoder.decode(value);
+            TypeSerializer<?> serializer = type.typeSerializer();
+            Object deserializedValue = serializer.deserialize(Slices.wrap(decodedValue));
+            return deserializedValue.toString();
+        }
+    }
+
 }
