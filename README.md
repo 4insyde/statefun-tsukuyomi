@@ -85,6 +85,13 @@ static class Testee implements StatefulFunction {
 ### Create envelopes
 
 ```java
+private Envelope outgoingEnvelopeToSelf() {
+    return Envelope.builder()
+        .from(Testee.TYPE, FUNCTION_ID)
+        .to(Testee.TYPE, FUNCTION_ID)
+        .data(Types.stringType(), HELLO + BAR)
+        .build();
+}
 private Envelope outgoingEnvelopeToEgress() {
     return Envelope.builder()
         .to(EGRESS, null)
@@ -113,24 +120,31 @@ private Envelope incomingEnvelope() {
 
 ```java
 @Test
-@Timeout(value = 1, unit = MINUTES)
+@Timeout(60)
 void exchangesMessages() {
+    // Define your envelopes
     Envelope envelope = incomingEnvelope();
     Envelope expectedToFunction = outgoingEnvelopeToFunction();
     Envelope expectedToEgress = outgoingEnvelopeToEgress();
+    Envelope expectedToSelf = outgoingEnvelopeToSelf();
+    // Define function under test and its initial state
     GivenFunction testee = given(
         function(Testee.TYPE, new Testee()),
-        withState(Testee.FOO, empty()),
+        withState(Testee.FOO, empty()), // Empty values must be defined as well
         withState(Testee.BAR, havingValue(BAR))
     );
 
+    // When function under test receives that envelope
     when(
         testee,
         receives(envelope)
     ).then(
+        // Then expect it sends the following messages
         expectMessage(expectedToFunction, toFunction()),
         expectMessage(expectedToEgress, toEgress()),
-        expectState(Testee.FOO, is("foo"))
+        expectMessage(expectedToSelf, toFunction()),
+        // and has the following state value after invocation
+        expectState(Testee.FOO, is("foo")) // Hamcrest matchers supported
     );
 }
 ```
