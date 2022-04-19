@@ -25,10 +25,10 @@ public class NextInvocationsInterceptor implements StatefulFunction {
     @Override
     public CompletableFuture<Void> apply(Context context, Message message) throws Throwable {
         if (captureAll) {
-            log.info("Forwarding {} message to the capture function...", message.valueTypeName().asTypeNameString());
+            log.info("Forwarding {} message to the capture function...", message);
             return messageCaptureFunction.apply(context, message);
         }
-        log.info("Forwarding {} message to the function under test", message.valueTypeName().asTypeNameString());
+        log.info("Forwarding {} message to the function under test", message);
         captureAll = true;
         log.info("Mode changed to capture all");
         return functionUnderTest.apply(context, message);
