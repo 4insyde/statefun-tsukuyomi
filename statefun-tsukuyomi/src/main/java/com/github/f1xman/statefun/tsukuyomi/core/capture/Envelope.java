@@ -71,6 +71,11 @@ public class Envelope implements Serializable {
             return this;
         }
 
+        public EnvelopeBuilder toEgress(TypeName typeName) {
+            to = NodeAddress.of(typeName.asTypeNameString(), null);
+            return this;
+        }
+
         public EnvelopeBuilder to(NodeAddress to) {
             this.to = to;
             return this;
