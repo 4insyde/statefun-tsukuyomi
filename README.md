@@ -94,7 +94,7 @@ private Envelope outgoingEnvelopeToSelf() {
 }
 private Envelope outgoingEnvelopeToEgress() {
     return Envelope.builder()
-        .to(EGRESS, null)
+        .toEgress(EGRESS)
         .data(Types.stringType(), HELLO + BAR)
         .build();
 }
