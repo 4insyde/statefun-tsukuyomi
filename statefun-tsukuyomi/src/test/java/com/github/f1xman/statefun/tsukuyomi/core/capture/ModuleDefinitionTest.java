@@ -1,6 +1,5 @@
 package com.github.f1xman.statefun.tsukuyomi.core.capture;
 
-import com.github.f1xman.statefun.tsukuyomi.core.capture.*;
 import org.apache.flink.statefun.sdk.java.*;
 import org.apache.flink.statefun.sdk.java.message.Message;
 import org.junit.jupiter.api.Test;
@@ -39,7 +38,15 @@ class ModuleDefinitionTest {
         assertThat(statefulFunctions.functionSpecs())
                 .hasEntrySatisfying(FunctionUnderTest.TYPE, s -> {
                     assertThat(s.typeName()).isEqualTo(FunctionUnderTest.TYPE);
-                    assertThat(s.supplier().get()).isEqualTo(expectedManagedStateWrapper);
+                    assertThat(s.supplier().get()).isInstanceOf(NextInvocationsInterceptor.class);
+                    assertThat(s.supplier().get()).hasFieldOrPropertyWithValue(
+                            "functionUnderTest",
+                            expectedManagedStateWrapper
+                    );
+                    assertThat(s.supplier().get()).hasFieldOrPropertyWithValue(
+                            "messageCaptureFunction",
+                            MessageCaptureFunction.INSTANCE
+                    );
                     assertThat(s.knownValues()).containsValue(VALUE_SPEC);
                 })
                 .hasEntrySatisfying(COLLABORATOR_1, s -> {
@@ -50,6 +57,22 @@ class ModuleDefinitionTest {
                     assertThat(s.typeName()).isEqualTo(COLLABORATOR_2);
                     assertThat(s.supplier().get()).isSameAs(MessageCaptureFunction.INSTANCE);
                 });
+    }
+
+    @Test
+    void excludesFunctionUnderTestCollaboratorSoNothingThrown() {
+        ManagedStateFunctionWrapper wrapper = ManagedStateFunctionWrapper.of(new FunctionUnderTest(), List.of());
+        ModuleDefinition.FunctionDefinition functionDefinition = ModuleDefinition.FunctionDefinition.builder()
+                .typeName(FunctionUnderTest.TYPE)
+                .instance(wrapper)
+                .stateSetters(List.of())
+                .build();
+        ModuleDefinition moduleDefinition = ModuleDefinition.builder()
+                .functionUnderTest(functionDefinition)
+                .collaborator(FunctionUnderTest.TYPE)
+                .build();
+
+        moduleDefinition.toStatefulFunctions();
     }
 
     @Test
@@ -105,6 +128,24 @@ class ModuleDefinitionTest {
         ManagedStateAccessor stateAccessor = moduleDefinition.getStateAccessor();
 
         assertThat(stateAccessor).isNotNull();
+    }
+
+    @Test
+    void setsEmptyEgressesWhenNullIsGiven() {
+        ModuleDefinition moduleDefinition = ModuleDefinition.builder()
+                .egresses(null)
+                .build();
+
+        assertThat(moduleDefinition.getEgresses()).isEmpty();
+    }
+
+    @Test
+    void setsEmptyCollaboratorsWhenNullIsGiven() {
+        ModuleDefinition moduleDefinition = ModuleDefinition.builder()
+                .collaborators(null)
+                .build();
+
+        assertThat(moduleDefinition.getCollaborators()).isEmpty();
     }
 
     private static class FunctionUnderTest implements StatefulFunction {

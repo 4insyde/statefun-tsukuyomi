@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static java.util.function.Predicate.isEqual;
+import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.joining;
 import static lombok.AccessLevel.PRIVATE;
 
@@ -20,26 +22,33 @@ import static lombok.AccessLevel.PRIVATE;
 public class ModuleDefinition {
 
     FunctionDefinition functionUnderTest;
-    @Singular
+    @Singular(ignoreNullCollections = true)
     Set<TypeName> collaborators;
-    @Singular
+    @Singular(ignoreNullCollections = true)
     Set<TypeName> egresses;
 
     public StatefulFunctions toStatefulFunctions() {
+        NextInvocationsInterceptor interceptor = NextInvocationsInterceptor.of(
+                functionUnderTest.getInstance(),
+                MessageCaptureFunction.INSTANCE
+        );
         StatefulFunctionSpec functionUnderTestSpec = StatefulFunctionSpec
                 .builder(functionUnderTest.getTypeName())
-                .withSupplier(functionUnderTest::getInstance)
+                .withSupplier(() -> interceptor)
                 .withValueSpecs(functionUnderTest.getValueSpecs())
                 .build();
         Stream<StatefulFunctionSpec> collaboratorSpecs = getCollaborators().stream()
+                .filter(not(isEqual(functionUnderTest.getTypeName())))
                 .map(t -> StatefulFunctionSpec
                         .builder(t)
                         .withSupplier(() -> MessageCaptureFunction.INSTANCE)
                         .build()
                 );
         StatefulFunctions statefulFunctions = new StatefulFunctions();
-        Stream
-                .concat(Stream.of(functionUnderTestSpec), collaboratorSpecs)
+        Stream.concat(
+                        Stream.of(functionUnderTestSpec),
+                        collaboratorSpecs
+                )
                 .forEach(statefulFunctions::withStatefulFunction);
         return statefulFunctions;
     }

@@ -11,13 +11,13 @@ public
 class ThenImpl implements Then {
 
     GivenFunction givenFunction;
-    Interactor[] interactors;
+    Interactor interactor;
 
     @Override
     public void then(ChangeMatcher... matchers) {
         try {
             givenFunction.start(matchers);
-            givenFunction.interact(interactors);
+            givenFunction.interact(interactor);
             givenFunction.expect(matchers);
         } finally {
             givenFunction.stop();

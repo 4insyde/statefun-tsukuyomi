@@ -18,8 +18,7 @@ import static lombok.AccessLevel.PRIVATE;
 
 @RequiredArgsConstructor(staticName = "of")
 @FieldDefaults(level = PRIVATE, makeFinal = true)
-public
-class GivenFunctionImpl implements GivenFunction {
+public class GivenFunctionImpl implements GivenFunction {
 
     TypedFunction typedFunction;
     StateSetter<?>[] stateSetters;
@@ -54,10 +53,8 @@ class GivenFunctionImpl implements GivenFunction {
     }
 
     @Override
-    public void interact(Interactor[] interactors) {
-        for (Interactor interactor : interactors) {
-            interactor.interact(tsukuyomi);
-        }
+    public void interact(Interactor interactor) {
+        interactor.interact(tsukuyomi);
     }
 
     @Override

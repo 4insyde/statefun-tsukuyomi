@@ -1,9 +1,5 @@
 package com.github.f1xman.statefun.tsukuyomi.core.validation;
 
-import com.github.f1xman.statefun.tsukuyomi.core.validation.ChangeMatcher;
-import com.github.f1xman.statefun.tsukuyomi.core.validation.GivenFunction;
-import com.github.f1xman.statefun.tsukuyomi.core.validation.Interactor;
-import com.github.f1xman.statefun.tsukuyomi.core.validation.ThenImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -24,19 +20,19 @@ class ThenImplTest {
 
     @Test
     void startsFunctionThenInteractsThenExpectsThenStops() {
-        ThenImpl then = ThenImpl.of(mockedGivenFunction, new Interactor[]{mockedInteractor});
+        ThenImpl then = ThenImpl.of(mockedGivenFunction, mockedInteractor);
 
         then.then(mockedChangeMatcher);
 
         then(mockedGivenFunction).should().start(new ChangeMatcher[]{mockedChangeMatcher});
-        then(mockedGivenFunction).should().interact(new Interactor[]{mockedInteractor});
+        then(mockedGivenFunction).should().interact(mockedInteractor);
         then(mockedGivenFunction).should().expect(mockedChangeMatcher);
         then(mockedGivenFunction).should().stop();
     }
 
     @Test
     void shutsDownIfExceptionOccurredDuringInteraction() {
-        ThenImpl then = ThenImpl.of(mockedGivenFunction, new Interactor[]{mockedInteractor});
+        ThenImpl then = ThenImpl.of(mockedGivenFunction, mockedInteractor);
         willThrow(RuntimeException.class).given(mockedGivenFunction).start(
                 new ChangeMatcher[]{mockedChangeMatcher}
         );

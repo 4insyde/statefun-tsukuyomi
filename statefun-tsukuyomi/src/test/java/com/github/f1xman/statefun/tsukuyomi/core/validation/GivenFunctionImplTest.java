@@ -78,7 +78,7 @@ class GivenFunctionImplTest {
         );
         function.setTsukuyomi(mockedTsukuyomiApi);
 
-        function.interact(new Interactor[]{mockedInteractor});
+        function.interact(mockedInteractor);
 
         then(mockedInteractor).should().interact(mockedTsukuyomiApi);
     }

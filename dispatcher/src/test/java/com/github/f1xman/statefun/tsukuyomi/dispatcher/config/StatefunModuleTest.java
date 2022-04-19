@@ -1,6 +1,5 @@
 package com.github.f1xman.statefun.tsukuyomi.dispatcher.config;
 
-import com.github.f1xman.statefun.tsukuyomi.dispatcher.config.StatefunModule;
 import org.apache.flink.statefun.sdk.FunctionType;
 import org.junit.jupiter.api.Test;
 
@@ -39,8 +38,18 @@ class StatefunModuleTest {
     }
 
     @Test
-    void returnsEmptySetIfNoEgressesPresent() {
+    void returnsEmptySetIfEgressesIsNull() {
         StatefunModule module = StatefunModule.of(FOOBARBAZ, ENDPOINT, null);
+        Set<String> expected = Set.of();
+
+        Set<String> actual = module.getEgressIds();
+
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void returnsEmptySetIfEgressesIsEmpty() {
+        StatefunModule module = StatefunModule.of(FOOBARBAZ, ENDPOINT, "");
         Set<String> expected = Set.of();
 
         Set<String> actual = module.getEgressIds();

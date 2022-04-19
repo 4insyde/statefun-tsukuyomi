@@ -37,7 +37,7 @@ public class StatefunModule {
     }
 
     public Set<String> getEgressIds() {
-        if (egresses == null) {
+        if (egresses == null || egresses.isEmpty()) {
             return Set.of();
         }
         return Arrays.stream(egresses.split(DELIMITER))

@@ -37,6 +37,7 @@ class BddTsukuyomiTest {
         Envelope envelope = incomingEnvelope();
         Envelope expectedToFunction = outgoingEnvelopeToFunction();
         Envelope expectedToEgress = outgoingEnvelopeToEgress();
+        Envelope expectedToSelf = outgoingEnvelopeToSelf();
         GivenFunction testee = given(
                 function(Testee.TYPE, new Testee()),
                 withState(Testee.FOO, empty()),
@@ -49,6 +50,7 @@ class BddTsukuyomiTest {
         ).then(
                 expectMessage(expectedToFunction, toFunction()),
                 expectMessage(expectedToEgress, toEgress()),
+                expectMessage(expectedToSelf, toFunction()),
                 expectState(Testee.FOO, is("foo"))
         );
     }
@@ -64,6 +66,14 @@ class BddTsukuyomiTest {
         return Envelope.builder()
                 .from(Testee.TYPE, FUNCTION_ID)
                 .to(COLLABORATOR_2, FUNCTION_ID)
+                .data(Types.stringType(), HELLO + BAR)
+                .build();
+    }
+
+    private Envelope outgoingEnvelopeToSelf() {
+        return Envelope.builder()
+                .from(Testee.TYPE, FUNCTION_ID)
+                .to(Testee.TYPE, FUNCTION_ID)
                 .data(Types.stringType(), HELLO + BAR)
                 .build();
     }
@@ -92,6 +102,10 @@ class BddTsukuyomiTest {
                     .withValue(value)
                     .build();
             context.send(toFunction);
+            Message toSelf = MessageBuilder.forAddress(context.self())
+                    .withValue(value)
+                    .build();
+            context.send(toSelf);
             EgressMessage toEgress = EgressMessageBuilder.forEgress(EGRESS)
                     .withValue(value)
                     .build();

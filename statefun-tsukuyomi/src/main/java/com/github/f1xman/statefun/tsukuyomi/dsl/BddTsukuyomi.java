@@ -28,8 +28,8 @@ public class BddTsukuyomi {
         return StateSetterImpl.of(spec, value.get());
     }
 
-    public static Then when(GivenFunction givenFunction, Interactor... interactors) {
-        return ThenImpl.of(givenFunction, interactors);
+    public static Then when(GivenFunction givenFunction, Interactor interactor) {
+        return ThenImpl.of(givenFunction, interactor);
     }
 
     public static Interactor receives(Envelope envelope) {

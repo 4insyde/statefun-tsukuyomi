@@ -4,7 +4,7 @@ public interface GivenFunction {
 
     void start(ChangeMatcher[] matchers);
 
-    void interact(Interactor[] interactors);
+    void interact(Interactor interactor);
 
     void expect(ChangeMatcher... matchers);
 
