@@ -1,6 +1,6 @@
 package com.github.f1xman.statefun.tsukuyomi.core.dispatcher;
 
-import com.github.f1xman.statefun.tsukuyomi.core.capture.ModuleDefinition;
+import com.github.f1xman.statefun.tsukuyomi.core.capture.StatefunModule;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.experimental.FieldDefaults;
@@ -27,7 +27,7 @@ public class DispatcherContainer extends GenericContainer<DispatcherContainer> {
     @NonNull
     Integer statefunPort;
     @NonNull
-    ModuleDefinition moduleDefinition;
+    StatefunModule statefunModule;
 
     public DispatcherClient createClient() {
         String host = this.getHost();
@@ -41,16 +41,16 @@ public class DispatcherContainer extends GenericContainer<DispatcherContainer> {
         Testcontainers.exposeHostPorts(statefunPort);
         this.withExposedPorts(DEBUGGER_PORT, DISPATCHER_PORT);
         this.waitingFor(Wait.forLogMessage(".*Job status is RUNNING.*", 1));
-        this.addEnv(FUNCTIONS_ENV, moduleDefinition.generateFunctionsString());
+        this.addEnv(FUNCTIONS_ENV, statefunModule.generateFunctionsString());
         this.addEnv(ENDPOINT_ENV, String.format("http://host.testcontainers.internal:%d", statefunPort));
-        this.addEnv(EGRESSES_ENV, moduleDefinition.generateEgressesString());
+        this.addEnv(EGRESSES_ENV, statefunModule.generateEgressesString());
         this.withLogConsumer(new Slf4jLogConsumer(log));
     }
 
     @Builder
-    private DispatcherContainer(DockerImageName image, Integer statefunPort, ModuleDefinition moduleDefinition) {
+    private DispatcherContainer(DockerImageName image, Integer statefunPort, StatefunModule statefunModule) {
         super(requireNonNullElse(image, DispatcherImageName.INSTANCE));
         this.statefunPort = statefunPort;
-        this.moduleDefinition = moduleDefinition;
+        this.statefunModule = statefunModule;
     }
 }

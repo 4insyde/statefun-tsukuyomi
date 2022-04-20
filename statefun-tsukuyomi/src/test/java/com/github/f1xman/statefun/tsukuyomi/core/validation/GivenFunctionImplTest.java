@@ -1,6 +1,7 @@
 package com.github.f1xman.statefun.tsukuyomi.core.validation;
 
-import com.github.f1xman.statefun.tsukuyomi.core.capture.ModuleDefinition;
+import com.github.f1xman.statefun.tsukuyomi.core.capture.FunctionDefinition;
+import com.github.f1xman.statefun.tsukuyomi.core.capture.StatefunModule;
 import com.github.f1xman.statefun.tsukuyomi.core.capture.StateSetter;
 import org.apache.flink.statefun.sdk.java.Context;
 import org.apache.flink.statefun.sdk.java.StatefulFunction;
@@ -48,12 +49,12 @@ class GivenFunctionImplTest {
                 new StateSetter[]{mockedStateSetter},
                 mockedTsukuyomiManager
         );
-        ModuleDefinition.FunctionDefinition functionDefinition = ModuleDefinition.FunctionDefinition.builder()
+        FunctionDefinition functionDefinition = FunctionDefinition.builder()
                 .typeName(FooBar.TYPE_NAME)
                 .instance(instance)
                 .stateSetters(List.of(mockedStateSetter))
                 .build();
-        ModuleDefinition moduleDefinition = ModuleDefinition.builder()
+        StatefunModule statefunModule = StatefunModule.builder()
                 .functionUnderTest(functionDefinition)
                 .collaborator(COLLABORATOR)
                 .egress(EGRESS)
@@ -65,7 +66,7 @@ class GivenFunctionImplTest {
 
         function.start(new ChangeMatcher[]{mockedChangeMatcherA, mockedChangeMatcherB});
 
-        then(mockedTsukuyomiManager).should().start(moduleDefinition);
+        then(mockedTsukuyomiManager).should().start(statefunModule);
     }
 
     @Test

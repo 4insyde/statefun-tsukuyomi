@@ -1,7 +1,8 @@
 package com.github.f1xman.statefun.tsukuyomi.core;
 
 import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
-import com.github.f1xman.statefun.tsukuyomi.core.capture.ModuleDefinition;
+import com.github.f1xman.statefun.tsukuyomi.core.capture.FunctionDefinition;
+import com.github.f1xman.statefun.tsukuyomi.core.capture.StatefunModule;
 import com.github.f1xman.statefun.tsukuyomi.core.validation.TsukuyomiApi;
 import com.github.f1xman.statefun.tsukuyomi.core.validation.TsukuyomiManagerImpl;
 import com.github.f1xman.statefun.tsukuyomi.testutil.IntegrationTest;
@@ -39,17 +40,17 @@ class TsukuyomiManagerImplTest {
         Assertions.assertTimeoutPreemptively(Duration.ofMinutes(1), () -> {
             TsukuyomiManagerImpl tsukuyomiManager = new TsukuyomiManagerImpl();
             Testee testee = new Testee();
-            ModuleDefinition.FunctionDefinition functionDefinition = ModuleDefinition.FunctionDefinition.builder()
+            FunctionDefinition functionDefinition = FunctionDefinition.builder()
                     .typeName(Testee.TYPE)
                     .instance(testee)
                     .stateSetters(List.of())
                     .build();
-            ModuleDefinition moduleDefinition = ModuleDefinition.builder()
+            StatefunModule statefunModule = StatefunModule.builder()
                     .functionUnderTest(functionDefinition)
                     .collaborator(COLLABORATOR)
                     .egress(EGRESS)
                     .build();
-            TsukuyomiApi client = tsukuyomiManager.start(moduleDefinition);
+            TsukuyomiApi client = tsukuyomiManager.start(statefunModule);
             Envelope envelope = Envelope.builder()
                     .from(COLLABORATOR, FUNCTION_ID)
                     .to(Testee.TYPE, FUNCTION_ID)

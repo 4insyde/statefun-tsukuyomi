@@ -1,10 +1,10 @@
 package com.github.f1xman.statefun.tsukuyomi.core.validation;
 
-import com.github.f1xman.statefun.tsukuyomi.core.capture.ModuleDefinition;
+import com.github.f1xman.statefun.tsukuyomi.core.capture.StatefunModule;
 
 public interface TsukuyomiManager {
 
-    TsukuyomiApi start(ModuleDefinition moduleDefinition);
+    TsukuyomiApi start(StatefunModule statefunModule);
 
     void stop();
 }

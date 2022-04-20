@@ -1,6 +1,7 @@
 package com.github.f1xman.statefun.tsukuyomi.core.validation;
 
-import com.github.f1xman.statefun.tsukuyomi.core.capture.ModuleDefinition;
+import com.github.f1xman.statefun.tsukuyomi.core.capture.FunctionDefinition;
+import com.github.f1xman.statefun.tsukuyomi.core.capture.StatefunModule;
 import com.github.f1xman.statefun.tsukuyomi.core.capture.StateSetter;
 import com.github.f1xman.statefun.tsukuyomi.core.validation.Target.Type;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,7 @@ public class GivenFunctionImpl implements GivenFunction {
 
     @Override
     public void start(ChangeMatcher[] matchers) {
-        ModuleDefinition.FunctionDefinition functionDefinition = ModuleDefinition.FunctionDefinition.builder()
+        FunctionDefinition functionDefinition = FunctionDefinition.builder()
                 .typeName(typedFunction.getTypeName())
                 .instance(typedFunction.getInstance())
                 .stateSetters(List.of(stateSetters))
@@ -44,12 +45,12 @@ public class GivenFunctionImpl implements GivenFunction {
                         groupingBy(Target::getType,
                                 mapping(Target::getTypeName,
                                         toSet())));
-        ModuleDefinition moduleDefinition = ModuleDefinition.builder()
+        StatefunModule statefunModule = StatefunModule.builder()
                 .functionUnderTest(functionDefinition)
                 .collaborators(targetsByType.get(FUNCTION))
                 .egresses(targetsByType.get(EGRESS))
                 .build();
-        tsukuyomi = manager.start(moduleDefinition);
+        tsukuyomi = manager.start(statefunModule);
     }
 
     @Override

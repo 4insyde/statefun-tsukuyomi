@@ -4,63 +4,62 @@ import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.Headers;
-import lombok.AllArgsConstructor;
+import lombok.Cleanup;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.SneakyThrows;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.statefun.sdk.java.StatefulFunctions;
 import org.apache.flink.statefun.sdk.java.handler.RequestReplyHandler;
 import org.apache.flink.statefun.sdk.java.slice.Slice;
 import org.apache.flink.statefun.sdk.java.slice.Slices;
 
-import java.net.InetAddress;
+import java.net.ServerSocket;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
 
 import static io.undertow.UndertowOptions.ENABLE_HTTP2;
 import static lombok.AccessLevel.PRIVATE;
 
-@Slf4j
 @RequiredArgsConstructor(access = PRIVATE)
-public class ModuleServer {
+public class UndertowStatefunServer implements StatefunServer {
 
-    private static final RequestReplyHandler EMPTY = new StatefulFunctions().requestReplyHandler();
-    private static Undertow server;
-    private final HandlerSupplier handlerSupplier;
+    @Getter
+    private final int port;
+    private Undertow server;
 
-    public static ModuleServer start(int port) {
-        HandlerSupplier handlerSupplier = new HandlerSupplier(EMPTY);
+    @SneakyThrows
+    public static UndertowStatefunServer useAvailablePort() {
+        @Cleanup
+        ServerSocket serverSocket = new ServerSocket(0);
+        int port = serverSocket.getLocalPort();
+        serverSocket.close();
+        return new UndertowStatefunServer(port);
+    }
+
+    @Override
+    public void start(StatefulFunctions statefulFunctions) {
         server = Undertow.builder()
                 .addHttpListener(port, "0.0.0.0")
-                .setHandler(new UndertowHttpHandler(handlerSupplier))
+                .setHandler(new UndertowHttpHandler(statefulFunctions.requestReplyHandler()))
                 .setServerOption(ENABLE_HTTP2, true)
                 .build();
         server.start();
-        return new ModuleServer(handlerSupplier);
     }
 
-    @SneakyThrows
-    public static String getHostAddress() {
-        return InetAddress.getLocalHost().getHostAddress();
-    }
-
-    public void deployModule(ModuleDefinition moduleDefinition) {
-        StatefulFunctions statefulFunctions = moduleDefinition.toStatefulFunctions();
-        handlerSupplier.setHandler(statefulFunctions.requestReplyHandler());
-    }
-
+    @Override
     public void stop() {
         if (server != null) {
-            log.info("Stopping server");
             server.stop();
         }
     }
 
+    @Slf4j
     @RequiredArgsConstructor
+    @FieldDefaults(level = PRIVATE, makeFinal = true)
     private static final class UndertowHttpHandler implements HttpHandler {
 
-        private final Supplier<RequestReplyHandler> handlerSupplier;
+        RequestReplyHandler handler;
 
         @Override
         public void handleRequest(HttpServerExchange exchange) {
@@ -69,7 +68,7 @@ public class ModuleServer {
 
         private void onRequestBody(HttpServerExchange exchange, byte[] requestBytes) {
             exchange.dispatch();
-            CompletableFuture<Slice> future = handlerSupplier.get().handle(Slices.wrap(requestBytes));
+            CompletableFuture<Slice> future = handler.handle(Slices.wrap(requestBytes));
             future.whenComplete((response, exception) -> onComplete(exchange, response, exception));
         }
 
@@ -82,18 +81,6 @@ public class ModuleServer {
             }
             exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "application/octet-stream");
             exchange.getResponseSender().send(responseBytes.asReadOnlyByteBuffer());
-        }
-    }
-
-    @AllArgsConstructor
-    private static class HandlerSupplier implements Supplier<RequestReplyHandler> {
-
-        @Setter
-        private RequestReplyHandler handler;
-
-        @Override
-        public RequestReplyHandler get() {
-            return handler;
         }
     }
 }

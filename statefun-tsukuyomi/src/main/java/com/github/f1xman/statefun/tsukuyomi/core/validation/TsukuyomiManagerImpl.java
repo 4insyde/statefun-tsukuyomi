@@ -1,7 +1,7 @@
 package com.github.f1xman.statefun.tsukuyomi.core.validation;
 
-import com.github.f1xman.statefun.tsukuyomi.core.capture.ModuleDefinition;
-import com.github.f1xman.statefun.tsukuyomi.core.capture.ModuleServer;
+import com.github.f1xman.statefun.tsukuyomi.core.capture.StatefunModule;
+import com.github.f1xman.statefun.tsukuyomi.core.capture.UndertowStatefunServer;
 import com.github.f1xman.statefun.tsukuyomi.core.dispatcher.DispatcherBasedTsukuyomi;
 import com.github.f1xman.statefun.tsukuyomi.core.dispatcher.DispatcherClient;
 import com.github.f1xman.statefun.tsukuyomi.core.dispatcher.DispatcherContainer;
@@ -10,21 +10,20 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TsukuyomiManagerImpl implements TsukuyomiManager {
 
-    static final int STATEFUN_PORT = 9876;
-    private ModuleServer server;
     private DispatcherContainer dispatcher;
+    private StatefunModule statefunModule;
 
     @Override
-    public TsukuyomiApi start(ModuleDefinition moduleDefinition) {
-        startStatefunServer(moduleDefinition);
-        DispatcherClient dispatcherClient = startDispatcher(moduleDefinition);
-        return DispatcherBasedTsukuyomi.of(dispatcherClient, moduleDefinition.getStateAccessor());
+    public TsukuyomiApi start(StatefunModule statefunModule) {
+        startStatefunServer(statefunModule);
+        DispatcherClient dispatcherClient = startDispatcher(statefunModule);
+        return DispatcherBasedTsukuyomi.of(dispatcherClient, statefunModule.getStateAccessor());
     }
 
-    private DispatcherClient startDispatcher(ModuleDefinition moduleDefinition) {
+    private DispatcherClient startDispatcher(StatefunModule statefunModule) {
         dispatcher = DispatcherContainer.builder()
-                .statefunPort(STATEFUN_PORT)
-                .moduleDefinition(moduleDefinition)
+                .statefunPort(statefunModule.getPort())
+                .statefunModule(statefunModule)
                 .build();
         dispatcher.start();
         DispatcherClient client = dispatcher.createClient();
@@ -32,15 +31,15 @@ public class TsukuyomiManagerImpl implements TsukuyomiManager {
         return client;
     }
 
-    private void startStatefunServer(ModuleDefinition moduleDefinition) {
-        server = ModuleServer.start(STATEFUN_PORT);
-        server.deployModule(moduleDefinition);
+    private void startStatefunServer(StatefunModule statefunModule) {
+        this.statefunModule = statefunModule;
+        this.statefunModule.start(UndertowStatefunServer.useAvailablePort());
     }
 
     @Override
     public void stop() {
-        if (server != null) {
-            server.stop();
+        if (statefunModule != null) {
+            statefunModule.stop();
         }
         if (dispatcher != null) {
             dispatcher.stop();
