@@ -29,31 +29,6 @@ nice API.
 ```
 ## Usage
 
-### Import
-
-```java
-import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
-import com.github.f1xman.statefun.tsukuyomi.core.validation.GivenFunction;
-import com.github.f1xman.statefun.tsukuyomi.testutil.IntegrationTest;
-import org.apache.flink.statefun.sdk.java.*;
-import org.apache.flink.statefun.sdk.java.message.EgressMessage;
-import org.apache.flink.statefun.sdk.java.message.EgressMessageBuilder;
-import org.apache.flink.statefun.sdk.java.message.Message;
-import org.apache.flink.statefun.sdk.java.message.MessageBuilder;
-import org.apache.flink.statefun.sdk.java.types.Types;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
-
-import java.util.concurrent.CompletableFuture;
-
-import static com.github.f1xman.statefun.tsukuyomi.core.capture.StateValue.empty;
-import static com.github.f1xman.statefun.tsukuyomi.core.capture.StateValue.havingValue;
-import static com.github.f1xman.statefun.tsukuyomi.dsl.BddTsukuyomi.*;
-import static com.github.f1xman.statefun.tsukuyomi.dsl.Expectations.*;
-import static java.util.concurrent.TimeUnit.MINUTES;
-import static org.hamcrest.Matchers.is;
-```
-
 ### Have your function under test
 
 ```java
@@ -83,7 +58,13 @@ static class Testee implements StatefulFunction {
 ```
 
 ### Create envelopes
-
+Envelope is an object that describes a Message. Envelope has three main parts:
+#### From (Optional)
+Who sends this message. Do not set if message sender is an ingress.
+#### To (Mandatory)
+Who receives this message. Destination can be either function or egress.
+#### Data (Mandatory)
+A message content.
 ```java
 private Envelope outgoingEnvelopeToSelf() {
     return Envelope.builder()
