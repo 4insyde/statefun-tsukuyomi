@@ -61,7 +61,7 @@ class TsukuyomiManagerImplTest {
                     .build();
             Envelope expectedToEgress = envelope.toBuilder()
                     .from(null)
-                    .to(EGRESS, null)
+                    .toEgress(EGRESS)
                     .build();
 
             client.send(envelope);

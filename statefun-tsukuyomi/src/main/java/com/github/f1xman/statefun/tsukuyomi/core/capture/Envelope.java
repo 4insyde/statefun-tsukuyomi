@@ -67,7 +67,10 @@ public class Envelope implements Serializable {
         NodeAddress to;
         Data data;
 
-        public EnvelopeBuilder from(TypeName typeName, String id) {
+        public EnvelopeBuilder from(@NonNull TypeName typeName, @NonNull String id) {
+            if (id.isEmpty()) {
+                throw new IllegalArgumentException("id cannot be empty");
+            }
             from = NodeAddress.of(typeName.asTypeNameString(), id);
             return this;
         }
@@ -77,7 +80,10 @@ public class Envelope implements Serializable {
             return this;
         }
 
-        public EnvelopeBuilder to(TypeName typeName, String id) {
+        public EnvelopeBuilder to(@NonNull TypeName typeName, @NonNull String id) {
+            if (id.isEmpty()) {
+                throw new IllegalArgumentException("id cannot be empty");
+            }
             to = NodeAddress.of(typeName.asTypeNameString(), id);
             return this;
         }

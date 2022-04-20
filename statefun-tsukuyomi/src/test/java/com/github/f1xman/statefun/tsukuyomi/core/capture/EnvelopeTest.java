@@ -5,6 +5,9 @@ import org.apache.flink.statefun.sdk.java.types.Type;
 import org.apache.flink.statefun.sdk.java.types.TypeSerializer;
 import org.apache.flink.statefun.sdk.java.types.Types;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.NullSource;
 
 import java.util.Base64;
 
@@ -26,6 +29,48 @@ class EnvelopeTest {
         assertThatThrownBy(() -> Envelope.builder()
                 .data(null)
                 .to(TypeName.typeNameFromString("foo/bar"), "baz")
+                .build()
+        ).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void throwsExceptionIfFromTypenameIsNull() {
+        assertThatThrownBy(() -> Envelope.builder()
+                .from(null, "id")
+                .data(Types.stringType(), "foo")
+                .to(TypeName.typeNameFromString("foo/too"), "id")
+                .build()
+        ).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void throwsExceptionIfToTypenameIsNull() {
+        assertThatThrownBy(() -> Envelope.builder()
+                .to(null, "id")
+                .from(TypeName.typeNameFromString("foo/from"), "id")
+                .data(Types.stringType(), "foo")
+                .build()
+        ).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    void throwsExceptionIfFromIdIsNullOrEmpty(String id) {
+        assertThatThrownBy(() -> Envelope.builder()
+                .from(TypeName.typeNameFromString("foo/from"), id)
+                .to(TypeName.typeNameFromString("foo/to"), "id")
+                .data(Types.stringType(), "foo")
+                .build()
+        ).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    void throwsExceptionIfToIdIsNullOrEmpty(String id) {
+        assertThatThrownBy(() -> Envelope.builder()
+                .to(TypeName.typeNameFromString("foo/to"), id)
+                .from(TypeName.typeNameFromString("foo/from"), "id")
+                .data(Types.stringType(), "foo")
                 .build()
         ).isInstanceOf(IllegalArgumentException.class);
     }
