@@ -8,13 +8,13 @@ import static lombok.AccessLevel.PRIVATE;
 @RequiredArgsConstructor(staticName = "of")
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 public
-class ThenImpl implements Then {
+class ValidationRunnerImpl implements ValidationRunner {
 
     GivenFunction givenFunction;
     Interactor interactor;
 
     @Override
-    public void then(ChangeMatcher... matchers) {
+    public void validate(ChangeMatcher... matchers) {
         try {
             givenFunction.start(matchers);
             givenFunction.interact(interactor);

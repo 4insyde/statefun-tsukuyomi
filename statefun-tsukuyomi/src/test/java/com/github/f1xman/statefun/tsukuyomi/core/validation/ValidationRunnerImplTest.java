@@ -9,7 +9,7 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.BDDMockito.willThrow;
 
 @ExtendWith(MockitoExtension.class)
-class ThenImplTest {
+class ValidationRunnerImplTest {
 
     @Mock
     GivenFunction mockedGivenFunction;
@@ -20,9 +20,9 @@ class ThenImplTest {
 
     @Test
     void startsFunctionThenInteractsThenExpectsThenStops() {
-        ThenImpl then = ThenImpl.of(mockedGivenFunction, mockedInteractor);
+        ValidationRunnerImpl then = ValidationRunnerImpl.of(mockedGivenFunction, mockedInteractor);
 
-        then.then(mockedChangeMatcher);
+        then.validate(mockedChangeMatcher);
 
         then(mockedGivenFunction).should().start(new ChangeMatcher[]{mockedChangeMatcher});
         then(mockedGivenFunction).should().interact(mockedInteractor);
@@ -32,13 +32,13 @@ class ThenImplTest {
 
     @Test
     void shutsDownIfExceptionOccurredDuringInteraction() {
-        ThenImpl then = ThenImpl.of(mockedGivenFunction, mockedInteractor);
+        ValidationRunnerImpl then = ValidationRunnerImpl.of(mockedGivenFunction, mockedInteractor);
         willThrow(RuntimeException.class).given(mockedGivenFunction).start(
                 new ChangeMatcher[]{mockedChangeMatcher}
         );
 
         try {
-            then.then(mockedChangeMatcher);
+            then.validate(mockedChangeMatcher);
         } catch (Exception ignore) {
             // noop
         }

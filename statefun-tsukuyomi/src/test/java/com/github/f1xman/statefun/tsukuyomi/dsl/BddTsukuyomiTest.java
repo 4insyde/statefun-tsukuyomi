@@ -37,7 +37,7 @@ class BddTsukuyomiTest {
         Envelope envelope = incomingEnvelope();
         Envelope expectedToFunction = outgoingEnvelopeToFunction();
         Envelope expectedToEgress = outgoingEnvelopeToEgress();
-        Envelope expectedToSelf = outgoingEnvelopeToSelf();
+        Envelope expectedToSelf = outgoingEnvelopeToSelf().toBuilder().build();
         GivenFunction testee = given(
                 function(Testee.TYPE, new Testee()),
                 withState(Testee.FOO, empty()),
