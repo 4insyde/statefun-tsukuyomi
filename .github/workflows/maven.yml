@@ -33,9 +33,9 @@ jobs:
       - name: Compile Tsukuyomi
         run: mvn -pl statefun-tsukuyomi compile
       - name: Run Tsukuyomi unit tests
-        run: mvn -pl statefun-tsukuyomi test
+        run: mvn -P unit-only -pl statefun-tsukuyomi test
       - name: Run Tsukuyomi integration tests
-        run: mvn -P integration -pl statefun-tsukuyomi test
+        run: mvn -P integration-only -pl statefun-tsukuyomi test
       - name: Prepare Docker properties
         id: prep
         run: |
