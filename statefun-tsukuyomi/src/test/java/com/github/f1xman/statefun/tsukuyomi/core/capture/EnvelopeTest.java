@@ -85,7 +85,7 @@ class EnvelopeTest {
     }
 
     @Test
-    void toStringHaveDeserializedValueIfTypeIsKnown() {
+    void toStringHasDeserializedValueIfTypeIsKnown() {
         Envelope envelope = Envelope.builder()
                 .to(TypeName.typeNameFromString("foo/to"), "id")
                 .data(Types.stringType(), "Foo")
@@ -97,7 +97,7 @@ class EnvelopeTest {
     }
 
     @Test
-    void toStringHaveBase64ValueIfTypeIsUnknown() {
+    void toStringHasBase64ValueIfTypeIsUnknown() {
         Envelope.resetRenderers();
         byte[] bytes = Types.stringType().typeSerializer().serialize("Foo").toByteArray();
         String base64Value = Base64.getEncoder().encodeToString(bytes);
