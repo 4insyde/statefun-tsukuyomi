@@ -97,6 +97,7 @@
                 <configuration>
                     <excludedGroups>integration</excludedGroups>
                     <argLine>--illegal-access=permit</argLine>
+                    <trimStackTrace>false</trimStackTrace>
                 </configuration>
             </plugin>
             <plugin>
