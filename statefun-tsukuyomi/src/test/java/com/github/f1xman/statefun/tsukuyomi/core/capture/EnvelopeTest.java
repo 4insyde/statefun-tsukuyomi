@@ -6,12 +6,20 @@ import org.apache.flink.statefun.sdk.java.types.TypeSerializer;
 import org.apache.flink.statefun.sdk.java.types.Types;
 import org.junit.jupiter.api.Test;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class EnvelopeTest {
+
+    @Test
+    void throwsExceptionIfToIsNull() {
+        assertThatThrownBy(() -> Envelope.builder()
+                .data(Types.stringType(), "Foo")
+                .build()
+        ).isInstanceOf(IllegalArgumentException.class);
+    }
 
     @Test
     void envelopeBuiltViaShortcutsIsTheSameAsEnvelopeBuiltViaPureSetters() {
@@ -25,6 +33,7 @@ class EnvelopeTest {
     @Test
     void toStringHaveDeserializedValueIfTypeIsKnown() {
         Envelope envelope = Envelope.builder()
+                .to(TypeName.typeNameFromString("foo/to"), "id")
                 .data(Types.stringType(), "Foo")
                 .build();
 
@@ -39,6 +48,7 @@ class EnvelopeTest {
         byte[] bytes = Types.stringType().typeSerializer().serialize("Foo").toByteArray();
         String base64Value = Base64.getEncoder().encodeToString(bytes);
         Envelope envelope = Envelope.builder()
+                .to(TypeName.typeNameFromString("foo/to"), "id")
                 .data(Envelope.Data.of(Types.stringType().typeName().asTypeNameString(), base64Value))
                 .build();
 
@@ -51,8 +61,8 @@ class EnvelopeTest {
         Type<String> stringType = Types.stringType();
         TypeSerializer<String> serializer = stringType.typeSerializer();
         return Envelope.builder()
-                .from(Envelope.NodeAddress.of("foo/bar", "foobar"))
-                .to(Envelope.NodeAddress.of("foo/baz", "foobaz"))
+                .from(TypeName.typeNameFromString("foo/bar"), "foobar")
+                .to(TypeName.typeNameFromString("foo/baz"), "foobaz")
                 .data(Envelope.Data.of(
                         stringType.typeName().asTypeNameString(),
                         Base64.getEncoder().encodeToString(serializer.serialize("foobarbaz").toByteArray())

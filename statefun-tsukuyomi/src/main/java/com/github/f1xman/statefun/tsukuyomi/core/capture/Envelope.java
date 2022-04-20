@@ -35,6 +35,7 @@ public class Envelope implements Serializable {
     @JsonProperty("from")
     NodeAddress from;
     @JsonProperty("to")
+    @NonNull
     NodeAddress to;
     @JsonProperty("data")
     Data data;

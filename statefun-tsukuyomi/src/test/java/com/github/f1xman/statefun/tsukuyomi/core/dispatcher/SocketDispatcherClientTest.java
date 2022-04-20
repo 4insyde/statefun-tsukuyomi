@@ -5,6 +5,7 @@ import lombok.Cleanup;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
+import org.apache.flink.statefun.sdk.java.TypeName;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -30,7 +31,8 @@ class SocketDispatcherClientTest {
     void sendsEnvelope() throws IOException {
         Assertions.assertTimeoutPreemptively(Duration.ofSeconds(5), () -> {
             Envelope expected = Envelope.builder()
-                    .from(Envelope.NodeAddress.of("foo", "id"))
+                    .from(TypeName.typeNameFromString("foo/from"), "id")
+                    .to(TypeName.typeNameFromString("foo/to"), "id")
                     .build();
             @Cleanup
             ServerSocket serverSocket = new ServerSocket(0);
@@ -49,10 +51,12 @@ class SocketDispatcherClientTest {
     @Test
     void receivesEnvelopesInOrder() throws IOException {
         Envelope expectedEnvelopeFoo = Envelope.builder()
-                .from(Envelope.NodeAddress.of("foo", "id"))
+                .from(TypeName.typeNameFromString("foo/from"), "id")
+                .to(TypeName.typeNameFromString("foo/to"), "id")
                 .build();
         Envelope expectedEnvelopeBar = Envelope.builder()
-                .from(Envelope.NodeAddress.of("bar", "id"))
+                .from(TypeName.typeNameFromString("bar/from"), "id")
+                .to(TypeName.typeNameFromString("bar/to"), "id")
                 .build();
         Envelope[] expected = {expectedEnvelopeBar, expectedEnvelopeFoo};
         @Cleanup
