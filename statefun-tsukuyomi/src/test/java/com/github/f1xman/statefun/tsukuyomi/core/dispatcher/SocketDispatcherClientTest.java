@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import org.apache.flink.statefun.sdk.java.TypeName;
+import org.apache.flink.statefun.sdk.java.types.Types;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -33,6 +34,7 @@ class SocketDispatcherClientTest {
             Envelope expected = Envelope.builder()
                     .from(TypeName.typeNameFromString("foo/from"), "id")
                     .to(TypeName.typeNameFromString("foo/to"), "id")
+                    .data(Types.stringType(), "foo")
                     .build();
             @Cleanup
             ServerSocket serverSocket = new ServerSocket(0);
@@ -53,10 +55,12 @@ class SocketDispatcherClientTest {
         Envelope expectedEnvelopeFoo = Envelope.builder()
                 .from(TypeName.typeNameFromString("foo/from"), "id")
                 .to(TypeName.typeNameFromString("foo/to"), "id")
+                .data(Types.stringType(), "foo")
                 .build();
         Envelope expectedEnvelopeBar = Envelope.builder()
                 .from(TypeName.typeNameFromString("bar/from"), "id")
                 .to(TypeName.typeNameFromString("bar/to"), "id")
+                .data(Types.stringType(), "foo")
                 .build();
         Envelope[] expected = {expectedEnvelopeBar, expectedEnvelopeFoo};
         @Cleanup

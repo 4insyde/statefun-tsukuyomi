@@ -38,6 +38,7 @@ public class Envelope implements Serializable {
     @NonNull
     NodeAddress to;
     @JsonProperty("data")
+    @NonNull
     Data data;
 
     public static Envelope fromJson(byte[] bytes) {

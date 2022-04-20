@@ -22,6 +22,15 @@ class EnvelopeTest {
     }
 
     @Test
+    void throwsExceptionIfDataIsNull() {
+        assertThatThrownBy(() -> Envelope.builder()
+                .data(null)
+                .to(TypeName.typeNameFromString("foo/bar"), "baz")
+                .build()
+        ).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
     void envelopeBuiltViaShortcutsIsTheSameAsEnvelopeBuiltViaPureSetters() {
         Envelope expectedEnvelope = buildEnvelopeViaPureSetters();
 
