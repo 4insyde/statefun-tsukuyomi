@@ -35,7 +35,9 @@ class EnvelopeTest {
 
     @Test
     void toStringHaveBase64ValueIfTypeIsUnknown() {
-        String base64Value = Base64.getEncoder().encodeToString("Foo".getBytes(StandardCharsets.UTF_8));
+        Envelope.resetRenderers();
+        byte[] bytes = Types.stringType().typeSerializer().serialize("Foo").toByteArray();
+        String base64Value = Base64.getEncoder().encodeToString(bytes);
         Envelope envelope = Envelope.builder()
                 .data(Envelope.Data.of(Types.stringType().typeName().asTypeNameString(), base64Value))
                 .build();

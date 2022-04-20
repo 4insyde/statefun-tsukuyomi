@@ -47,6 +47,10 @@ public class Envelope implements Serializable {
         return SerDe.deserialize(json, Envelope.class);
     }
 
+    static void resetRenderers() {
+        renderersByType.clear();
+    }
+
     public byte[] toJson() {
         return SerDe.serialize(this);
     }
