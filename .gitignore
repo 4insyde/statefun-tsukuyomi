@@ -1,3 +1,4 @@
 # Project exclude paths
 /dispatcher/target/
 /statefun-tsukuyomi/target/
+.idea/
