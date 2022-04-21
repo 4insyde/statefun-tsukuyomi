@@ -48,7 +48,7 @@ class DefinitionOfReady {
         Supplier<Boolean> matchingValueSupplier;
 
         void await() {
-            while (!Thread.interrupted() && !matchingValueSupplier.get()) {
+            while (!Thread.currentThread().isInterrupted() && !matchingValueSupplier.get()) {
                 Thread.onSpinWait();
             }
         }

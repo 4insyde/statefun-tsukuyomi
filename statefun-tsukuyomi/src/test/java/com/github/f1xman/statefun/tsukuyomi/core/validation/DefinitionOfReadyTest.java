@@ -74,4 +74,26 @@ class DefinitionOfReadyTest {
 
         then(mockedTsukuyomiApi).shouldHaveZeroInteractions();
     }
+
+    @Test
+    void doesNotWaitIfInvokedAfterInterrupting() {
+        assertTimeoutPreemptively(Duration.ofSeconds(3), () -> {
+            DefinitionOfReady definitionOfReady = DefinitionOfReady.of(mockedTsukuyomiApi);
+            given(mockedTsukuyomiApi.getReceived()).willReturn(List.of());
+
+            definitionOfReady.incrementExpectedEnvelopes();
+            Thread interruptedThread = Thread.currentThread();
+            Thread interrupterThread = new Thread(() -> {
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                    interruptedThread.interrupt();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            interrupterThread.start();
+            definitionOfReady.await();
+            definitionOfReady.await();
+        });
+    }
 }
