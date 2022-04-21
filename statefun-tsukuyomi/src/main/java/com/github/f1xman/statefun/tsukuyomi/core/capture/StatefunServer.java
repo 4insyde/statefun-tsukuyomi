@@ -2,6 +2,8 @@ package com.github.f1xman.statefun.tsukuyomi.core.capture;
 
 import org.apache.flink.statefun.sdk.java.StatefulFunctions;
 
+import java.util.function.Consumer;
+
 public interface StatefunServer {
 
     void start(StatefulFunctions statefulFunctions);
@@ -9,5 +11,7 @@ public interface StatefunServer {
     void stop();
 
     int getPort();
+
+    void setUncaughtExceptionHandler(Consumer<Throwable> exceptionHandler);
 
 }

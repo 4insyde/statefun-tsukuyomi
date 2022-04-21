@@ -50,7 +50,7 @@ class ManagedStateFunctionWrapper implements StatefulFunction, ManagedStateAcces
 
     @Override
     public <T> Optional<T> getStateValue(ValueSpec<T> spec) {
-        return (Optional<T>) latestStateValues.get(spec);
+        return (Optional<T>) latestStateValues.getOrDefault(spec, Optional.empty());
     }
 
     @Override

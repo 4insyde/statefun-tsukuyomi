@@ -29,11 +29,11 @@ class DefinitionOfReady {
                 Collection<Envelope> receivedEnvelopes = tsukuyomiApi.getReceived();
                 return receivedEnvelopes.size() == expectedEnvelopes.intValue();
             });
-            waiter.await();
+            waiter.await(tsukuyomiApi::isActive);
         }
         if (updatedStateRequired.get()) {
             Waiter waiter = new Waiter(tsukuyomiApi::isStateUpdated);
-            waiter.await();
+            waiter.await(tsukuyomiApi::isActive);
         }
     }
 
@@ -47,8 +47,12 @@ class DefinitionOfReady {
 
         Supplier<Boolean> matchingValueSupplier;
 
-        void await() {
-            while (!Thread.currentThread().isInterrupted() && !matchingValueSupplier.get()) {
+        void await(Supplier<Boolean> keepRunning) {
+            while (
+                    !Thread.currentThread().isInterrupted()
+                            && !matchingValueSupplier.get()
+                            && keepRunning.get()
+            ) {
                 Thread.onSpinWait();
             }
         }

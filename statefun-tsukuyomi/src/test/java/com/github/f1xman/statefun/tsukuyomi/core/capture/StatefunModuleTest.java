@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.then;
@@ -213,6 +214,44 @@ class StatefunModuleTest {
         Integer actualPort = module.getPort();
 
         assertThat(actualPort).isEqualTo(expectedPort);
+    }
+
+    @Test
+    void throwsStatefunModuleNotStartedExceptionIfSettingUncaughtExceptionHandlerOnNotStartedModule() {
+        StatefunModule module = StatefunModule.builder()
+                .functionUnderTest(FunctionDefinition.builder()
+                        .typeName(FunctionUnderTest.TYPE)
+                        .instance(new FunctionUnderTest())
+                        .build()
+                )
+                .collaborator(COLLABORATOR_1)
+                .egress(EGRESS_1)
+                .build();
+
+        assertThatThrownBy(() -> module.setUncaughtExceptionHandler(e -> {
+        }))
+                .isInstanceOf(StatefunModuleNotStartedException.class)
+                .hasMessage("Cannot set UncaughtExceptionHandler if StatefunModule is not started");
+    }
+
+    @Test
+    void setsUncaughtExceptionHandlerIfModuleIsStarted() {
+        StatefunModule module = StatefunModule.builder()
+                .functionUnderTest(FunctionDefinition.builder()
+                        .typeName(FunctionUnderTest.TYPE)
+                        .instance(new FunctionUnderTest())
+                        .build()
+                )
+                .collaborator(COLLABORATOR_1)
+                .egress(EGRESS_1)
+                .build();
+        Consumer<Throwable> exceptionHandler = e -> {
+        };
+
+        module.start(mockedServer);
+        module.setUncaughtExceptionHandler(exceptionHandler);
+
+        then(mockedServer).should().setUncaughtExceptionHandler(exceptionHandler);
     }
 
     private static class FunctionUnderTest implements StatefulFunction {

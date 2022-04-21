@@ -80,4 +80,13 @@ class ManagedStateFunctionWrapperTest {
 
         assertThat(wrapper.isStateUpdated()).isTrue();
     }
+
+    @Test
+    void returnsEmptyOptionalIfStateValueIsAbsent() {
+        ManagedStateFunctionWrapper wrapper = ManagedStateFunctionWrapper.of(statefulFunction, List.of());
+
+        Optional<String> actualValue = wrapper.getStateValue(FOO);
+
+        assertThat(actualValue).isEmpty();
+    }
 }

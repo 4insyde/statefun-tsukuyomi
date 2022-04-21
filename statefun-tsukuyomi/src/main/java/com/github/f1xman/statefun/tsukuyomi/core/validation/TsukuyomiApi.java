@@ -13,4 +13,6 @@ public interface TsukuyomiApi {
     ManagedStateAccessor getStateAccessor();
 
     boolean isStateUpdated();
+
+    boolean isActive();
 }

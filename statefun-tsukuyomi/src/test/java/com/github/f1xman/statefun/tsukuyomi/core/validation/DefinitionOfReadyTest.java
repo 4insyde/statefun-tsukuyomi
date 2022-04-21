@@ -25,6 +25,7 @@ class DefinitionOfReadyTest {
     void awaitsUntil2MessagesReceived() {
         DefinitionOfReady definitionOfReady = DefinitionOfReady.of(mockedTsukuyomiApi);
         given(mockedTsukuyomiApi.getReceived()).willReturn(mockedReceivedEnvelopes);
+        given(mockedTsukuyomiApi.isActive()).willReturn(true);
         given(mockedReceivedEnvelopes.size()).willReturn(0, 2);
 
         definitionOfReady.incrementExpectedEnvelopes();
@@ -38,6 +39,7 @@ class DefinitionOfReadyTest {
     void awaitsUntilStateIsUpdated() {
         DefinitionOfReady definitionOfReady = DefinitionOfReady.of(mockedTsukuyomiApi);
         given(mockedTsukuyomiApi.isStateUpdated()).willReturn(false, true);
+        given(mockedTsukuyomiApi.isActive()).willReturn(true);
 
         definitionOfReady.requireUpdatedState();
         definitionOfReady.await();
@@ -62,6 +64,18 @@ class DefinitionOfReadyTest {
                 }
             });
             interrupterThread.start();
+            definitionOfReady.await();
+        });
+    }
+
+    @Test
+    void stopsWaitingWhenTsukuyomiApiDeactivated() {
+        assertTimeoutPreemptively(Duration.ofSeconds(3), () -> {
+            DefinitionOfReady definitionOfReady = DefinitionOfReady.of(mockedTsukuyomiApi);
+            given(mockedTsukuyomiApi.getReceived()).willReturn(List.of());
+            given(mockedTsukuyomiApi.isActive()).willReturn(true, false);
+
+            definitionOfReady.incrementExpectedEnvelopes();
             definitionOfReady.await();
         });
     }

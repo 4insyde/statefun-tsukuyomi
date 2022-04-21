@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 import java.util.Collection;
+import java.util.function.Supplier;
 
 import static lombok.AccessLevel.PRIVATE;
 
@@ -16,6 +17,7 @@ public class DispatcherBasedTsukuyomi implements TsukuyomiApi {
 
     DispatcherClient client;
     ManagedStateAccessor stateAccessor;
+    Supplier<Boolean> activityStatusSupplier;
 
     @Override
     public void send(Envelope envelope) {
@@ -35,5 +37,10 @@ public class DispatcherBasedTsukuyomi implements TsukuyomiApi {
     @Override
     public boolean isStateUpdated() {
         return stateAccessor.isStateUpdated();
+    }
+
+    @Override
+    public boolean isActive() {
+        return activityStatusSupplier.get();
     }
 }

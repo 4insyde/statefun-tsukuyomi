@@ -25,7 +25,7 @@ class DispatcherBasedTsukuyomiTest {
 
     @Test
     void sendsEnvelope() {
-        DispatcherBasedTsukuyomi tsukuyomi = DispatcherBasedTsukuyomi.of(mockedClient, null);
+        DispatcherBasedTsukuyomi tsukuyomi = DispatcherBasedTsukuyomi.of(mockedClient, null, () -> true);
         Envelope envelope = Envelope.builder()
                 .from(TypeName.typeNameFromString("foo/from"), "from")
                 .to(TypeName.typeNameFromString("foo/to"), "to")
@@ -39,7 +39,7 @@ class DispatcherBasedTsukuyomiTest {
 
     @Test
     void getsReceived() {
-        DispatcherBasedTsukuyomi tsukuyomi = DispatcherBasedTsukuyomi.of(mockedClient, null);
+        DispatcherBasedTsukuyomi tsukuyomi = DispatcherBasedTsukuyomi.of(mockedClient, null, () -> true);
         Envelope envelope = Envelope.builder()
                 .from(TypeName.typeNameFromString("foo/from"), "from")
                 .to(TypeName.typeNameFromString("foo/to"), "to")
@@ -55,10 +55,19 @@ class DispatcherBasedTsukuyomiTest {
 
     @Test
     void delegatesIsStateUpdatedCall() {
-        DispatcherBasedTsukuyomi tsukuyomi = DispatcherBasedTsukuyomi.of(mockedClient, mockedStateAccessor);
+        DispatcherBasedTsukuyomi tsukuyomi = DispatcherBasedTsukuyomi.of(mockedClient, mockedStateAccessor, () -> true);
         given(mockedStateAccessor.isStateUpdated()).willReturn(true, false);
 
         assertThat(tsukuyomi.isStateUpdated()).isTrue();
         assertThat(tsukuyomi.isStateUpdated()).isFalse();
+    }
+
+    @Test
+    void isActiveReturnsActivityStatusSupplierValue() {
+        DispatcherBasedTsukuyomi tsukuyomi = DispatcherBasedTsukuyomi.of(mockedClient, mockedStateAccessor, () -> true);
+
+        boolean actualActive = tsukuyomi.isActive();
+
+        assertThat(actualActive).isTrue();
     }
 }

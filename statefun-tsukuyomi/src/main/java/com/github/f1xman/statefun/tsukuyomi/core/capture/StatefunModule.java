@@ -9,6 +9,7 @@ import org.apache.flink.statefun.sdk.java.StatefulFunctions;
 import org.apache.flink.statefun.sdk.java.TypeName;
 
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
@@ -82,4 +83,11 @@ public class StatefunModule {
         return server.getPort();
     }
 
+    public void setUncaughtExceptionHandler(Consumer<Throwable> exceptionHandler) {
+        if (server == null) {
+            throw new StatefunModuleNotStartedException(
+                    "Cannot set UncaughtExceptionHandler if StatefunModule is not started");
+        }
+        server.setUncaughtExceptionHandler(exceptionHandler);
+    }
 }
