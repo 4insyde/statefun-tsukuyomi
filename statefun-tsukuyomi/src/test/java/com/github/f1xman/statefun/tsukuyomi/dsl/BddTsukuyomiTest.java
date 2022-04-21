@@ -18,7 +18,6 @@ import static com.github.f1xman.statefun.tsukuyomi.core.capture.StateValue.empty
 import static com.github.f1xman.statefun.tsukuyomi.core.capture.StateValue.havingValue;
 import static com.github.f1xman.statefun.tsukuyomi.dsl.BddTsukuyomi.*;
 import static com.github.f1xman.statefun.tsukuyomi.dsl.Expectations.*;
-import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.hamcrest.Matchers.is;
 
 @IntegrationTest
