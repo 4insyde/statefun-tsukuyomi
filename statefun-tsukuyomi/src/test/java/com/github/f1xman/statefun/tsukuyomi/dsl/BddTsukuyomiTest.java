@@ -32,7 +32,7 @@ class BddTsukuyomiTest {
     static final String BAR = "bar";
 
     @Test
-    @Timeout(value = 1, unit = MINUTES)
+    @Timeout(30)
     void exchangesMessages() {
         Envelope envelope = incomingEnvelope();
         Envelope expectedToFunction = outgoingEnvelopeToFunction();
