@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.flink.contrib.streaming.state.EmbeddedRocksDBStateBackend;
 import org.apache.flink.core.execution.JobClient;
 import org.apache.flink.statefun.flink.core.StatefulFunctionsConfig;
 import org.apache.flink.statefun.flink.core.message.RoutableMessage;
@@ -36,6 +37,7 @@ public class DispatcherJob implements FlinkDispatcherJob {
     @SneakyThrows
     public JobClient start() {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        env.setStateBackend(new EmbeddedRocksDBStateBackend());
 
         DataStream<Envelope> input = env.addSource(new DispatcherSocketSource());
         DataStream<RoutableMessage> ingress = input.map(Envelope::toRoutableMessage);
