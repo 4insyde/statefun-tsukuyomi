@@ -11,6 +11,8 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
 
+import java.time.Duration;
+
 import static java.util.Objects.requireNonNullElse;
 import static lombok.AccessLevel.PRIVATE;
 
@@ -20,9 +22,10 @@ public class DispatcherContainer extends GenericContainer<DispatcherContainer> {
 
     static final int DISPATCHER_PORT = 5555;
     static final int DEBUGGER_PORT = 5005;
-    static String FUNCTIONS_ENV = "FUNCTIONS";
-    static String ENDPOINT_ENV = "ENDPOINT";
-    static String EGRESSES_ENV = "EGRESSES";
+    static final Duration STARTUP_TIMEOUT = Duration.ofSeconds(20);
+    static final String FUNCTIONS_ENV = "FUNCTIONS";
+    static final String ENDPOINT_ENV = "ENDPOINT";
+    static final String EGRESSES_ENV = "EGRESSES";
 
     @NonNull
     Integer statefunPort;
@@ -40,7 +43,10 @@ public class DispatcherContainer extends GenericContainer<DispatcherContainer> {
         super.configure();
         Testcontainers.exposeHostPorts(statefunPort);
         this.withExposedPorts(DEBUGGER_PORT, DISPATCHER_PORT);
-        this.waitingFor(Wait.forLogMessage(".*Job status is RUNNING.*", 1));
+        this.waitingFor(Wait
+                .forLogMessage(".*Job status is RUNNING.*", 1)
+                .withStartupTimeout(STARTUP_TIMEOUT)
+        );
         this.addEnv(FUNCTIONS_ENV, statefunModule.generateFunctionsString());
         this.addEnv(ENDPOINT_ENV, String.format("http://host.testcontainers.internal:%d", statefunPort));
         this.addEnv(EGRESSES_ENV, statefunModule.generateEgressesString());
