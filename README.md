@@ -11,6 +11,58 @@ This project does the same with the function under test — it puts the function
 other functions. Those fake components capture function state and messages to provide the developer with a clean and
 nice API.
 
+## Features
+### BDD-style DSL
+```java
+GivenFunction testee = given(
+    // Define your function under test        
+);
+
+when(
+    // Define interaction with the function
+).then(
+    // Verify your expectations
+);
+```
+### Initial state
+```java
+GivenFunction testee = given(
+    function(Testee.TYPE, new Testee()),
+    withState(Testee.FOO, empty()),
+    withState(Testee.BAR, havingValue(BAR))
+);
+```
+### Verification of outgoing messages
+```java
+then(
+    expectMessage(expectedToFunction, toFunction()),
+    expectMessage(expectedToEgress, toEgress()),
+    expectMessage(expectedToSelf, toFunction()),
+);
+```
+### Verification of message order
+When a function sends multiple messages to the **same destination** (e.g. the same egress, or another function of the same 
+type and id), it might be essential to ensure that messages have a specific order. For instance, CREATE operation goes 
+before the UPDATE or DELETE. Statefun Tsukuyomi validates that the order of outgoing messages is the same as you declare
+it in a then(..) block.
+**Statefun Tsukuyomi does not verify the order of messages with different destinations** since real-life use cases rarely 
+require it due to the async nature of event-driven applications.
+```java
+then(
+    // Verifies the target function receives this message first
+    expectMessage(expectedToTheSameFunction, toFunction()),
+    // Does not care about the order
+    expectMessage(expectedToEgress, toEgress()),
+    // Verifies the target function then receives this message
+    expectMessage(expectedToTheSameFunction, toFunction()),
+);
+```
+### Verification of state after interaction
+```java
+.then(
+    expectState(Testee.FOO, is("foo")) // Hamcrest matchers supported
+);
+```
 ## Installation
 ## Add repository
 ```xml
