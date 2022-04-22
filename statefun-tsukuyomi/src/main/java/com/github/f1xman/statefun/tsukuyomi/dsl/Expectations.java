@@ -15,10 +15,25 @@ import static lombok.AccessLevel.PRIVATE;
 public class Expectations {
 
     public static <T> ChangeMatcher expectState(ValueSpec<T> spec, Matcher<T> matcher) {
+        if (spec == null) {
+            throw new NullValueSpecException("ValueSpec of a verifying state is null");
+        }
+        if (matcher == null) {
+            throw new NullStateMatcherException(
+                    "Matcher cannot be null. Either use org.hamcrest.Matchers.*() or implement a custom one");
+        }
         return ExpectState.of(spec, matcher);
     }
 
     public static ChangeMatcher expectMessage(Envelope expected, Target.Type targetType) {
+        if (expected == null) {
+            throw new NullExpectedEnvelopeException(
+                    "Expected envelope cannot be null. Use Envelope.builder() to build a message");
+        }
+        if (targetType == null) {
+            throw new NullExpectedTargetTypeException(
+                    "Expected target type cannot be null. Use Expectations.toFunction() or Expectations.toEgress()");
+        }
         return ExpectMessage.of(expected, targetType);
     }
 

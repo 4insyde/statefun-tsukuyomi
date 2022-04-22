@@ -1,78 +1,126 @@
 package com.github.f1xman.statefun.tsukuyomi.dsl;
 
 import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
-import com.github.f1xman.statefun.tsukuyomi.core.validation.GivenFunction;
-import com.github.f1xman.statefun.tsukuyomi.testutil.IntegrationTest;
-import org.apache.flink.statefun.sdk.java.*;
-import org.apache.flink.statefun.sdk.java.message.EgressMessage;
-import org.apache.flink.statefun.sdk.java.message.EgressMessageBuilder;
+import com.github.f1xman.statefun.tsukuyomi.core.capture.StateSetter;
+import com.github.f1xman.statefun.tsukuyomi.core.validation.ChangeMatcher;
+import com.github.f1xman.statefun.tsukuyomi.core.validation.TypedFunction;
+import org.apache.flink.statefun.sdk.java.Context;
+import org.apache.flink.statefun.sdk.java.StatefulFunction;
+import org.apache.flink.statefun.sdk.java.TypeName;
+import org.apache.flink.statefun.sdk.java.ValueSpec;
 import org.apache.flink.statefun.sdk.java.message.Message;
-import org.apache.flink.statefun.sdk.java.message.MessageBuilder;
 import org.apache.flink.statefun.sdk.java.types.Types;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
 
 import java.util.concurrent.CompletableFuture;
 
 import static com.github.f1xman.statefun.tsukuyomi.core.capture.StateValue.empty;
-import static com.github.f1xman.statefun.tsukuyomi.core.capture.StateValue.havingValue;
 import static com.github.f1xman.statefun.tsukuyomi.dsl.BddTsukuyomi.*;
-import static com.github.f1xman.statefun.tsukuyomi.dsl.Expectations.*;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
 
-@IntegrationTest
 class BddTsukuyomiTest {
 
     static final TypeName COLLABORATOR_1 = TypeName.typeNameFromString("foo/collaborator-1");
-    static final TypeName COLLABORATOR_2 = TypeName.typeNameFromString("foo/collaborator-2");
     static final TypeName EGRESS = TypeName.typeNameFromString("foo/egress");
     static final String HELLO = "hello";
     static final String FUNCTION_ID = "functionId";
     static final String BAR = "bar";
 
     @Test
-    @Timeout(30)
-    void exchangesMessages() {
-        Envelope envelope = incomingEnvelope();
-        Envelope expectedToFunction = outgoingEnvelopeToFunction();
-        Envelope expectedToEgress = outgoingEnvelopeToEgress();
-        Envelope expectedToSelf = outgoingEnvelopeToSelf().toBuilder().build();
-        GivenFunction testee = given(
-                function(Testee.TYPE, new Testee()),
-                withState(Testee.FOO, empty()),
-                withState(Testee.BAR, havingValue(BAR))
-        );
+    void throwsNullTypedFunctionExceptionIfPassingNull() {
+        assertThatThrownBy(() -> given(null))
+                .isInstanceOf(NullTypedFunctionException.class)
+                .hasMessage("Use BddTsukuyomi.function(..) to define your function");
+    }
 
-        when(
-                testee,
-                receives(envelope)
-        ).then(
-                expectMessage(expectedToFunction, toFunction()),
-                expectMessage(expectedToEgress, toEgress()),
-                expectMessage(expectedToSelf, toFunction()),
-                expectState(Testee.FOO, is("foo"))
-        );
+    @Test
+    void throwsNullStateSettersExceptionIfPassingNull() {
+        assertThatThrownBy(() -> given(mock(TypedFunction.class), null))
+                .isInstanceOf(NullStateSettersException.class)
+                .hasMessage("Use BddTsukuyomi.withState(..) to define initial state");
+    }
+
+    @Test
+    void throwsNullStateSetterExceptionIfPassingNull() {
+        assertThatThrownBy(() -> given(mock(TypedFunction.class), new StateSetter[]{null}))
+                .isInstanceOf(NullStateSetterException.class)
+                .hasMessage("At least one StateSetter is null. Use BddTsukuyomi.withState(..) to define initial state");
+    }
+
+    @Test
+    void throwsNullFunctionTypeNameExceptionIfPassingNull() {
+        assertThatThrownBy(() -> function(null, new Testee()))
+                .isInstanceOf(NullFunctionTypeNameException.class)
+                .hasMessage("Function under test must have a TypeName");
+    }
+
+    @Test
+    void throwsNullFunctionInstanceExceptionIfPassingNull() {
+        assertThatThrownBy(() -> function(Testee.TYPE, null))
+                .isInstanceOf(NullFunctionInstanceException.class)
+                .hasMessage("Function under test must have an instance");
+    }
+
+    @Test
+    void throwsNullValueSpecExceptionIfPassingNull() {
+        assertThatThrownBy(() -> withState(null, empty()))
+                .isInstanceOf(NullValueSpecException.class)
+                .hasMessage("ValueSpec cannot be null");
+    }
+
+    @Test
+    void throwsNullStateValueExceptionIfPassingNull() {
+        assertThatThrownBy(() -> withState(Testee.BAR, null))
+                .isInstanceOf(NullStateValueException.class)
+                .hasMessage("StateValue cannot be null");
+    }
+
+    @Test
+    void throwsNullGivenFunctionExceptionIfPassingNull() {
+        assertThatThrownBy(() -> when(null, receives(outgoingEnvelopeToEgress())))
+                .isInstanceOf(NullGivenFunctionException.class)
+                .hasMessage("GivenFunction cannot be null. Use BddTsukuyomi.given(..) to instantiate one");
+    }
+
+    @Test
+    void throwsNullInteractorExceptionIfPassingNull() {
+        assertThatThrownBy(() -> when(given(function(Testee.TYPE, new Testee())), null))
+                .isInstanceOf(NullInteractorException.class)
+                .hasMessage("Interactor cannot be null. Use BddTsukuyomi.receives(..) to instantiate one");
+    }
+
+    @Test
+    void throwsNullIncomingEnvelopeExceptionIfPassingNull() {
+        assertThatThrownBy(() -> receives(null))
+                .isInstanceOf(NullIncomingEnvelopeException.class)
+                .hasMessage("The function under test cannot receive null. Use Envelope.builder() to build a message");
+    }
+
+    @Test
+    void throwsMissingExpectationsExceptionIfNothingPassed() {
+        assertThatThrownBy(() -> when(given(function(Testee.TYPE, new Testee())), receives(incomingEnvelope())).then())
+                .isInstanceOf(MissingExpectationsException.class)
+                .hasMessage("Nothing to verify. Define your expectations using Expectations.*() in a then(..) block");
+    }
+
+    @Test
+    void throwsNullExpectationsExceptionIfNullPassed() {
+        assertThatThrownBy(() -> when(given(function(Testee.TYPE, new Testee())), receives(incomingEnvelope())).then(null))
+                .isInstanceOf(NullExpectationsException.class)
+                .hasMessage("Nothing to verify. Define your expectations using Expectations.*() in a then(..) block");
+    }
+
+    @Test
+    void throwsNullExpectationExceptionIfNullPassed() {
+        assertThatThrownBy(() -> when(given(function(Testee.TYPE, new Testee())), receives(incomingEnvelope())).then(new ChangeMatcher[]{null}))
+                .isInstanceOf(NullExpectationException.class)
+                .hasMessage("At least one expectation is null. Define your expectations using Expectations.*() in a then(..) block");
     }
 
     private Envelope outgoingEnvelopeToEgress() {
         return Envelope.builder()
                 .toEgress(EGRESS)
-                .data(Types.stringType(), HELLO + BAR)
-                .build();
-    }
-
-    private Envelope outgoingEnvelopeToFunction() {
-        return Envelope.builder()
-                .from(Testee.TYPE, FUNCTION_ID)
-                .to(COLLABORATOR_2, FUNCTION_ID)
-                .data(Types.stringType(), HELLO + BAR)
-                .build();
-    }
-
-    private Envelope outgoingEnvelopeToSelf() {
-        return Envelope.builder()
-                .from(Testee.TYPE, FUNCTION_ID)
-                .to(Testee.TYPE, FUNCTION_ID)
                 .data(Types.stringType(), HELLO + BAR)
                 .build();
     }
@@ -88,27 +136,10 @@ class BddTsukuyomiTest {
     static class Testee implements StatefulFunction {
 
         static TypeName TYPE = TypeName.typeNameFromString("foo/testee");
-        static ValueSpec<String> FOO = ValueSpec.named("foo").withUtf8StringType();
         static ValueSpec<String> BAR = ValueSpec.named("bar").withUtf8StringType();
 
         @Override
         public CompletableFuture<Void> apply(Context context, Message message) {
-            AddressScopedStorage storage = context.storage();
-            String bar = storage.get(BAR).orElse("");
-            storage.set(FOO, "foo");
-            String value = message.asUtf8String() + bar;
-            Message toFunction = MessageBuilder.forAddress(COLLABORATOR_2, context.self().id())
-                    .withValue(value)
-                    .build();
-            context.send(toFunction);
-            Message toSelf = MessageBuilder.forAddress(context.self())
-                    .withValue(value)
-                    .build();
-            context.send(toSelf);
-            EgressMessage toEgress = EgressMessageBuilder.forEgress(EGRESS)
-                    .withValue(value)
-                    .build();
-            context.send(toEgress);
             return context.done();
         }
     }
