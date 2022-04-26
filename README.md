@@ -35,9 +35,9 @@ GivenFunction testee = given(
 ### Verification of outgoing messages
 ```java
 then(
-    expectMessage(expectedToFunction, toFunction()),
-    expectMessage(expectedToEgress, toEgress()),
-    expectMessage(expectedToSelf, toFunction()),
+    expectMessage(expectedToFunction),
+    expectEgressMessage(expectedToEgress),
+    expectMessage(expectedToSelf),
 );
 ```
 ### Verification of message order
@@ -50,11 +50,11 @@ require it due to the async nature of event-driven applications.
 ```java
 then(
     // Verifies the target function receives this message first
-    expectMessage(expectedToTheSameFunction, toFunction()),
+    expectMessage(expectedToTheSameFunction),
     // Does not care about the order
-    expectMessage(expectedToEgress, toEgress()),
+    expectEgressMessage(expectedToEgress),
     // Verifies the target function then receives this message
-    expectMessage(expectedToTheSameFunction, toFunction()),
+    expectMessage(expectedToTheSameFunction),
 );
 ```
 ### Verification of state after interaction
@@ -173,9 +173,9 @@ void exchangesMessages() {
         receives(envelope)
     ).then(
         // Then expect it sends the following messages
-        expectMessage(expectedToFunction, toFunction()),
-        expectMessage(expectedToEgress, toEgress()),
-        expectMessage(expectedToSelf, toFunction()),
+        expectMessage(expectedToFunction),
+        expectEgressMessage(expectedToEgress),
+        expectMessage(expectedToSelf),
         // and has the following state value after invocation
         expectState(Testee.FOO, is("foo")) // Hamcrest matchers supported
     );
