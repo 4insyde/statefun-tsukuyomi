@@ -1,6 +1,8 @@
 package com.github.f1xman.statefun.tsukuyomi.core.validation;
 
+import com.github.f1xman.statefun.tsukuyomi.core.capture.Egresses;
 import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
+import com.github.f1xman.statefun.tsukuyomi.core.capture.InvocationReport;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -18,33 +20,24 @@ class DefinitionOfReadyTest {
 
     @Mock
     TsukuyomiApi mockedTsukuyomiApi;
-    @Mock
-    List<Envelope> mockedReceivedEnvelopes;
 
     @Test
     void awaitsUntil2MessagesReceived() {
         DefinitionOfReady definitionOfReady = DefinitionOfReady.of(mockedTsukuyomiApi);
-        given(mockedTsukuyomiApi.getReceived()).willReturn(mockedReceivedEnvelopes);
-        given(mockedTsukuyomiApi.isActive()).willReturn(true);
-        given(mockedReceivedEnvelopes.size()).willReturn(0, 2);
-
-        definitionOfReady.incrementExpectedEnvelopes();
-        definitionOfReady.incrementExpectedEnvelopes();
-        definitionOfReady.await();
-
-        then(mockedReceivedEnvelopes).should(times(2)).size();
-    }
-
-    @Test
-    void awaitsUntilStateIsUpdated() {
-        DefinitionOfReady definitionOfReady = DefinitionOfReady.of(mockedTsukuyomiApi);
-        given(mockedTsukuyomiApi.isStateUpdated()).willReturn(false, true);
+        Envelope reportEnvelope = Envelope.builder()
+                .toEgress(Egresses.CAPTURED_MESSAGES)
+                .data(InvocationReport.TYPE, InvocationReport.of(2))
+                .build();
+        given(mockedTsukuyomiApi.getReceived()).willReturn(
+                List.of(),
+                List.of(reportEnvelope),
+                List.of(reportEnvelope, reportEnvelope, reportEnvelope)
+        );
         given(mockedTsukuyomiApi.isActive()).willReturn(true);
 
-        definitionOfReady.requireUpdatedState();
         definitionOfReady.await();
 
-        then(mockedTsukuyomiApi).should(times(2)).isStateUpdated();
+        then(mockedTsukuyomiApi).should(times(3)).getReceived();
     }
 
     @Test
@@ -83,6 +76,10 @@ class DefinitionOfReadyTest {
     @Test
     void doesNothingWhenNoRequirementsSet() {
         DefinitionOfReady definitionOfReady = DefinitionOfReady.of(mockedTsukuyomiApi);
+        given(mockedTsukuyomiApi.getReceived()).willReturn(List.of(Envelope.builder()
+                .toEgress(Egresses.CAPTURED_MESSAGES)
+                .data(InvocationReport.TYPE, InvocationReport.of(0))
+                .build()));
 
         definitionOfReady.await();
 

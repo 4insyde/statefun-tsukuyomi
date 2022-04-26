@@ -61,6 +61,15 @@ public class Envelope implements Serializable {
         return SerDe.serializeAsString(this);
     }
 
+    public <T> T extractData(Type<T> type) {
+        byte[] bytes = Base64.getDecoder().decode(data.value);
+        return type.typeSerializer().deserialize(Slices.wrap(bytes));
+    }
+
+    public boolean is(Type<?> type) {
+        return data.type.equals(type.typeName().asTypeNameString());
+    }
+
     public static class EnvelopeBuilder {
 
         NodeAddress from;

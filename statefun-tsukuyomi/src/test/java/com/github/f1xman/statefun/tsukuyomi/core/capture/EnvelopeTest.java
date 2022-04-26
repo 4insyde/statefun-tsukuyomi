@@ -111,6 +111,28 @@ class EnvelopeTest {
         assertThat(actual).contains(String.format("value='%s'", base64Value));
     }
 
+    @Test
+    void deserializesData() {
+        Envelope envelope = Envelope.builder()
+                .to(TypeName.typeNameFromString("foo/to"), "id")
+                .data(Types.stringType(), "Foo")
+                .build();
+
+        String actual = envelope.extractData(Types.stringType());
+
+        assertThat(actual).isEqualTo("Foo");
+    }
+
+    @Test
+    void returnsTrueIfTypeEquals() {
+        Envelope envelope = Envelope.builder()
+                .to(TypeName.typeNameFromString("foo/to"), "id")
+                .data(Types.stringType(), "Foo")
+                .build();
+
+        assertThat(envelope.is(Types.stringType())).isTrue();
+    }
+
     private Envelope buildEnvelopeViaPureSetters() {
         Type<String> stringType = Types.stringType();
         TypeSerializer<String> serializer = stringType.typeSerializer();

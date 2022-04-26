@@ -1,12 +1,13 @@
 package com.github.f1xman.statefun.tsukuyomi.core.validation;
 
 import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
+import com.github.f1xman.statefun.tsukuyomi.core.capture.InvocationReport;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import static lombok.AccessLevel.PRIVATE;
@@ -15,30 +16,27 @@ import static lombok.AccessLevel.PRIVATE;
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 class DefinitionOfReady {
 
-    AtomicInteger expectedEnvelopes = new AtomicInteger();
-    AtomicBoolean updatedStateRequired = new AtomicBoolean();
     TsukuyomiApi tsukuyomiApi;
 
     public void incrementExpectedEnvelopes() {
-        expectedEnvelopes.incrementAndGet();
     }
 
     public void await() {
-        if (expectedEnvelopes.get() > 0) {
-            Waiter waiter = new Waiter(() -> {
-                Collection<Envelope> receivedEnvelopes = tsukuyomiApi.getReceived();
-                return receivedEnvelopes.size() == expectedEnvelopes.intValue();
-            });
-            waiter.await(tsukuyomiApi::isActive);
-        }
-        if (updatedStateRequired.get()) {
-            Waiter waiter = new Waiter(tsukuyomiApi::isStateUpdated);
-            waiter.await(tsukuyomiApi::isActive);
-        }
+        Waiter waiter = new Waiter(() -> {
+            Collection<Envelope> receivedEnvelopes = new ArrayList<>(tsukuyomiApi.getReceived());
+            Optional<InvocationReport> report = receivedEnvelopes.stream()
+                    .filter(e -> e.is(InvocationReport.TYPE))
+                    .map(e -> e.extractData(InvocationReport.TYPE))
+                    .findAny();
+            Integer expectedSize = report.map(InvocationReport::getOutgoingMessagesCount)
+                    .map(c -> c + 1)
+                    .orElse(Integer.MAX_VALUE);
+            return receivedEnvelopes.size() == expectedSize;
+        });
+        waiter.await(tsukuyomiApi::isActive);
     }
 
     public void requireUpdatedState() {
-        updatedStateRequired.set(true);
     }
 
     @RequiredArgsConstructor(staticName = "of")

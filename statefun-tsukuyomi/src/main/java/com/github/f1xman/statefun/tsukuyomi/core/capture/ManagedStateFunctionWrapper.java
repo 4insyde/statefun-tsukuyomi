@@ -33,11 +33,13 @@ class ManagedStateFunctionWrapper implements StatefulFunction, ManagedStateAcces
     @Override
     @SneakyThrows
     public CompletableFuture<Void> apply(Context context, Message message) {
-        AddressScopedStorage storage = context.storage();
+        ReportableContextImpl reportableContext = ReportableContextImpl.spyOn(context);
+        AddressScopedStorage storage = reportableContext.storage();
         stateSetters.forEach(s -> s.setStateValue(storage));
         return function
-                .apply(context, message)
-                .thenRun(() -> copyState(storage));
+                .apply(reportableContext, message)
+                .thenRun(() -> copyState(storage))
+                .thenRun(reportableContext::report);
     }
 
     private void copyState(AddressScopedStorage storage) {

@@ -1,11 +1,11 @@
 package com.github.f1xman.statefun.tsukuyomi.core.capture;
 
-import com.github.f1xman.statefun.tsukuyomi.core.capture.ManagedStateFunctionWrapper;
-import com.github.f1xman.statefun.tsukuyomi.core.capture.StateSetter;
-import com.github.f1xman.statefun.tsukuyomi.core.capture.StateSetterImpl;
 import org.apache.flink.statefun.sdk.java.*;
+import org.apache.flink.statefun.sdk.java.message.EgressMessage;
+import org.apache.flink.statefun.sdk.java.message.EgressMessageBuilder;
 import org.apache.flink.statefun.sdk.java.message.Message;
 import org.apache.flink.statefun.sdk.java.testing.TestContext;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -29,12 +29,18 @@ class ManagedStateFunctionWrapperTest {
     StatefulFunction statefulFunction;
     @Mock
     Context context;
+    ReportableContext reportableContext;
     @Mock
     Message message;
     @Mock
     StateSetter<?> stateSetter;
     @Mock
     AddressScopedStorage storage;
+
+    @BeforeEach
+    void setUp() {
+        reportableContext = ReportableContextImpl.spyOn(context);
+    }
 
     @Test
     void preparesStateViaStateSettersBeforeFunctionInvocation() throws Throwable {
@@ -45,7 +51,7 @@ class ManagedStateFunctionWrapperTest {
         wrapper.apply(context, message);
 
         then(stateSetter).should().setStateValue(storage);
-        then(statefulFunction).should().apply(context, message);
+        then(statefulFunction).should().apply(reportableContext, message);
     }
 
     @Test
@@ -74,7 +80,7 @@ class ManagedStateFunctionWrapperTest {
     @Test
     void returnsTrueIfStateIsUpdated() throws Throwable {
         ManagedStateFunctionWrapper wrapper = ManagedStateFunctionWrapper.of(statefulFunction, List.of());
-        given(statefulFunction.apply(context, message)).willReturn(CompletableFuture.completedFuture(null));
+        given(statefulFunction.apply(reportableContext, message)).willReturn(CompletableFuture.completedFuture(null));
 
         wrapper.apply(context, message);
 
@@ -88,5 +94,15 @@ class ManagedStateFunctionWrapperTest {
         Optional<String> actualValue = wrapper.getStateValue(FOO);
 
         assertThat(actualValue).isEmpty();
+    }
+
+    @Test
+    void reportsAfterInvocation() throws Throwable {
+        ManagedStateFunctionWrapper wrapper = ManagedStateFunctionWrapper.of(statefulFunction, List.of());
+        when(statefulFunction.apply(any(), any())).thenReturn(CompletableFuture.completedFuture(null));
+
+        wrapper.apply(context, message);
+
+        then(context).should().send(any(EgressMessage.class));
     }
 }
