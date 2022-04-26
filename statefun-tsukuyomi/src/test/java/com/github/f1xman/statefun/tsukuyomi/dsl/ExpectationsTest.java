@@ -1,9 +1,6 @@
 package com.github.f1xman.statefun.tsukuyomi.dsl;
 
-import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
-import org.apache.flink.statefun.sdk.java.TypeName;
 import org.apache.flink.statefun.sdk.java.ValueSpec;
-import org.apache.flink.statefun.sdk.java.types.Types;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -27,14 +24,21 @@ class ExpectationsTest {
 
     @Test
     void throwsNullExpectedEnvelopeExceptionIfNullIsPassed() {
-        assertThatThrownBy(() -> Expectations.expectMessage(null))
+        assertThatThrownBy(() -> Expectations.expectMessageInExactOrder(null))
+                .isInstanceOf(NullExpectedEnvelopeException.class)
+                .hasMessage("Expected envelope cannot be null. Use Envelope.builder() to build a message");
+    }
+
+    @Test
+    void expectMessageInAnyOrderThrowsNullExpectedEnvelopeExceptionIfNullIsPassed() {
+        assertThatThrownBy(() -> Expectations.expectMessageInAnyOrder(null))
                 .isInstanceOf(NullExpectedEnvelopeException.class)
                 .hasMessage("Expected envelope cannot be null. Use Envelope.builder() to build a message");
     }
 
     @Test
     void throwsNullExpectedEnvelopeExceptionIfNullIsPassedInsteadOfEnvelopeToEgress() {
-        assertThatThrownBy(() -> Expectations.expectEgressMessage(null))
+        assertThatThrownBy(() -> Expectations.expectEgressMessageInExactOrder(null))
                 .isInstanceOf(NullExpectedEnvelopeException.class)
                 .hasMessage("Expected envelope to egress cannot be null. Use Envelope.builder() to build a message");
     }

@@ -1,18 +1,20 @@
 package com.github.f1xman.statefun.tsukuyomi.dsl;
 
 import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
-import com.github.f1xman.statefun.tsukuyomi.core.validation.ChangeMatcher;
-import com.github.f1xman.statefun.tsukuyomi.core.validation.ExpectMessage;
-import com.github.f1xman.statefun.tsukuyomi.core.validation.ExpectState;
-import com.github.f1xman.statefun.tsukuyomi.core.validation.Target;
+import com.github.f1xman.statefun.tsukuyomi.core.validation.*;
 import lombok.NoArgsConstructor;
 import org.apache.flink.statefun.sdk.java.ValueSpec;
 import org.hamcrest.Matcher;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import static lombok.AccessLevel.PRIVATE;
 
 @NoArgsConstructor(access = PRIVATE)
 public class Expectations {
+
+    private static final Set<Integer> exhaustedIndexes = new HashSet<>();
 
     public static <T> ChangeMatcher expectState(ValueSpec<T> spec, Matcher<T> matcher) {
         if (spec == null) {
@@ -25,19 +27,35 @@ public class Expectations {
         return ExpectState.of(spec, matcher);
     }
 
-    public static ChangeMatcher expectMessage(Envelope expected) {
+    public static ChangeMatcher expectMessageInExactOrder(Envelope expected) {
         if (expected == null) {
             throw new NullExpectedEnvelopeException(
                     "Expected envelope cannot be null. Use Envelope.builder() to build a message");
         }
-        return ExpectMessage.of(expected, Target.Type.FUNCTION);
+        return ExpectMessageInExactOrder.of(expected, Target.Type.FUNCTION);
     }
 
-    public static ChangeMatcher expectEgressMessage(Envelope expected) {
+    public static ChangeMatcher expectEgressMessageInExactOrder(Envelope expected) {
         if (expected == null) {
             throw new NullExpectedEnvelopeException(
                     "Expected envelope to egress cannot be null. Use Envelope.builder() to build a message");
         }
-        return ExpectMessage.of(expected, Target.Type.EGRESS);
+        return ExpectMessageInExactOrder.of(expected, Target.Type.EGRESS);
+    }
+
+    public static ChangeMatcher expectMessageInAnyOrder(Envelope expected) {
+        if (expected == null) {
+            throw new NullExpectedEnvelopeException(
+                    "Expected envelope cannot be null. Use Envelope.builder() to build a message");
+        }
+        return ExpectMessageInAnyOrder.of(expected, Target.Type.FUNCTION, exhaustedIndexes);
+    }
+
+    public static ChangeMatcher expectEgressMessageInAnyOrder(Envelope expected) {
+        if (expected == null) {
+            throw new NullExpectedEnvelopeException(
+                    "Expected envelope to egress cannot be null. Use Envelope.builder() to build a message");
+        }
+        return ExpectMessageInAnyOrder.of(expected, Target.Type.EGRESS, exhaustedIndexes);
     }
 }

@@ -32,7 +32,7 @@ class BddTsukuyomiIntegrationTest {
 
     @Test
     @Timeout(30)
-    void exchangesMessages() {
+    void verifiesThatTheFunctionSendsMessagesInOrderTheyGoInThen() {
         Envelope envelope = incomingEnvelope();
         Envelope expectedToFunction = outgoingEnvelopeToFunction();
         Envelope expectedToEgress = outgoingEnvelopeToEgress();
@@ -47,13 +47,36 @@ class BddTsukuyomiIntegrationTest {
                 testee,
                 receives(envelope)
         ).then(
-                expectMessage(expectedToFunction),
-                expectEgressMessage(expectedToEgress),
-                expectMessage(expectedToSelf),
+                expectMessageInExactOrder(expectedToFunction),
+                expectEgressMessageInExactOrder(expectedToEgress),
+                expectMessageInExactOrder(expectedToSelf),
                 expectState(Testee.FOO, is("foo"))
         );
     }
 
+    @Test
+    @Timeout(30)
+    void verifiesThatTheFunctionSendsMessagesInAnyOrder() {
+        Envelope envelope = incomingEnvelope();
+        Envelope expectedToFunction = outgoingEnvelopeToFunction();
+        Envelope expectedToEgress = outgoingEnvelopeToEgress();
+        Envelope expectedToSelf = outgoingEnvelopeToSelf().toBuilder().build();
+        GivenFunction testee = given(
+                function(Testee.TYPE, new Testee()),
+                withState(Testee.FOO, empty()),
+                withState(Testee.BAR, havingValue(BAR))
+        );
+
+        when(
+                testee,
+                receives(envelope)
+        ).then(
+                expectEgressMessageInAnyOrder(expectedToEgress),
+                expectMessageInAnyOrder(expectedToSelf),
+                expectMessageInAnyOrder(expectedToFunction),
+                expectState(Testee.FOO, is("foo"))
+        );
+    }
     private Envelope outgoingEnvelopeToEgress() {
         return Envelope.builder()
                 .toEgress(EGRESS)

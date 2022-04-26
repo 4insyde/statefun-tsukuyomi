@@ -3,12 +3,11 @@ package com.github.f1xman.statefun.tsukuyomi.core.validation;
 import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.apache.flink.statefun.sdk.java.TypeName;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -19,7 +18,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 @RequiredArgsConstructor(staticName = "of")
 @FieldDefaults(level = PRIVATE, makeFinal = true)
-public class ExpectMessage implements ChangeMatcher {
+public class ExpectMessageInExactOrder extends AbstractExpectMessage {
 
     Envelope expected;
     Target.Type targetType;
@@ -31,17 +30,20 @@ public class ExpectMessage implements ChangeMatcher {
     }
 
     @Override
-    public Optional<Target> getTarget() {
-        return Optional.of(expected.getTo())
-                .map(NodeAddress::getType)
-                .map(TypeName::typeNameFromString)
-                .map(t -> Target.of(t, targetType));
+    @NotNull
+    protected NodeAddress getTo() {
+        return expected.getTo();
+    }
+
+    @Override
+    protected Target.Type getTargetType() {
+        return targetType;
     }
 
     private Envelope getEnvelope(int order, Supplier<Collection<Envelope>> receivedSupplier) {
         Collection<Envelope> envelopes = receivedSupplier.get();
         List<Envelope> thisTargetScopedEnvelopes = envelopes.stream()
-                .filter(e -> Objects.equals(e.getTo(), expected.getTo()))
+                .filter(e -> Objects.equals(e.getTo(), getTo()))
                 .collect(Collectors.toList());
         return thisTargetScopedEnvelopes.get(order);
     }

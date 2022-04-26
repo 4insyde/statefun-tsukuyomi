@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ExpectMessageTest {
+class ExpectMessageInExactOrderTest {
 
     @Mock
     TsukuyomiApi tsukuyomi;
@@ -27,7 +27,7 @@ class ExpectMessageTest {
     void throwsExceptionIfEnvelopeDoesNotMatch() {
         Envelope envelope = envelope();
         Envelope notMatchingEnvelope = copyFromOfTo(envelope);
-        ExpectMessage expectMessage = ExpectMessage.of(notMatchingEnvelope, Target.Type.FUNCTION);
+        ExpectMessageInExactOrder expectMessage = ExpectMessageInExactOrder.of(notMatchingEnvelope, Target.Type.FUNCTION);
         when(tsukuyomi.getReceived()).thenReturn(List.of(envelope));
 
         assertThatThrownBy(
@@ -38,7 +38,7 @@ class ExpectMessageTest {
     @Test
     void nothingThrownWhenEnvelopeMatches() {
         Envelope envelope = envelope();
-        ExpectMessage expectMessage = ExpectMessage.of(envelope, Target.Type.FUNCTION);
+        ExpectMessageInExactOrder expectMessage = ExpectMessageInExactOrder.of(envelope, Target.Type.FUNCTION);
         when(tsukuyomi.getReceived()).thenReturn(List.of(envelope));
 
         expectMessage.match(0, tsukuyomi);
@@ -58,7 +58,7 @@ class ExpectMessageTest {
                 .to(TypeName.typeNameFromString("foo/b"), "foobaz")
                 .data(Types.stringType(), "b")
                 .build();
-        ExpectMessage expectMessage = ExpectMessage.of(targetAEnvelopeA, Target.Type.FUNCTION);
+        ExpectMessageInExactOrder expectMessage = ExpectMessageInExactOrder.of(targetAEnvelopeA, Target.Type.FUNCTION);
         when(tsukuyomi.getReceived()).thenReturn(List.of(targetBEnvelopeB, targetAEnvelopeA, targetAEnvelopeB));
 
         expectMessage.match(0, tsukuyomi);
@@ -67,7 +67,7 @@ class ExpectMessageTest {
     @Test
     void targetIsFunctionThatHasTheSameTypeNameAsEnvelopeTo() {
         Envelope envelope = envelope();
-        ExpectMessage expectMessage = ExpectMessage.of(envelope, Target.Type.FUNCTION);
+        ExpectMessageInExactOrder expectMessage = ExpectMessageInExactOrder.of(envelope, Target.Type.FUNCTION);
 
         Optional<Target> actual = expectMessage.getTarget();
 
