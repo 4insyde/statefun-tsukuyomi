@@ -13,7 +13,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.BDDMockito.then;
 import static org.mockito.BDDMockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -76,15 +75,6 @@ class ExpectMessageTest {
             assertThat(t.getType()).isEqualTo(Target.Type.FUNCTION);
             assertThat(t.getTypeName().asTypeNameString()).isEqualTo(envelope.getTo().getType());
         });
-    }
-
-    @Test
-    void incrementsExpectedEnvelopesOnDefinitionOfReady() {
-        ExpectMessage expectMessage = ExpectMessage.of(envelope(), Target.Type.FUNCTION);
-
-        expectMessage.exportReadyDefinition(mockedDefinitionOfReady);
-
-        then(mockedDefinitionOfReady).should().incrementExpectedEnvelopes();
     }
 
     private Envelope envelope() {

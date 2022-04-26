@@ -30,8 +30,4 @@ public class ExpectState<T> implements ChangeMatcher {
         return Optional.empty();
     }
 
-    @Override
-    public void exportReadyDefinition(DefinitionOfReady definitionOfReady) {
-        definitionOfReady.requireUpdatedState();
-    }
 }

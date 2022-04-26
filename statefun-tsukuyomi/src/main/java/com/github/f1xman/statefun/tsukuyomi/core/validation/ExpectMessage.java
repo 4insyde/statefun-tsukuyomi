@@ -38,11 +38,6 @@ public class ExpectMessage implements ChangeMatcher {
                 .map(t -> Target.of(t, targetType));
     }
 
-    @Override
-    public void exportReadyDefinition(DefinitionOfReady definitionOfReady) {
-        definitionOfReady.incrementExpectedEnvelopes();
-    }
-
     private Envelope getEnvelope(int order, Supplier<Collection<Envelope>> receivedSupplier) {
         Collection<Envelope> envelopes = receivedSupplier.get();
         List<Envelope> thisTargetScopedEnvelopes = envelopes.stream()

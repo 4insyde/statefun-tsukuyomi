@@ -8,5 +8,4 @@ public interface ChangeMatcher {
 
     Optional<Target> getTarget();
 
-    void exportReadyDefinition(DefinitionOfReady definitionOfReady);
 }

@@ -23,7 +23,7 @@ class DefinitionOfReadyTest {
 
     @Test
     void awaitsUntil2MessagesReceived() {
-        DefinitionOfReady definitionOfReady = DefinitionOfReady.of(mockedTsukuyomiApi);
+        DefinitionOfReady definitionOfReady = DefinitionOfReady.getFrom(mockedTsukuyomiApi);
         Envelope reportEnvelope = Envelope.builder()
                 .toEgress(Egresses.CAPTURED_MESSAGES)
                 .data(InvocationReport.TYPE, InvocationReport.of(2))
@@ -43,7 +43,7 @@ class DefinitionOfReadyTest {
     @Test
     void stopsWaitingWhenThreadIsInterrupted() {
         assertTimeoutPreemptively(Duration.ofSeconds(3), () -> {
-            DefinitionOfReady definitionOfReady = DefinitionOfReady.of(mockedTsukuyomiApi);
+            DefinitionOfReady definitionOfReady = DefinitionOfReady.getFrom(mockedTsukuyomiApi);
             given(mockedTsukuyomiApi.getReceived()).willReturn(List.of());
 
             definitionOfReady.incrementExpectedEnvelopes();
@@ -64,7 +64,7 @@ class DefinitionOfReadyTest {
     @Test
     void stopsWaitingWhenTsukuyomiApiDeactivated() {
         assertTimeoutPreemptively(Duration.ofSeconds(3), () -> {
-            DefinitionOfReady definitionOfReady = DefinitionOfReady.of(mockedTsukuyomiApi);
+            DefinitionOfReady definitionOfReady = DefinitionOfReady.getFrom(mockedTsukuyomiApi);
             given(mockedTsukuyomiApi.getReceived()).willReturn(List.of());
             given(mockedTsukuyomiApi.isActive()).willReturn(true, false);
 
@@ -75,7 +75,7 @@ class DefinitionOfReadyTest {
 
     @Test
     void doesNothingWhenNoRequirementsSet() {
-        DefinitionOfReady definitionOfReady = DefinitionOfReady.of(mockedTsukuyomiApi);
+        DefinitionOfReady definitionOfReady = DefinitionOfReady.getFrom(mockedTsukuyomiApi);
         given(mockedTsukuyomiApi.getReceived()).willReturn(List.of(Envelope.builder()
                 .toEgress(Egresses.CAPTURED_MESSAGES)
                 .data(InvocationReport.TYPE, InvocationReport.of(0))
@@ -89,7 +89,7 @@ class DefinitionOfReadyTest {
     @Test
     void doesNotWaitIfInvokedAfterInterrupting() {
         assertTimeoutPreemptively(Duration.ofSeconds(3), () -> {
-            DefinitionOfReady definitionOfReady = DefinitionOfReady.of(mockedTsukuyomiApi);
+            DefinitionOfReady definitionOfReady = DefinitionOfReady.getFrom(mockedTsukuyomiApi);
             given(mockedTsukuyomiApi.getReceived()).willReturn(List.of());
 
             definitionOfReady.incrementExpectedEnvelopes();

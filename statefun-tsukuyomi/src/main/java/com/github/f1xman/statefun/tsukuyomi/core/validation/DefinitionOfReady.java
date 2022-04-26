@@ -12,7 +12,7 @@ import java.util.function.Supplier;
 
 import static lombok.AccessLevel.PRIVATE;
 
-@RequiredArgsConstructor(staticName = "of")
+@RequiredArgsConstructor(staticName = "getFrom")
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 class DefinitionOfReady {
 

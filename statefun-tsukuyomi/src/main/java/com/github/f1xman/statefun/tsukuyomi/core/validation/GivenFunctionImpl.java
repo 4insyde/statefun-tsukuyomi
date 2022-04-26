@@ -1,8 +1,8 @@
 package com.github.f1xman.statefun.tsukuyomi.core.validation;
 
 import com.github.f1xman.statefun.tsukuyomi.core.capture.FunctionDefinition;
-import com.github.f1xman.statefun.tsukuyomi.core.capture.StatefunModule;
 import com.github.f1xman.statefun.tsukuyomi.core.capture.StateSetter;
+import com.github.f1xman.statefun.tsukuyomi.core.capture.StatefunModule;
 import com.github.f1xman.statefun.tsukuyomi.core.validation.Target.Type;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -60,8 +60,7 @@ public class GivenFunctionImpl implements GivenFunction {
 
     @Override
     public void expect(ChangeMatcher... matchers) {
-        DefinitionOfReady definitionOfReady = DefinitionOfReady.of(tsukuyomi);
-        Arrays.stream(matchers).forEach(m -> m.exportReadyDefinition(definitionOfReady));
+        DefinitionOfReady definitionOfReady = DefinitionOfReady.getFrom(tsukuyomi);
         definitionOfReady.await();
 
         Map<Optional<Target>, List<ChangeMatcher>> matchersByTarget = Arrays.stream(matchers)

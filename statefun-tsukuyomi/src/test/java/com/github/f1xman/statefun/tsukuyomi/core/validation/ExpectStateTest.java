@@ -11,7 +11,6 @@ import java.util.Optional;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.BDDMockito.then;
 import static org.mockito.BDDMockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,14 +41,5 @@ class ExpectStateTest {
         when(mockedStateAccessor.getStateValue(FOO)).thenReturn(Optional.of("foo"));
 
         expectState.match(0, mockedTsukuyomi);
-    }
-
-    @Test
-    void requiresStateToBeUpdated() {
-        ExpectState<String> expectState = ExpectState.of(FOO, is("foo"));
-
-        expectState.exportReadyDefinition(mockedDefinitionOfReady);
-
-        then(mockedDefinitionOfReady).should().requireUpdatedState();
     }
 }
