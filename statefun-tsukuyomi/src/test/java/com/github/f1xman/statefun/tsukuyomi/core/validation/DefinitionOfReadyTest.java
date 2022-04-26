@@ -46,7 +46,6 @@ class DefinitionOfReadyTest {
             DefinitionOfReady definitionOfReady = DefinitionOfReady.getFrom(mockedTsukuyomiApi);
             given(mockedTsukuyomiApi.getReceived()).willReturn(List.of());
 
-            definitionOfReady.incrementExpectedEnvelopes();
             Thread interruptedThread = Thread.currentThread();
             Thread interrupterThread = new Thread(() -> {
                 try {
@@ -68,7 +67,6 @@ class DefinitionOfReadyTest {
             given(mockedTsukuyomiApi.getReceived()).willReturn(List.of());
             given(mockedTsukuyomiApi.isActive()).willReturn(true, false);
 
-            definitionOfReady.incrementExpectedEnvelopes();
             definitionOfReady.await();
         });
     }
@@ -92,7 +90,6 @@ class DefinitionOfReadyTest {
             DefinitionOfReady definitionOfReady = DefinitionOfReady.getFrom(mockedTsukuyomiApi);
             given(mockedTsukuyomiApi.getReceived()).willReturn(List.of());
 
-            definitionOfReady.incrementExpectedEnvelopes();
             Thread interruptedThread = Thread.currentThread();
             Thread interrupterThread = new Thread(() -> {
                 try {
