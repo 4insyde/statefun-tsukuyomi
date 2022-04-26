@@ -27,19 +27,15 @@ class ExpectationsTest {
 
     @Test
     void throwsNullExpectedEnvelopeExceptionIfNullIsPassed() {
-        assertThatThrownBy(() -> Expectations.expectMessage(null, Expectations.toFunction()))
+        assertThatThrownBy(() -> Expectations.expectMessage(null))
                 .isInstanceOf(NullExpectedEnvelopeException.class)
                 .hasMessage("Expected envelope cannot be null. Use Envelope.builder() to build a message");
     }
 
     @Test
-    void throwsNullExpectedTargetTypeExceptionIfNullIsPassed() {
-        Envelope envelope = Envelope.builder()
-                .toEgress(TypeName.typeNameFromString("foo/egress"))
-                .data(Types.stringType(), "foo")
-                .build();
-        assertThatThrownBy(() -> Expectations.expectMessage(envelope, null))
-                .isInstanceOf(NullExpectedTargetTypeException.class)
-                .hasMessage("Expected target type cannot be null. Use Expectations.toFunction() or Expectations.toEgress()");
+    void throwsNullExpectedEnvelopeExceptionIfNullIsPassedInsteadOfEnvelopeToEgress() {
+        assertThatThrownBy(() -> Expectations.expectEgressMessage(null))
+                .isInstanceOf(NullExpectedEnvelopeException.class)
+                .hasMessage("Expected envelope to egress cannot be null. Use Envelope.builder() to build a message");
     }
 }

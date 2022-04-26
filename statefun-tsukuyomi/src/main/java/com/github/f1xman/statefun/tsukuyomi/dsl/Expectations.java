@@ -25,23 +25,19 @@ public class Expectations {
         return ExpectState.of(spec, matcher);
     }
 
-    public static ChangeMatcher expectMessage(Envelope expected, Target.Type targetType) {
+    public static ChangeMatcher expectMessage(Envelope expected) {
         if (expected == null) {
             throw new NullExpectedEnvelopeException(
                     "Expected envelope cannot be null. Use Envelope.builder() to build a message");
         }
-        if (targetType == null) {
-            throw new NullExpectedTargetTypeException(
-                    "Expected target type cannot be null. Use Expectations.toFunction() or Expectations.toEgress()");
+        return ExpectMessage.of(expected, Target.Type.FUNCTION);
+    }
+
+    public static ChangeMatcher expectEgressMessage(Envelope expected) {
+        if (expected == null) {
+            throw new NullExpectedEnvelopeException(
+                    "Expected envelope to egress cannot be null. Use Envelope.builder() to build a message");
         }
-        return ExpectMessage.of(expected, targetType);
-    }
-
-    public static Target.Type toFunction() {
-        return Target.Type.FUNCTION;
-    }
-
-    public static Target.Type toEgress() {
-        return Target.Type.EGRESS;
+        return ExpectMessage.of(expected, Target.Type.EGRESS);
     }
 }

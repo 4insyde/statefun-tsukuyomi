@@ -1,9 +1,7 @@
 package com.github.f1xman.statefun.tsukuyomi.dsl;
 
 import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
-import com.github.f1xman.statefun.tsukuyomi.core.capture.StateSetter;
 import com.github.f1xman.statefun.tsukuyomi.core.validation.GivenFunction;
-import com.github.f1xman.statefun.tsukuyomi.core.validation.TypedFunction;
 import com.github.f1xman.statefun.tsukuyomi.testutil.IntegrationTest;
 import org.apache.flink.statefun.sdk.java.*;
 import org.apache.flink.statefun.sdk.java.message.EgressMessage;
@@ -20,9 +18,7 @@ import static com.github.f1xman.statefun.tsukuyomi.core.capture.StateValue.empty
 import static com.github.f1xman.statefun.tsukuyomi.core.capture.StateValue.havingValue;
 import static com.github.f1xman.statefun.tsukuyomi.dsl.BddTsukuyomi.*;
 import static com.github.f1xman.statefun.tsukuyomi.dsl.Expectations.*;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.mock;
 
 @IntegrationTest
 class BddTsukuyomiIntegrationTest {
@@ -51,9 +47,9 @@ class BddTsukuyomiIntegrationTest {
                 testee,
                 receives(envelope)
         ).then(
-                expectMessage(expectedToFunction, toFunction()),
-                expectMessage(expectedToEgress, toEgress()),
-                expectMessage(expectedToSelf, toFunction()),
+                expectMessage(expectedToFunction),
+                expectEgressMessage(expectedToEgress),
+                expectMessage(expectedToSelf),
                 expectState(Testee.FOO, is("foo"))
         );
     }
