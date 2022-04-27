@@ -33,23 +33,28 @@ class BddTsukuyomiIntegrationTest {
     @Test
     @Timeout(30)
     void verifiesThatTheFunctionSendsMessagesInOrderTheyGoInThen() {
+        // Define your envelopes
         Envelope envelope = incomingEnvelope();
         Envelope expectedToFunction = outgoingEnvelopeToFunction();
         Envelope expectedToEgress = outgoingEnvelopeToEgress();
         Envelope expectedToSelf = outgoingEnvelopeToSelf().toBuilder().build();
+        // Define function under test and its initial state
         GivenFunction testee = given(
                 function(Testee.TYPE, new Testee()),
                 withState(Testee.FOO, empty()),
                 withState(Testee.BAR, havingValue(BAR))
         );
 
+        // When function under test receives that envelope
         when(
                 testee,
                 receives(envelope)
         ).then(
+                // Then expect it sends the following messages
                 expectMessageInExactOrder(expectedToFunction),
                 expectEgressMessageInExactOrder(expectedToEgress),
                 expectMessageInExactOrder(expectedToSelf),
+                // and has the following state value after invocation
                 expectState(Testee.FOO, is("foo"))
         );
     }

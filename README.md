@@ -35,9 +35,9 @@ GivenFunction testee = given(
 ### Verification of outgoing messages
 ```java
 then(
-    expectMessage(expectedToFunction),
-    expectEgressMessage(expectedToEgress),
-    expectMessage(expectedToSelf),
+    expectMessageInExactOrder(expectedToFunction),
+    expectEgressMessageInExactOrder(expectedToEgress),
+    expectMessageInAnyOrder(expectedToSelf)
 );
 ```
 ### Verification of message order
@@ -50,11 +50,11 @@ require it due to the async nature of event-driven applications.
 ```java
 then(
     // Verifies the target function receives this message first
-    expectMessage(expectedToTheSameFunction),
+    expectMessageInExactOrder(expectedToFunction),
     // Does not care about the order
-    expectEgressMessage(expectedToEgress),
+    expectEgressMessageInAnyOrder(expectedToEgress),
     // Verifies the target function then receives this message
-    expectMessage(expectedToTheSameFunction),
+    expectMessageInExactOrder(expectedToFunction),
 );
 ```
 ### Verification of state after interaction
@@ -159,11 +159,11 @@ void exchangesMessages() {
     Envelope envelope = incomingEnvelope();
     Envelope expectedToFunction = outgoingEnvelopeToFunction();
     Envelope expectedToEgress = outgoingEnvelopeToEgress();
-    Envelope expectedToSelf = outgoingEnvelopeToSelf();
+    Envelope expectedToSelf = outgoingEnvelopeToSelf().toBuilder().build();
     // Define function under test and its initial state
     GivenFunction testee = given(
         function(Testee.TYPE, new Testee()),
-        withState(Testee.FOO, empty()), // Empty values must be defined as well
+        withState(Testee.FOO, empty()),
         withState(Testee.BAR, havingValue(BAR))
     );
 
@@ -173,11 +173,11 @@ void exchangesMessages() {
         receives(envelope)
     ).then(
         // Then expect it sends the following messages
-        expectMessage(expectedToFunction),
-        expectEgressMessage(expectedToEgress),
-        expectMessage(expectedToSelf),
+        expectMessageInExactOrder(expectedToFunction),
+        expectEgressMessageInExactOrder(expectedToEgress),
+        expectMessageInExactOrder(expectedToSelf),
         // and has the following state value after invocation
-        expectState(Testee.FOO, is("foo")) // Hamcrest matchers supported
+        expectState(Testee.FOO, is("foo"))
     );
 }
 ```
