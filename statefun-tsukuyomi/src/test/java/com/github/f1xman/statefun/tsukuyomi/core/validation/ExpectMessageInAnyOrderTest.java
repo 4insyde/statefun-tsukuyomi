@@ -10,7 +10,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -48,12 +47,10 @@ class ExpectMessageInAnyOrderTest {
         Envelope envelope = envelope();
         ExpectMessageInAnyOrder expectMessage = ExpectMessageInAnyOrder.of(envelope, Target.Type.FUNCTION, new HashSet<>());
 
-        Optional<Target> actual = expectMessage.getTarget();
+        Target actual = expectMessage.getTarget();
 
-        assertThat(actual).hasValueSatisfying(t -> {
-            assertThat(t.getType()).isEqualTo(Target.Type.FUNCTION);
-            assertThat(t.getTypeName().asTypeNameString()).isEqualTo(envelope.getTo().getType());
-        });
+        assertThat(actual.getType()).isEqualTo(Target.Type.FUNCTION);
+        assertThat(actual.getTypeName().asTypeNameString()).isEqualTo(envelope.getTo().getType());
     }
 
     @Test

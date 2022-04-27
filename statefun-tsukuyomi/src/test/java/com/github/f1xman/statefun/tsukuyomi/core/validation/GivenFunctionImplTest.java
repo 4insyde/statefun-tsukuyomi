@@ -1,12 +1,11 @@
 package com.github.f1xman.statefun.tsukuyomi.core.validation;
 
 import com.github.f1xman.statefun.tsukuyomi.core.capture.FunctionDefinition;
-import com.github.f1xman.statefun.tsukuyomi.core.capture.StatefunModule;
 import com.github.f1xman.statefun.tsukuyomi.core.capture.StateSetter;
+import com.github.f1xman.statefun.tsukuyomi.core.capture.StatefunModule;
 import org.apache.flink.statefun.sdk.java.Context;
 import org.apache.flink.statefun.sdk.java.StatefulFunction;
 import org.apache.flink.statefun.sdk.java.TypeName;
-import org.apache.flink.statefun.sdk.java.ValueSpec;
 import org.apache.flink.statefun.sdk.java.message.Message;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,7 +13,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import static org.mockito.BDDMockito.given;
@@ -35,11 +33,11 @@ class GivenFunctionImplTest {
     @Mock
     Interactor mockedInteractor;
     @Mock
-    ChangeMatcher mockedChangeMatcherA;
+    MessageMatcher mockedChangeMatcherA;
     @Mock
-    ChangeMatcher mockedChangeMatcherB;
+    MessageMatcher mockedChangeMatcherB;
     @Mock
-    ChangeMatcher mockedChangeMatcherC;
+    MessageMatcher mockedChangeMatcherC;
 
     @Test
     void startsTsukuyomi() {
@@ -60,9 +58,9 @@ class GivenFunctionImplTest {
                 .egress(EGRESS)
                 .build();
         given(mockedChangeMatcherA.getTarget())
-                .willReturn(Optional.of(Target.of(COLLABORATOR, Target.Type.FUNCTION)));
+                .willReturn(Target.of(COLLABORATOR, Target.Type.FUNCTION));
         given(mockedChangeMatcherB.getTarget())
-                .willReturn(Optional.of(Target.of(EGRESS, Target.Type.EGRESS)));
+                .willReturn(Target.of(EGRESS, Target.Type.EGRESS));
 
         function.start(new ChangeMatcher[]{mockedChangeMatcherA, mockedChangeMatcherB});
 
@@ -94,11 +92,11 @@ class GivenFunctionImplTest {
         );
         function.setTsukuyomi(mockedTsukuyomiApi);
         given(mockedChangeMatcherA.getTarget())
-                .willReturn(Optional.of(Target.of(COLLABORATOR, Target.Type.FUNCTION)));
+                .willReturn(Target.of(COLLABORATOR, Target.Type.FUNCTION));
         given(mockedChangeMatcherB.getTarget())
-                .willReturn(Optional.of(Target.of(EGRESS, Target.Type.EGRESS)));
+                .willReturn(Target.of(EGRESS, Target.Type.EGRESS));
         given(mockedChangeMatcherC.getTarget())
-                .willReturn(Optional.of(Target.of(COLLABORATOR, Target.Type.FUNCTION)));
+                .willReturn(Target.of(COLLABORATOR, Target.Type.FUNCTION));
 
         function.expect(mockedChangeMatcherA, mockedChangeMatcherB, mockedChangeMatcherC);
 
@@ -124,7 +122,6 @@ class GivenFunctionImplTest {
     private static class FooBar implements StatefulFunction {
 
         static final TypeName TYPE_NAME = TypeName.typeNameFromString("foo/bar");
-        static final ValueSpec<String> BAZ = ValueSpec.named("baz").withUtf8StringType();
 
         @Override
         public CompletableFuture<Void> apply(Context context, Message argument) throws Throwable {

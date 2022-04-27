@@ -8,7 +8,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import static lombok.AccessLevel.PRIVATE;
@@ -30,14 +29,6 @@ public class ExpectMessageInAnyOrder extends AbstractExpectMessage {
         assertThat(received, hasItem(expected));
         int index = received.indexOf(expected);
         exhaustedIndexes.add(index);
-    }
-
-    @Override
-    public Optional<Target> getTarget() {
-        return Optional.of(expected.getTo())
-                .map(Envelope.NodeAddress::getType)
-                .map(TypeName::typeNameFromString)
-                .map(t -> Target.of(t, targetType));
     }
 
     @Override

@@ -6,13 +6,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
-public abstract class AbstractExpectMessage implements ChangeMatcher {
+public abstract class AbstractExpectMessage implements MessageMatcher {
     @Override
-    public Optional<Target> getTarget() {
-        return Optional.of(getTo())
-                .map(Envelope.NodeAddress::getType)
-                .map(TypeName::typeNameFromString)
-                .map(t -> Target.of(t, getTargetType()));
+    public Target getTarget() {
+        String type = getTo().getType();
+        TypeName typeName = TypeName.typeNameFromString(type);
+        return Target.of(typeName, getTargetType());
     }
 
     @NotNull

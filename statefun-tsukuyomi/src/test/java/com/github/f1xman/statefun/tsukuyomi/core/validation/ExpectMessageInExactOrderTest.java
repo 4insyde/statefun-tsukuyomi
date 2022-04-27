@@ -9,7 +9,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -20,8 +19,6 @@ class ExpectMessageInExactOrderTest {
 
     @Mock
     TsukuyomiApi tsukuyomi;
-    @Mock
-    DefinitionOfReady mockedDefinitionOfReady;
 
     @Test
     void throwsExceptionIfEnvelopeDoesNotMatch() {
@@ -69,12 +66,10 @@ class ExpectMessageInExactOrderTest {
         Envelope envelope = envelope();
         ExpectMessageInExactOrder expectMessage = ExpectMessageInExactOrder.of(envelope, Target.Type.FUNCTION);
 
-        Optional<Target> actual = expectMessage.getTarget();
+        Target actual = expectMessage.getTarget();
 
-        assertThat(actual).hasValueSatisfying(t -> {
-            assertThat(t.getType()).isEqualTo(Target.Type.FUNCTION);
-            assertThat(t.getTypeName().asTypeNameString()).isEqualTo(envelope.getTo().getType());
-        });
+        assertThat(actual.getType()).isEqualTo(Target.Type.FUNCTION);
+        assertThat(actual.getTypeName().asTypeNameString()).isEqualTo(envelope.getTo().getType());
     }
 
     private Envelope envelope() {

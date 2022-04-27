@@ -10,7 +10,10 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import org.apache.flink.statefun.sdk.java.TypeName;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static com.github.f1xman.statefun.tsukuyomi.core.validation.Target.Type.EGRESS;
 import static com.github.f1xman.statefun.tsukuyomi.core.validation.Target.Type.FUNCTION;
@@ -36,9 +39,9 @@ public class GivenFunctionImpl implements GivenFunction {
                 .stateSetters(List.of(stateSetters))
                 .build();
         Set<Target> targets = Arrays.stream(matchers)
-                .map(ChangeMatcher::getTarget)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                .filter(MessageMatcher.class::isInstance)
+                .map(MessageMatcher.class::cast)
+                .map(MessageMatcher::getTarget)
                 .collect(toSet());
         Map<Type, Set<TypeName>> targetsByType = targets.stream()
                 .collect(
@@ -62,14 +65,27 @@ public class GivenFunctionImpl implements GivenFunction {
     public void expect(ChangeMatcher... matchers) {
         DefinitionOfReady definitionOfReady = DefinitionOfReady.getFrom(tsukuyomi);
         definitionOfReady.await();
+        matchState(matchers);
+        matchMessages(matchers);
+    }
 
-        Map<Optional<Target>, List<ChangeMatcher>> matchersByTarget = Arrays.stream(matchers)
+    private void matchState(ChangeMatcher[] matchers) {
+        Arrays.stream(matchers)
+                .filter(StateMatcher.class::isInstance)
+                .map(StateMatcher.class::cast)
+                .forEach(m -> m.match(tsukuyomi));
+    }
+
+    private void matchMessages(ChangeMatcher[] matchers) {
+        Map<Target, List<MessageMatcher>> matchersByTarget = Arrays.stream(matchers)
+                .filter(MessageMatcher.class::isInstance)
+                .map(MessageMatcher.class::cast)
                 .collect(
-                        groupingBy(ChangeMatcher::getTarget,
-                                toList()));
-        for (List<ChangeMatcher> sameTargetMatchers : matchersByTarget.values()) {
+                        groupingBy(
+                                MessageMatcher::getTarget));
+        for (List<MessageMatcher> sameTargetMatchers : matchersByTarget.values()) {
             for (int order = 0; order < sameTargetMatchers.size(); order++) {
-                ChangeMatcher orderedMatcher = sameTargetMatchers.get(order);
+                MessageMatcher orderedMatcher = sameTargetMatchers.get(order);
                 orderedMatcher.match(order, tsukuyomi);
             }
         }

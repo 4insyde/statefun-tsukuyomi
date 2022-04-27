@@ -31,7 +31,7 @@ class ExpectStateTest {
         when(mockedTsukuyomi.getStateAccessor()).thenReturn(mockedStateAccessor);
         when(mockedStateAccessor.getStateValue(FOO)).thenReturn(Optional.empty());
 
-        assertThrows(AssertionError.class, () -> expectState.match(0, mockedTsukuyomi));
+        assertThrows(AssertionError.class, () -> expectState.match(mockedTsukuyomi));
     }
 
     @Test
@@ -40,6 +40,6 @@ class ExpectStateTest {
         when(mockedTsukuyomi.getStateAccessor()).thenReturn(mockedStateAccessor);
         when(mockedStateAccessor.getStateValue(FOO)).thenReturn(Optional.of("foo"));
 
-        expectState.match(0, mockedTsukuyomi);
+        expectState.match(mockedTsukuyomi);
     }
 }

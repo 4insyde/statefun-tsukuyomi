@@ -13,21 +13,15 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 @RequiredArgsConstructor(staticName = "of")
 @FieldDefaults(level = PRIVATE, makeFinal = true)
-public class ExpectState<T> implements ChangeMatcher {
+public class ExpectState<T> implements StateMatcher {
 
     ValueSpec<T> spec;
     Matcher<T> matcher;
 
     @Override
-    public void match(int order, TsukuyomiApi tsukuyomi) {
+    public void match(TsukuyomiApi tsukuyomi) {
         ManagedStateAccessor stateAccessor = tsukuyomi.getStateAccessor();
         Optional<T> value = stateAccessor.getStateValue(spec);
         assertThat(value.orElse(null), matcher);
     }
-
-    @Override
-    public Optional<Target> getTarget() {
-        return Optional.empty();
-    }
-
 }
