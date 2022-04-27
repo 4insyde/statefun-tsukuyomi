@@ -8,12 +8,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
+import lombok.val;
 import org.apache.flink.statefun.sdk.java.TypeName;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static com.github.f1xman.statefun.tsukuyomi.core.validation.Target.Type.EGRESS;
 import static com.github.f1xman.statefun.tsukuyomi.core.validation.Target.Type.FUNCTION;
@@ -83,10 +81,12 @@ public class GivenFunctionImpl implements GivenFunction {
                 .collect(
                         groupingBy(
                                 MessageMatcher::getTarget));
+        val indexBlacklist = new HashSet<Integer>();
         for (List<MessageMatcher> sameTargetMatchers : matchersByTarget.values()) {
             for (int order = 0; order < sameTargetMatchers.size(); order++) {
                 MessageMatcher orderedMatcher = sameTargetMatchers.get(order);
-                orderedMatcher.match(order, tsukuyomi, Set.of());
+                Integer matchedIndex = orderedMatcher.match(order, tsukuyomi, indexBlacklist);
+                indexBlacklist.add(matchedIndex);
             }
         }
     }

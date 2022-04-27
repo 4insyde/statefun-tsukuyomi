@@ -1,5 +1,6 @@
 package com.github.f1xman.statefun.tsukuyomi.core.validation;
 
+import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
 import com.github.f1xman.statefun.tsukuyomi.core.capture.FunctionDefinition;
 import com.github.f1xman.statefun.tsukuyomi.core.capture.StateSetter;
 import com.github.f1xman.statefun.tsukuyomi.core.capture.StatefunModule;
@@ -7,6 +8,8 @@ import org.apache.flink.statefun.sdk.java.Context;
 import org.apache.flink.statefun.sdk.java.StatefulFunction;
 import org.apache.flink.statefun.sdk.java.TypeName;
 import org.apache.flink.statefun.sdk.java.message.Message;
+import org.apache.flink.statefun.sdk.java.types.Types;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -16,6 +19,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
@@ -24,6 +29,7 @@ class GivenFunctionImplTest {
 
     static final TypeName COLLABORATOR = TypeName.typeNameFromString("foo/collaborator");
     static final TypeName EGRESS = TypeName.typeNameFromString("foo/egress");
+    static final String ID = "foobar";
 
     @Mock
     TsukuyomiManager mockedTsukuyomiManager;
@@ -101,9 +107,26 @@ class GivenFunctionImplTest {
 
         function.expect(mockedChangeMatcherA, mockedChangeMatcherB, mockedChangeMatcherC);
 
-        then(mockedChangeMatcherA).should().match(0, mockedTsukuyomiApi, Set.of());
-        then(mockedChangeMatcherB).should().match(0, mockedTsukuyomiApi, Set.of());
-        then(mockedChangeMatcherC).should().match(1, mockedTsukuyomiApi, Set.of());
+        then(mockedChangeMatcherA).should().match(eq(0), eq(mockedTsukuyomiApi), any());
+        then(mockedChangeMatcherB).should().match(eq(0), eq(mockedTsukuyomiApi), any());
+        then(mockedChangeMatcherC).should().match(eq(1), eq(mockedTsukuyomiApi), any());
+    }
+
+    @Test
+    void throwsAssertionErrorIfMultipleMatchersExpectTheSameEnvelope() {
+        GivenFunctionImpl function = GivenFunctionImpl.of(
+                TypedFunctionImpl.of(FooBar.TYPE_NAME, new FooBar()),
+                new StateSetter[]{},
+                mockedTsukuyomiManager
+        );
+        function.setTsukuyomi(mockedTsukuyomiApi);
+        Envelope envelope = envelope();
+        given(mockedTsukuyomiApi.getReceived()).willReturn(List.of(envelope));
+
+        Assertions.assertThatThrownBy(() -> function.expect(
+                ExpectMessageInAnyOrder.of(envelope, Target.Type.FUNCTION),
+                ExpectMessageInAnyOrder.of(envelope, Target.Type.FUNCTION)
+        ));
     }
 
     @Test
@@ -118,6 +141,13 @@ class GivenFunctionImplTest {
         function.stop();
 
         then(mockedTsukuyomiManager).should().stop();
+    }
+
+    private Envelope envelope() {
+        return Envelope.builder()
+                .to(FooBar.TYPE_NAME, ID)
+                .data(Types.stringType(), "foobarbaz")
+                .build();
     }
 
     private static class FooBar implements StatefulFunction {
