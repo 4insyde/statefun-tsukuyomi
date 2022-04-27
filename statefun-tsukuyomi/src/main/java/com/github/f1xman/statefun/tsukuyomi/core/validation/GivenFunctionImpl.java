@@ -86,7 +86,7 @@ public class GivenFunctionImpl implements GivenFunction {
         for (List<MessageMatcher> sameTargetMatchers : matchersByTarget.values()) {
             for (int order = 0; order < sameTargetMatchers.size(); order++) {
                 MessageMatcher orderedMatcher = sameTargetMatchers.get(order);
-                orderedMatcher.match(order, tsukuyomi);
+                orderedMatcher.match(order, tsukuyomi, Set.of());
             }
         }
     }

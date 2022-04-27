@@ -14,8 +14,6 @@ import static lombok.AccessLevel.PRIVATE;
 @NoArgsConstructor(access = PRIVATE)
 public class Expectations {
 
-    private static final Set<Integer> exhaustedIndexes = new HashSet<>();
-
     public static <T> ChangeMatcher expectState(ValueSpec<T> spec, Matcher<T> matcher) {
         if (spec == null) {
             throw new NullValueSpecException("ValueSpec of a verifying state is null");
@@ -48,7 +46,7 @@ public class Expectations {
             throw new NullExpectedEnvelopeException(
                     "Expected envelope cannot be null. Use Envelope.builder() to build a message");
         }
-        return ExpectMessageInAnyOrder.of(expected, Target.Type.FUNCTION, exhaustedIndexes);
+        return ExpectMessageInAnyOrder.of(expected, Target.Type.FUNCTION);
     }
 
     public static ChangeMatcher expectEgressMessageInAnyOrder(Envelope expected) {
@@ -56,6 +54,6 @@ public class Expectations {
             throw new NullExpectedEnvelopeException(
                     "Expected envelope to egress cannot be null. Use Envelope.builder() to build a message");
         }
-        return ExpectMessageInAnyOrder.of(expected, Target.Type.EGRESS, exhaustedIndexes);
+        return ExpectMessageInAnyOrder.of(expected, Target.Type.EGRESS);
     }
 }

@@ -1,8 +1,10 @@
 package com.github.f1xman.statefun.tsukuyomi.core.validation;
 
+import java.util.Set;
+
 public interface MessageMatcher extends ChangeMatcher {
 
-    void match(int order, TsukuyomiApi tsukuyomi);
+    Integer match(int order, TsukuyomiApi tsukuyomi, Set<Integer> indexBlacklist);
 
     Target getTarget();
 

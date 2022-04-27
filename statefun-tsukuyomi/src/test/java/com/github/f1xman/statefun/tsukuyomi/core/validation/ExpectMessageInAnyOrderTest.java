@@ -8,8 +8,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -25,27 +25,29 @@ class ExpectMessageInAnyOrderTest {
     void throwsExceptionIfEnvelopeDoesNotMatch() {
         Envelope envelope = envelope();
         Envelope notMatchingEnvelope = copyFromOfTo(envelope);
-        ExpectMessageInAnyOrder expectMessage = ExpectMessageInAnyOrder.of(notMatchingEnvelope, Target.Type.FUNCTION, new HashSet<>());
+        ExpectMessageInAnyOrder expectMessage = ExpectMessageInAnyOrder.of(notMatchingEnvelope, Target.Type.FUNCTION);
         when(tsukuyomi.getReceived()).thenReturn(List.of(envelope));
 
         assertThatThrownBy(
-                () -> expectMessage.match(0, tsukuyomi))
+                () -> expectMessage.match(0, tsukuyomi, Set.of()))
                 .isInstanceOf(AssertionError.class);
     }
 
     @Test
-    void nothingThrownWhenEnvelopeMatches() {
+    void returnsIndexOfMatchedEnvelope() {
         Envelope envelope = envelope();
-        ExpectMessageInAnyOrder expectMessage = ExpectMessageInAnyOrder.of(envelope, Target.Type.FUNCTION, new HashSet<>());
+        ExpectMessageInAnyOrder expectMessage = ExpectMessageInAnyOrder.of(envelope, Target.Type.FUNCTION);
         when(tsukuyomi.getReceived()).thenReturn(List.of(envelope));
 
-        expectMessage.match(0, tsukuyomi);
+        Integer actualIndex = expectMessage.match(0, tsukuyomi, Set.of());
+
+        assertThat(actualIndex).isZero();
     }
 
     @Test
     void targetIsFunctionThatHasTheSameTypeNameAsEnvelopeTo() {
         Envelope envelope = envelope();
-        ExpectMessageInAnyOrder expectMessage = ExpectMessageInAnyOrder.of(envelope, Target.Type.FUNCTION, new HashSet<>());
+        ExpectMessageInAnyOrder expectMessage = ExpectMessageInAnyOrder.of(envelope, Target.Type.FUNCTION);
 
         Target actual = expectMessage.getTarget();
 
@@ -54,16 +56,13 @@ class ExpectMessageInAnyOrderTest {
     }
 
     @Test
-    void doesNotMatchTheSameEnvelopeTwice() {
+    void doesNotMatchTheEnvelopeWithBlacklistedIndex() {
         Envelope envelope = envelope();
-        HashSet<Integer> exhaustedIndexes = new HashSet<>();
-        ExpectMessageInAnyOrder expectMessage1 = ExpectMessageInAnyOrder.of(envelope, Target.Type.FUNCTION, exhaustedIndexes);
-        ExpectMessageInAnyOrder expectMessage2 = ExpectMessageInAnyOrder.of(envelope, Target.Type.FUNCTION, exhaustedIndexes);
+        Set<Integer> indexBlacklist = Set.of(0);
+        ExpectMessageInAnyOrder expectMessage = ExpectMessageInAnyOrder.of(envelope, Target.Type.FUNCTION);
         when(tsukuyomi.getReceived()).thenReturn(List.of(envelope));
 
-        expectMessage1.match(0, tsukuyomi);
-
-        assertThatThrownBy(() -> expectMessage2.match(0, tsukuyomi))
+        assertThatThrownBy(() -> expectMessage.match(0, tsukuyomi, indexBlacklist))
                 .isInstanceOf(AssertionError.class);
     }
 

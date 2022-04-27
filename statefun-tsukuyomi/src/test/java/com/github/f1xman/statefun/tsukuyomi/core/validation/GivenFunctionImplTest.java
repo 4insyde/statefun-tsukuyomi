@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import static org.mockito.BDDMockito.given;
@@ -100,9 +101,9 @@ class GivenFunctionImplTest {
 
         function.expect(mockedChangeMatcherA, mockedChangeMatcherB, mockedChangeMatcherC);
 
-        then(mockedChangeMatcherA).should().match(0, mockedTsukuyomiApi);
-        then(mockedChangeMatcherB).should().match(0, mockedTsukuyomiApi);
-        then(mockedChangeMatcherC).should().match(1, mockedTsukuyomiApi);
+        then(mockedChangeMatcherA).should().match(0, mockedTsukuyomiApi, Set.of());
+        then(mockedChangeMatcherB).should().match(0, mockedTsukuyomiApi, Set.of());
+        then(mockedChangeMatcherC).should().match(1, mockedTsukuyomiApi, Set.of());
     }
 
     @Test

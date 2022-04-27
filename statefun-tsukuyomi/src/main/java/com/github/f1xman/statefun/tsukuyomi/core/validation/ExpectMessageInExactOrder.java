@@ -5,10 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.function.Supplier;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope.NodeAddress;
@@ -24,9 +21,11 @@ public class ExpectMessageInExactOrder extends AbstractExpectMessage {
     Target.Type targetType;
 
     @Override
-    public void match(int order, TsukuyomiApi tsukuyomi) {
-        Envelope envelope = getEnvelope(order, tsukuyomi::getReceived);
+    public Integer match(int order, TsukuyomiApi tsukuyomi, Set<Integer> indexBlacklist) {
+        List<Envelope> received = new ArrayList<>(tsukuyomi.getReceived());
+        Envelope envelope = getEnvelope(order, received);
         assertThat(envelope, is(expected));
+        return received.indexOf(expected);
     }
 
     @Override
@@ -40,11 +39,12 @@ public class ExpectMessageInExactOrder extends AbstractExpectMessage {
         return targetType;
     }
 
-    private Envelope getEnvelope(int order, Supplier<Collection<Envelope>> receivedSupplier) {
-        Collection<Envelope> envelopes = receivedSupplier.get();
+    private Envelope getEnvelope(int order, Collection<Envelope> envelopes) {
         List<Envelope> thisTargetScopedEnvelopes = envelopes.stream()
                 .filter(e -> Objects.equals(e.getTo(), getTo()))
                 .collect(Collectors.toList());
-        return thisTargetScopedEnvelopes.get(order);
+        return thisTargetScopedEnvelopes.size() > order
+                ? thisTargetScopedEnvelopes.get(order)
+                : null;
     }
 }

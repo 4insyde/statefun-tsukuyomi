@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -28,17 +29,19 @@ class ExpectMessageInExactOrderTest {
         when(tsukuyomi.getReceived()).thenReturn(List.of(envelope));
 
         assertThatThrownBy(
-                () -> expectMessage.match(0, tsukuyomi))
+                () -> expectMessage.match(0, tsukuyomi, Set.of()))
                 .isInstanceOf(AssertionError.class);
     }
 
     @Test
-    void nothingThrownWhenEnvelopeMatches() {
+    void returnsIndexOfMatchedEnvelope() {
         Envelope envelope = envelope();
         ExpectMessageInExactOrder expectMessage = ExpectMessageInExactOrder.of(envelope, Target.Type.FUNCTION);
         when(tsukuyomi.getReceived()).thenReturn(List.of(envelope));
 
-        expectMessage.match(0, tsukuyomi);
+        Integer actualIndex = expectMessage.match(0, tsukuyomi, Set.of());
+
+        assertThat(actualIndex).isZero();
     }
 
     @Test
@@ -58,7 +61,7 @@ class ExpectMessageInExactOrderTest {
         ExpectMessageInExactOrder expectMessage = ExpectMessageInExactOrder.of(targetAEnvelopeA, Target.Type.FUNCTION);
         when(tsukuyomi.getReceived()).thenReturn(List.of(targetBEnvelopeB, targetAEnvelopeA, targetAEnvelopeB));
 
-        expectMessage.match(0, tsukuyomi);
+        expectMessage.match(0, tsukuyomi, Set.of());
     }
 
     @Test
@@ -70,6 +73,17 @@ class ExpectMessageInExactOrderTest {
 
         assertThat(actual.getType()).isEqualTo(Target.Type.FUNCTION);
         assertThat(actual.getTypeName().asTypeNameString()).isEqualTo(envelope.getTo().getType());
+    }
+
+    @Test
+    void throwsAssertionErrorIfOrderIsBiggerThanNumberOfReceivedEnvelopes() {
+        Envelope envelope = envelope();
+        ExpectMessageInExactOrder expectMessage = ExpectMessageInExactOrder.of(envelope, Target.Type.FUNCTION);
+        when(tsukuyomi.getReceived()).thenReturn(List.of(envelope));
+
+        assertThatThrownBy(
+                () -> expectMessage.match(1, tsukuyomi, Set.of()))
+                .isInstanceOf(AssertionError.class);
     }
 
     private Envelope envelope() {
