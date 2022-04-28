@@ -67,9 +67,8 @@ class TsukuyomiManagerImplTest {
                     .build();
 
             client.send(envelope);
-            Collection<Envelope> received = client.getReceived();
-            await().atMost(Duration.ofMinutes(1)).until(() -> received.size() >= 2);
-            assertThat(received).contains(expectedToFunction, expectedToEgress);
+            await().atMost(Duration.ofMinutes(1)).until(() -> client.getReceived().size() >= 2);
+            assertThat(client.getReceived()).contains(expectedToFunction, expectedToEgress);
 
             tsukuyomiManager.stop();
         });

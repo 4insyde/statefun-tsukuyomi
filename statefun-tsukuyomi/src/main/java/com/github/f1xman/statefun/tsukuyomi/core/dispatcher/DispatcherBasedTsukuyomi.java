@@ -1,14 +1,19 @@
 package com.github.f1xman.statefun.tsukuyomi.core.dispatcher;
 
+import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
+import com.github.f1xman.statefun.tsukuyomi.core.capture.InvocationReport;
 import com.github.f1xman.statefun.tsukuyomi.core.capture.ManagedStateAccessor;
 import com.github.f1xman.statefun.tsukuyomi.core.validation.TsukuyomiApi;
-import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.function.Supplier;
 
+import static java.util.function.Predicate.not;
+import static java.util.stream.Collectors.toUnmodifiableList;
 import static lombok.AccessLevel.PRIVATE;
 
 @RequiredArgsConstructor(staticName = "of")
@@ -26,7 +31,9 @@ public class DispatcherBasedTsukuyomi implements TsukuyomiApi {
 
     @Override
     public Collection<Envelope> getReceived() {
-        return client.getReceived();
+        return new ArrayList<>(client.getReceived()).stream()
+                .filter(not(e -> e.is(InvocationReport.TYPE)))
+                .collect(toUnmodifiableList());
     }
 
     @Override
@@ -42,5 +49,13 @@ public class DispatcherBasedTsukuyomi implements TsukuyomiApi {
     @Override
     public boolean isActive() {
         return activityStatusSupplier.get();
+    }
+
+    @Override
+    public Optional<InvocationReport> getInvocationReport() {
+        return new ArrayList<>(client.getReceived()).stream()
+                .filter(e -> e.is(InvocationReport.TYPE))
+                .map(e -> e.extractData(InvocationReport.TYPE))
+                .findAny();
     }
 }

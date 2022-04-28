@@ -1,8 +1,9 @@
 package com.github.f1xman.statefun.tsukuyomi.core.validation;
 
-import com.github.f1xman.statefun.tsukuyomi.core.capture.Egresses;
 import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
 import com.github.f1xman.statefun.tsukuyomi.core.capture.InvocationReport;
+import org.apache.flink.statefun.sdk.java.TypeName;
+import org.apache.flink.statefun.sdk.java.types.Types;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -10,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
@@ -24,20 +26,18 @@ class DefinitionOfReadyTest {
     @Test
     void awaitsUntil2MessagesReceived() {
         DefinitionOfReady definitionOfReady = DefinitionOfReady.getFrom(mockedTsukuyomiApi);
-        Envelope reportEnvelope = Envelope.builder()
-                .toEgress(Egresses.CAPTURED_MESSAGES)
-                .data(InvocationReport.TYPE, InvocationReport.of(2))
-                .build();
+        Envelope envelope = envelope();
         given(mockedTsukuyomiApi.getReceived()).willReturn(
                 List.of(),
-                List.of(reportEnvelope),
-                List.of(reportEnvelope, reportEnvelope, reportEnvelope)
+                List.of(envelope, envelope)
         );
         given(mockedTsukuyomiApi.isActive()).willReturn(true);
+        InvocationReport report = InvocationReport.of(2);
+        given(mockedTsukuyomiApi.getInvocationReport()).willReturn(Optional.of(report));
 
         definitionOfReady.await();
 
-        then(mockedTsukuyomiApi).should(times(3)).getReceived();
+        then(mockedTsukuyomiApi).should(times(2)).getReceived();
     }
 
     @Test
@@ -70,20 +70,6 @@ class DefinitionOfReadyTest {
             definitionOfReady.await();
         });
     }
-
-    @Test
-    void doesNothingWhenNoRequirementsSet() {
-        DefinitionOfReady definitionOfReady = DefinitionOfReady.getFrom(mockedTsukuyomiApi);
-        given(mockedTsukuyomiApi.getReceived()).willReturn(List.of(Envelope.builder()
-                .toEgress(Egresses.CAPTURED_MESSAGES)
-                .data(InvocationReport.TYPE, InvocationReport.of(0))
-                .build()));
-
-        definitionOfReady.await();
-
-        then(mockedTsukuyomiApi).shouldHaveZeroInteractions();
-    }
-
     @Test
     void doesNotWaitIfInvokedAfterInterrupting() {
         assertTimeoutPreemptively(Duration.ofSeconds(3), () -> {
@@ -103,5 +89,13 @@ class DefinitionOfReadyTest {
             definitionOfReady.await();
             definitionOfReady.await();
         });
+    }
+
+    private Envelope envelope() {
+        return Envelope.builder()
+                .from(TypeName.typeNameFromString("foo/bar"), "foobar")
+                .to(TypeName.typeNameFromString("foo/baz"), "foobaz")
+                .data(Types.stringType(), "foobarbaz")
+                .build();
     }
 }

@@ -1,7 +1,9 @@
 package com.github.f1xman.statefun.tsukuyomi.core.dispatcher;
 
-import com.github.f1xman.statefun.tsukuyomi.core.capture.ManagedStateAccessor;
+import com.github.f1xman.statefun.tsukuyomi.core.capture.Egresses;
 import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
+import com.github.f1xman.statefun.tsukuyomi.core.capture.InvocationReport;
+import com.github.f1xman.statefun.tsukuyomi.core.capture.ManagedStateAccessor;
 import org.apache.flink.statefun.sdk.java.TypeName;
 import org.apache.flink.statefun.sdk.java.types.Types;
 import org.junit.jupiter.api.Test;
@@ -11,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.*;
@@ -54,6 +57,21 @@ class DispatcherBasedTsukuyomiTest {
     }
 
     @Test
+    void receivedDoesNotContainTheReport() {
+        DispatcherBasedTsukuyomi tsukuyomi = DispatcherBasedTsukuyomi.of(mockedClient, null, () -> true);
+        Envelope envelope = Envelope.builder()
+                .toEgress(Egresses.CAPTURED_MESSAGES)
+                .data(InvocationReport.TYPE, InvocationReport.of(0))
+                .build();
+        List<Envelope> expected = List.of(envelope);
+        when(mockedClient.getReceived()).thenReturn(expected);
+
+        Collection<Envelope> actual = tsukuyomi.getReceived();
+
+        assertThat(actual).isEmpty();
+    }
+
+    @Test
     void delegatesIsStateUpdatedCall() {
         DispatcherBasedTsukuyomi tsukuyomi = DispatcherBasedTsukuyomi.of(mockedClient, mockedStateAccessor, () -> true);
         given(mockedStateAccessor.isStateUpdated()).willReturn(true, false);
@@ -69,5 +87,21 @@ class DispatcherBasedTsukuyomiTest {
         boolean actualActive = tsukuyomi.isActive();
 
         assertThat(actualActive).isTrue();
+    }
+
+    @Test
+    void returnsOptionalWithInvocationReportIfPresent() {
+        DispatcherBasedTsukuyomi tsukuyomi = DispatcherBasedTsukuyomi.of(mockedClient, null, () -> true);
+        InvocationReport expected = InvocationReport.of(0);
+        Envelope envelope = Envelope.builder()
+                .toEgress(Egresses.CAPTURED_MESSAGES)
+                .data(InvocationReport.TYPE, expected)
+                .build();
+        List<Envelope> received = List.of(envelope);
+        when(mockedClient.getReceived()).thenReturn(received);
+
+        Optional<InvocationReport> actual = tsukuyomi.getInvocationReport();
+
+        assertThat(actual).contains(expected);
     }
 }
