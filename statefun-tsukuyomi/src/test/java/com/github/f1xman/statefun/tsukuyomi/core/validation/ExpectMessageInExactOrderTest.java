@@ -1,6 +1,7 @@
 package com.github.f1xman.statefun.tsukuyomi.core.validation;
 
 import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
+import com.github.f1xman.statefun.tsukuyomi.core.capture.InvocationReport;
 import org.apache.flink.statefun.sdk.java.TypeName;
 import org.apache.flink.statefun.sdk.java.types.Types;
 import org.junit.jupiter.api.Test;
@@ -9,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,8 +27,20 @@ class ExpectMessageInExactOrderTest {
     void throwsExceptionIfEnvelopeDoesNotMatch() {
         Envelope envelope = envelope();
         Envelope notMatchingEnvelope = copyFromOfTo(envelope);
-        ExpectMessageInExactOrder expectMessage = ExpectMessageInExactOrder.of(notMatchingEnvelope, Target.Type.FUNCTION);
+        ExpectMessageInExactOrder expectMessage = ExpectMessageInExactOrder.of(notMatchingEnvelope, Target.Type.EGRESS);
         when(tsukuyomi.getReceived()).thenReturn(List.of(envelope));
+
+        assertThatThrownBy(
+                () -> expectMessage.match(0, tsukuyomi, Set.of()))
+                .isInstanceOf(AssertionError.class);
+    }
+
+    @Test
+    void throwsExceptionIfMatchingEnvelopeIsNotRegular() {
+        Envelope envelope = envelope();
+        ExpectMessageInExactOrder expectMessage = ExpectMessageInExactOrder.of(envelope, Target.Type.FUNCTION);
+        when(tsukuyomi.getReceived()).thenReturn(List.of(envelope));
+        when(tsukuyomi.getInvocationReport()).thenReturn(Optional.of(InvocationReport.of(0, List.of())));
 
         assertThatThrownBy(
                 () -> expectMessage.match(0, tsukuyomi, Set.of()))
@@ -36,7 +50,7 @@ class ExpectMessageInExactOrderTest {
     @Test
     void returnsIndexOfMatchedEnvelope() {
         Envelope envelope = envelope();
-        ExpectMessageInExactOrder expectMessage = ExpectMessageInExactOrder.of(envelope, Target.Type.FUNCTION);
+        ExpectMessageInExactOrder expectMessage = ExpectMessageInExactOrder.of(envelope, Target.Type.EGRESS);
         when(tsukuyomi.getReceived()).thenReturn(List.of(envelope));
 
         Integer actualIndex = expectMessage.match(0, tsukuyomi, Set.of());
@@ -58,7 +72,7 @@ class ExpectMessageInExactOrderTest {
                 .to(TypeName.typeNameFromString("foo/b"), "foobaz")
                 .data(Types.stringType(), "b")
                 .build();
-        ExpectMessageInExactOrder expectMessage = ExpectMessageInExactOrder.of(targetAEnvelopeA, Target.Type.FUNCTION);
+        ExpectMessageInExactOrder expectMessage = ExpectMessageInExactOrder.of(targetAEnvelopeA, Target.Type.EGRESS);
         when(tsukuyomi.getReceived()).thenReturn(List.of(targetBEnvelopeB, targetAEnvelopeA, targetAEnvelopeB));
 
         expectMessage.match(0, tsukuyomi, Set.of());

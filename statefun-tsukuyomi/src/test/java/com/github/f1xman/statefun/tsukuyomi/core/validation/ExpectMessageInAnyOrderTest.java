@@ -1,6 +1,7 @@
 package com.github.f1xman.statefun.tsukuyomi.core.validation;
 
 import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
+import com.github.f1xman.statefun.tsukuyomi.core.capture.InvocationReport;
 import org.apache.flink.statefun.sdk.java.TypeName;
 import org.apache.flink.statefun.sdk.java.types.Types;
 import org.junit.jupiter.api.Test;
@@ -9,10 +10,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,14 +35,36 @@ class ExpectMessageInAnyOrderTest {
     }
 
     @Test
+    void throwsExceptionIfMatchingEnvelopeIsNotRegular() {
+        Envelope envelope = envelope();
+        ExpectMessageInAnyOrder expectMessage = ExpectMessageInAnyOrder.of(envelope, Target.Type.FUNCTION);
+        when(tsukuyomi.getReceived()).thenReturn(List.of(envelope));
+        when(tsukuyomi.getInvocationReport()).thenReturn(Optional.of(InvocationReport.of(0, List.of())));
+
+        assertThatThrownBy(
+                () -> expectMessage.match(0, tsukuyomi, Set.of()))
+                .isInstanceOf(AssertionError.class);
+    }
+
+    @Test
     void returnsIndexOfMatchedEnvelope() {
         Envelope envelope = envelope();
         ExpectMessageInAnyOrder expectMessage = ExpectMessageInAnyOrder.of(envelope, Target.Type.FUNCTION);
         when(tsukuyomi.getReceived()).thenReturn(List.of(envelope));
+        when(tsukuyomi.getInvocationReport()).thenReturn(Optional.of(InvocationReport.of(1, List.of(envelope))));
 
         Integer actualIndex = expectMessage.match(0, tsukuyomi, Set.of());
 
         assertThat(actualIndex).isZero();
+    }
+
+    @Test
+    void matchesEgressEnvelopesWithoutVerificationForRegularity() {
+        Envelope envelope = envelope();
+        ExpectMessageInAnyOrder expectMessage = ExpectMessageInAnyOrder.of(envelope, Target.Type.EGRESS);
+        when(tsukuyomi.getReceived()).thenReturn(List.of(envelope));
+
+        assertThatNoException().isThrownBy(() -> expectMessage.match(0, tsukuyomi, Set.of()));
     }
 
     @Test

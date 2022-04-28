@@ -1,6 +1,7 @@
 package com.github.f1xman.statefun.tsukuyomi.core.validation;
 
 import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
+import com.github.f1xman.statefun.tsukuyomi.core.capture.InvocationReport;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.jetbrains.annotations.NotNull;
@@ -11,6 +12,7 @@ import java.util.Set;
 
 import static lombok.AccessLevel.PRIVATE;
 import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 @RequiredArgsConstructor(staticName = "of")
@@ -25,11 +27,12 @@ public class ExpectMessageInAnyOrder extends AbstractExpectMessage {
         List<Envelope> received = new ArrayList<>(tsukuyomi.getReceived());
         indexBlacklist.forEach(i -> received.set(i, null));
         assertThat(received, hasItem(expected));
+        targetType.doAssert(expected, tsukuyomi);
         return received.indexOf(expected);
     }
 
     @Override
-    protected @NotNull Envelope.NodeAddress getTo() {
+    protected Envelope.NodeAddress getTo() {
         return expected.getTo();
     }
 

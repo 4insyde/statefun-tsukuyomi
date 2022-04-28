@@ -25,6 +25,7 @@ public class ExpectMessageInExactOrder extends AbstractExpectMessage {
         List<Envelope> received = new ArrayList<>(tsukuyomi.getReceived());
         Envelope envelope = getEnvelope(order, received);
         assertThat(envelope, is(expected));
+        targetType.doAssert(expected, tsukuyomi);
         return received.indexOf(expected);
     }
 

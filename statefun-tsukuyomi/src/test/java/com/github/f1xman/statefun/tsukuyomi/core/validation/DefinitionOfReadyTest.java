@@ -32,7 +32,7 @@ class DefinitionOfReadyTest {
                 List.of(envelope, envelope)
         );
         given(mockedTsukuyomiApi.isActive()).willReturn(true);
-        InvocationReport report = InvocationReport.of(2);
+        InvocationReport report = InvocationReport.of(2, List.of());
         given(mockedTsukuyomiApi.getInvocationReport()).willReturn(Optional.of(report));
 
         definitionOfReady.await();

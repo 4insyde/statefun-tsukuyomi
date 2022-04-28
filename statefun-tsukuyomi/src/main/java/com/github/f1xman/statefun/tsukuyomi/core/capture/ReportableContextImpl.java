@@ -12,8 +12,7 @@ import org.apache.flink.statefun.sdk.java.message.EgressMessageBuilder;
 import org.apache.flink.statefun.sdk.java.message.Message;
 
 import java.time.Duration;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -27,6 +26,7 @@ public class ReportableContextImpl implements ReportableContext {
 
     AtomicInteger numberOfOutgoingMessages = new AtomicInteger();
     Set<String> cancellationTokens = newSetFromMap(new ConcurrentHashMap<>());
+    List<Envelope> envelopes = Collections.synchronizedList(new ArrayList<>());
     @NonNull
     Context context;
 
@@ -34,7 +34,7 @@ public class ReportableContextImpl implements ReportableContext {
     public void report() {
         Envelope envelope = Envelope.builder()
                 .toEgress(Egresses.CAPTURED_MESSAGES)
-                .data(InvocationReport.TYPE, InvocationReport.of(getNumberOfOutgoingMessages()))
+                .data(InvocationReport.TYPE, InvocationReport.of(getNumberOfOutgoingMessages(), envelopes))
                 .build();
         EgressMessage message = EgressMessageBuilder.forEgress(Egresses.CAPTURED_MESSAGES)
                 .withCustomType(Envelope.TYPE, envelope)
@@ -54,6 +54,8 @@ public class ReportableContextImpl implements ReportableContext {
 
     @Override
     public void send(Message message) {
+        Envelope envelope = Envelope.fromMessage(self(), message);
+        envelopes.add(envelope);
         context.send(message);
         numberOfOutgoingMessages.incrementAndGet();
     }

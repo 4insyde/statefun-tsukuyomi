@@ -7,7 +7,6 @@ import org.apache.flink.statefun.sdk.java.types.Types;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
-import org.junit.jupiter.params.provider.NullSource;
 
 import java.util.Base64;
 

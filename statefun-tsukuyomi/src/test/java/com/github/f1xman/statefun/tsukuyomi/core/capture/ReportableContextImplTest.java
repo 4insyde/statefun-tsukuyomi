@@ -6,14 +6,17 @@ import org.apache.flink.statefun.sdk.java.TypeName;
 import org.apache.flink.statefun.sdk.java.message.EgressMessage;
 import org.apache.flink.statefun.sdk.java.message.EgressMessageBuilder;
 import org.apache.flink.statefun.sdk.java.message.Message;
+import org.apache.flink.statefun.sdk.java.message.MessageBuilder;
 import org.apache.flink.statefun.sdk.java.testing.SideEffects;
 import org.apache.flink.statefun.sdk.java.testing.TestContext;
+import org.apache.flink.statefun.sdk.java.types.Types;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,7 +27,9 @@ class ReportableContextImplTest {
 
     static final Address SELF = new Address(TypeName.typeNameFromString("foo/self"), "baz");
     static final Address CALLER = new Address(TypeName.typeNameFromString("foo/caller"), "baz");
+    static final Address TARGET = new Address(TypeName.typeNameFromString("foo/target"), "foobaz");
     static final String CANCELLATION_TOKEN = "CANCELLATION_TOKEN";
+    static final String VALUE = "foobarbaz";
 
     @Mock
     Message mockedMessage;
@@ -78,11 +83,14 @@ class ReportableContextImplTest {
     void sendsAMessageAndIncrementsCountOfOutgoingMessages() {
         TestContext context = TestContext.forTarget(SELF);
         ReportableContextImpl reportableContext = ReportableContextImpl.spyOn(context);
+        Message expectedMessage = MessageBuilder.forAddress(TARGET)
+                .withValue(0)
+                .build();
 
-        reportableContext.send(mockedMessage);
+        reportableContext.send(expectedMessage);
 
         assertThat(reportableContext.getNumberOfOutgoingMessages()).isEqualTo(1);
-        assertThat(context.getSentMessages()).contains(new SideEffects.SendSideEffect(mockedMessage));
+        assertThat(context.getSentMessages()).contains(new SideEffects.SendSideEffect(expectedMessage));
     }
 
     @Test
@@ -142,7 +150,7 @@ class ReportableContextImplTest {
         ReportableContextImpl reportableContext = ReportableContextImpl.spyOn(context);
         Envelope envelope = Envelope.builder()
                 .toEgress(Egresses.CAPTURED_MESSAGES)
-                .data(InvocationReport.TYPE, InvocationReport.of(0))
+                .data(InvocationReport.TYPE, InvocationReport.of(0, List.of()))
                 .build();
         EgressMessage expectedMessage = EgressMessageBuilder.forEgress(Egresses.CAPTURED_MESSAGES)
                 .withCustomType(Envelope.TYPE, envelope)
@@ -151,5 +159,34 @@ class ReportableContextImplTest {
         reportableContext.report();
 
         assertThat(context.getSentEgressMessages()).contains(new SideEffects.EgressSideEffect(expectedMessage));
+    }
+
+    @Test
+    void sendsReportWithEnvelopesIncluded() {
+        TestContext context = TestContext.forTarget(SELF);
+        ReportableContextImpl reportableContext = ReportableContextImpl.spyOn(context);
+        Envelope envelope = Envelope.builder()
+                .toEgress(Egresses.CAPTURED_MESSAGES)
+                .data(InvocationReport.TYPE, InvocationReport.of(1, List.of(envelope())))
+                .build();
+        EgressMessage expectedMessage = EgressMessageBuilder.forEgress(Egresses.CAPTURED_MESSAGES)
+                .withCustomType(Envelope.TYPE, envelope)
+                .build();
+        Message message = MessageBuilder.forAddress(TARGET)
+                .withValue(VALUE)
+                .build();
+
+        reportableContext.send(message);
+        reportableContext.report();
+
+        assertThat(context.getSentEgressMessages()).contains(new SideEffects.EgressSideEffect(expectedMessage));
+    }
+
+    private Envelope envelope() {
+        return Envelope.builder()
+                .from(SELF.type(), SELF.id())
+                .to(TARGET.type(), TARGET.id())
+                .data(Types.stringType(), VALUE)
+                .build();
     }
 }

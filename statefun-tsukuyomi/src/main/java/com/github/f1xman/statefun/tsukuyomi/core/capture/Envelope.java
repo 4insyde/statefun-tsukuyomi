@@ -5,7 +5,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.f1xman.statefun.tsukuyomi.util.SerDe;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.apache.flink.statefun.sdk.java.Address;
+import org.apache.flink.statefun.sdk.java.Context;
 import org.apache.flink.statefun.sdk.java.TypeName;
+import org.apache.flink.statefun.sdk.java.message.Message;
 import org.apache.flink.statefun.sdk.java.slice.Slices;
 import org.apache.flink.statefun.sdk.java.types.SimpleType;
 import org.apache.flink.statefun.sdk.java.types.Type;
@@ -47,6 +50,16 @@ public class Envelope implements Serializable {
 
     public static Envelope fromJson(String json) {
         return SerDe.deserialize(json, Envelope.class);
+    }
+
+    public static Envelope fromMessage(Address from, Message message) {
+        String type = message.valueTypeName().asTypeNameString();
+        String value = Base64.getEncoder().encodeToString(message.rawValue().toByteArray());
+        return Envelope.builder()
+                .from(from.type(), from.id())
+                .to(message.targetAddress().type(), message.targetAddress().id())
+                .data(Data.of(type, value))
+                .build();
     }
 
     static void resetRenderers() {

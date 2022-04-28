@@ -61,7 +61,7 @@ class DispatcherBasedTsukuyomiTest {
         DispatcherBasedTsukuyomi tsukuyomi = DispatcherBasedTsukuyomi.of(mockedClient, null, () -> true);
         Envelope envelope = Envelope.builder()
                 .toEgress(Egresses.CAPTURED_MESSAGES)
-                .data(InvocationReport.TYPE, InvocationReport.of(0))
+                .data(InvocationReport.TYPE, InvocationReport.of(0, List.of()))
                 .build();
         List<Envelope> expected = List.of(envelope);
         when(mockedClient.getReceived()).thenReturn(expected);
@@ -92,7 +92,7 @@ class DispatcherBasedTsukuyomiTest {
     @Test
     void returnsOptionalWithInvocationReportIfPresent() {
         DispatcherBasedTsukuyomi tsukuyomi = DispatcherBasedTsukuyomi.of(mockedClient, null, () -> true);
-        InvocationReport expected = InvocationReport.of(0);
+        InvocationReport expected = InvocationReport.of(0, List.of());
         Envelope envelope = Envelope.builder()
                 .toEgress(Egresses.CAPTURED_MESSAGES)
                 .data(InvocationReport.TYPE, expected)
