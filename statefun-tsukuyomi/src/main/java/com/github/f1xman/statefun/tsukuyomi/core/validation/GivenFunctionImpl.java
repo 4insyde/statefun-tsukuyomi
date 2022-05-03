@@ -3,6 +3,7 @@ package com.github.f1xman.statefun.tsukuyomi.core.validation;
 import com.github.f1xman.statefun.tsukuyomi.core.capture.FunctionDefinition;
 import com.github.f1xman.statefun.tsukuyomi.core.capture.StateSetter;
 import com.github.f1xman.statefun.tsukuyomi.core.capture.StatefunModule;
+import com.github.f1xman.statefun.tsukuyomi.core.dispatcher.TsukuyomiApi;
 import com.github.f1xman.statefun.tsukuyomi.core.validation.Target.Type;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;

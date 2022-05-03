@@ -1,6 +1,7 @@
 package com.github.f1xman.statefun.tsukuyomi.core.validation;
 
 import com.github.f1xman.statefun.tsukuyomi.core.capture.ManagedStateAccessor;
+import com.github.f1xman.statefun.tsukuyomi.core.dispatcher.TsukuyomiApi;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.apache.flink.statefun.sdk.java.ValueSpec;

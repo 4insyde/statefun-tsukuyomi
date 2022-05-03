@@ -1,4 +1,4 @@
-package com.github.f1xman.statefun.tsukuyomi.core.validation;
+package com.github.f1xman.statefun.tsukuyomi.core.dispatcher;
 
 import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
 import com.github.f1xman.statefun.tsukuyomi.core.capture.InvocationReport;

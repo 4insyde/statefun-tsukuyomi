@@ -3,7 +3,6 @@ package com.github.f1xman.statefun.tsukuyomi.core.dispatcher;
 import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
 import com.github.f1xman.statefun.tsukuyomi.core.capture.InvocationReport;
 import com.github.f1xman.statefun.tsukuyomi.core.capture.ManagedStateAccessor;
-import com.github.f1xman.statefun.tsukuyomi.core.validation.TsukuyomiApi;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 

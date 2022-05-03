@@ -4,6 +4,7 @@ import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
 import com.github.f1xman.statefun.tsukuyomi.core.capture.FunctionDefinition;
 import com.github.f1xman.statefun.tsukuyomi.core.capture.StateSetter;
 import com.github.f1xman.statefun.tsukuyomi.core.capture.StatefunModule;
+import com.github.f1xman.statefun.tsukuyomi.core.dispatcher.TsukuyomiApi;
 import org.apache.flink.statefun.sdk.java.Context;
 import org.apache.flink.statefun.sdk.java.StatefulFunction;
 import org.apache.flink.statefun.sdk.java.TypeName;
@@ -16,7 +17,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import static org.mockito.ArgumentMatchers.any;

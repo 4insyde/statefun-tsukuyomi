@@ -5,6 +5,7 @@ import com.github.f1xman.statefun.tsukuyomi.core.capture.UndertowStatefunServer;
 import com.github.f1xman.statefun.tsukuyomi.core.dispatcher.DispatcherBasedTsukuyomi;
 import com.github.f1xman.statefun.tsukuyomi.core.dispatcher.DispatcherClient;
 import com.github.f1xman.statefun.tsukuyomi.core.dispatcher.DispatcherContainer;
+import com.github.f1xman.statefun.tsukuyomi.core.dispatcher.TsukuyomiApi;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.CompletableFuture;

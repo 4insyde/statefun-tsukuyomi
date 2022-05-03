@@ -1,6 +1,7 @@
 package com.github.f1xman.statefun.tsukuyomi.core.validation;
 
 import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
+import com.github.f1xman.statefun.tsukuyomi.core.dispatcher.TsukuyomiApi;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 

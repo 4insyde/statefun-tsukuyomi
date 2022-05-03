@@ -1,6 +1,7 @@
 package com.github.f1xman.statefun.tsukuyomi.core.validation;
 
 import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
+import com.github.f1xman.statefun.tsukuyomi.core.dispatcher.TsukuyomiApi;
 import org.apache.flink.statefun.sdk.java.types.Types;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

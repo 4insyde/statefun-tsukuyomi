@@ -2,6 +2,7 @@ package com.github.f1xman.statefun.tsukuyomi.core.validation;
 
 import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
 import com.github.f1xman.statefun.tsukuyomi.core.capture.InvocationReport;
+import com.github.f1xman.statefun.tsukuyomi.core.dispatcher.TsukuyomiApi;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

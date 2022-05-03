@@ -3,7 +3,7 @@ package com.github.f1xman.statefun.tsukuyomi.core;
 import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
 import com.github.f1xman.statefun.tsukuyomi.core.capture.FunctionDefinition;
 import com.github.f1xman.statefun.tsukuyomi.core.capture.StatefunModule;
-import com.github.f1xman.statefun.tsukuyomi.core.validation.TsukuyomiApi;
+import com.github.f1xman.statefun.tsukuyomi.core.dispatcher.TsukuyomiApi;
 import com.github.f1xman.statefun.tsukuyomi.core.validation.TsukuyomiManagerImpl;
 import com.github.f1xman.statefun.tsukuyomi.testutil.IntegrationTest;
 import com.github.f1xman.statefun.tsukuyomi.testutil.ServerUtils;
@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
 import java.time.Duration;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
