@@ -11,6 +11,10 @@ import org.apache.flink.statefun.sdk.java.types.Type;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.IntStream;
+
+import static java.util.function.Predicate.not;
 
 @RequiredArgsConstructor(staticName = "of", onConstructor_ = {@JsonCreator})
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -31,6 +35,19 @@ public class InvocationReport {
 
     public boolean isRegular(Envelope envelope) {
         return envelopes.contains(envelope);
+    }
+
+    public boolean containsAt(Envelope envelope, int index) {
+        return envelopes.indexOf(envelope) == index;
+    }
+
+    public int indexOf(Envelope envelope, Set<Integer> exclude) {
+        return IntStream.range(0, envelopes.size())
+                .boxed()
+                .filter(not(exclude::contains))
+                .filter(i -> envelopes.get(i).equals(envelope))
+                .findAny()
+                .orElse(-1);
     }
 
     @RequiredArgsConstructor(staticName = "of", onConstructor_ = {@JsonCreator})
