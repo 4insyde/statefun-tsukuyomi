@@ -1,5 +1,6 @@
 package com.github.f1xman.statefun.tsukuyomi.core.capture;
 
+import com.github.f1xman.statefun.tsukuyomi.core.validation.EnvelopeMeta;
 import org.apache.flink.statefun.sdk.java.TypeName;
 import org.apache.flink.statefun.sdk.java.types.Types;
 import org.junit.jupiter.api.Test;
@@ -67,6 +68,16 @@ class InvocationReportTest {
         InvocationReport report = InvocationReport.of(0, List.of(envelope));
 
         assertThat(report.indexOf(envelope, Set.of(0))).isEqualTo(-1);
+    }
+
+    @Test
+    void returnsListOfEnvelopeMetaByGivenEnvelope() {
+        Envelope envelope = envelope();
+        InvocationReport report = InvocationReport.of(0, List.of(envelope));
+
+        List<EnvelopeMeta> metas = report.find(envelope);
+
+        assertThat(metas).containsExactly(EnvelopeMeta.of(0));
     }
 
     private Envelope envelope() {

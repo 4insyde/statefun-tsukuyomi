@@ -2,19 +2,21 @@ package com.github.f1xman.statefun.tsukuyomi.core.capture;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.github.f1xman.statefun.tsukuyomi.core.validation.EnvelopeMeta;
 import com.github.f1xman.statefun.tsukuyomi.util.SerDe;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.apache.flink.statefun.sdk.java.TypeName;
 import org.apache.flink.statefun.sdk.java.types.SimpleType;
 import org.apache.flink.statefun.sdk.java.types.Type;
+import org.javatuples.Pair;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.IntStream;
 
 import static java.util.function.Predicate.not;
+import static java.util.stream.Collectors.toUnmodifiableList;
 
 @RequiredArgsConstructor(staticName = "of", onConstructor_ = {@JsonCreator})
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -50,18 +52,11 @@ public class InvocationReport {
                 .orElse(-1);
     }
 
-    @RequiredArgsConstructor(staticName = "of", onConstructor_ = {@JsonCreator})
-    @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-    @Getter
-    @EqualsAndHashCode
-    @ToString
-    private static class DelayedEnvelope {
-
-        @JsonProperty("delay")
-        Duration delay;
-        @JsonProperty("envelope")
-        Envelope envelope;
-
+    public List<EnvelopeMeta> find(Envelope envelope) {
+        return IntStream.range(0, envelopes.size())
+                .mapToObj(i -> Pair.with(i, envelopes.get(i)))
+                .filter(p -> p.getValue1().equals(envelope))
+                .map(p -> EnvelopeMeta.of(p.getValue0()))
+                .collect(toUnmodifiableList());
     }
-
 }
