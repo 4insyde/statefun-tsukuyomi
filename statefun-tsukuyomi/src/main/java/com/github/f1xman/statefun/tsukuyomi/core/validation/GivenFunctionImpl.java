@@ -70,8 +70,8 @@ public class GivenFunctionImpl implements GivenFunction {
 
     private void matchState(ChangeMatcher[] matchers) {
         Arrays.stream(matchers)
-                .filter(StateMatcher.class::isInstance)
-                .map(StateMatcher.class::cast)
+                .filter(StateMatcherOld.class::isInstance)
+                .map(StateMatcherOld.class::cast)
                 .forEach(m -> m.match(tsukuyomi));
     }
 

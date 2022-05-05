@@ -14,10 +14,11 @@ import static java.util.stream.Collectors.toUnmodifiableSet;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor(staticName = "of")
-public class EnvelopeMatcher {
+public class EnvelopeMatcher implements Matcher {
 
     List<EnvelopeCriterion> criteria;
 
+    @Override
     public void match(TsukuyomiApi tsukuyomi) {
         InvocationReport invocationReport = tsukuyomi.getInvocationReport().orElseThrow();
         EnvelopeExplorer explorer = EnvelopeExplorerImpl.of(tsukuyomi);

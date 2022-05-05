@@ -14,7 +14,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 @RequiredArgsConstructor(staticName = "of")
 @FieldDefaults(level = PRIVATE, makeFinal = true)
-public class ExpectState<T> implements StateMatcher {
+public class ExpectState<T> implements StateMatcherOld {
 
     ValueSpec<T> spec;
     Matcher<T> matcher;
