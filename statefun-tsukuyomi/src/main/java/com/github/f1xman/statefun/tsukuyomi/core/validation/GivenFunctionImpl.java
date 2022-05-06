@@ -64,6 +64,7 @@ public class GivenFunctionImpl implements GivenFunction {
     }
 
     @Override
+    @Deprecated
     public void expect(ChangeMatcher... matchers) {
         InteractionCompletedWaiter interactionCompletedWaiter = InteractionCompletedWaiter.getFrom(tsukuyomi);
         interactionCompletedWaiter.await();
