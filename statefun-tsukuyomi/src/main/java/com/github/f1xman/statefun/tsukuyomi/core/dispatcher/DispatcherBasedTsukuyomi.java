@@ -26,6 +26,7 @@ public class DispatcherBasedTsukuyomi implements TsukuyomiApi {
     @Override
     public void send(Envelope envelope) {
         client.send(envelope);
+        InteractionCompletedWaiter.getFrom(this).await();
     }
 
     @Override

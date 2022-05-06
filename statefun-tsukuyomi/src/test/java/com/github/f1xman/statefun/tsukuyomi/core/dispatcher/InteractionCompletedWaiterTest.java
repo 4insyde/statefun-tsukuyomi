@@ -1,8 +1,7 @@
-package com.github.f1xman.statefun.tsukuyomi.core.validation;
+package com.github.f1xman.statefun.tsukuyomi.core.dispatcher;
 
 import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
 import com.github.f1xman.statefun.tsukuyomi.core.capture.InvocationReport;
-import com.github.f1xman.statefun.tsukuyomi.core.dispatcher.TsukuyomiApi;
 import org.apache.flink.statefun.sdk.java.TypeName;
 import org.apache.flink.statefun.sdk.java.types.Types;
 import org.junit.jupiter.api.Test;
@@ -19,14 +18,14 @@ import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.mockito.BDDMockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class DefinitionOfReadyTest {
+class InteractionCompletedWaiterTest {
 
     @Mock
     TsukuyomiApi mockedTsukuyomiApi;
 
     @Test
     void awaitsUntil2MessagesReceived() {
-        DefinitionOfReady definitionOfReady = DefinitionOfReady.getFrom(mockedTsukuyomiApi);
+        InteractionCompletedWaiter interactionCompletedWaiter = InteractionCompletedWaiter.getFrom(mockedTsukuyomiApi);
         Envelope envelope = envelope();
         given(mockedTsukuyomiApi.getReceived()).willReturn(
                 List.of(),
@@ -36,7 +35,7 @@ class DefinitionOfReadyTest {
         InvocationReport report = InvocationReport.of(2, List.of());
         given(mockedTsukuyomiApi.getInvocationReport()).willReturn(Optional.of(report));
 
-        definitionOfReady.await();
+        interactionCompletedWaiter.await();
 
         then(mockedTsukuyomiApi).should(times(2)).getReceived();
     }
@@ -44,7 +43,7 @@ class DefinitionOfReadyTest {
     @Test
     void stopsWaitingWhenThreadIsInterrupted() {
         assertTimeoutPreemptively(Duration.ofSeconds(3), () -> {
-            DefinitionOfReady definitionOfReady = DefinitionOfReady.getFrom(mockedTsukuyomiApi);
+            InteractionCompletedWaiter interactionCompletedWaiter = InteractionCompletedWaiter.getFrom(mockedTsukuyomiApi);
             given(mockedTsukuyomiApi.getReceived()).willReturn(List.of());
 
             Thread interruptedThread = Thread.currentThread();
@@ -57,24 +56,24 @@ class DefinitionOfReadyTest {
                 }
             });
             interrupterThread.start();
-            definitionOfReady.await();
+            interactionCompletedWaiter.await();
         });
     }
 
     @Test
     void stopsWaitingWhenTsukuyomiApiDeactivated() {
         assertTimeoutPreemptively(Duration.ofSeconds(3), () -> {
-            DefinitionOfReady definitionOfReady = DefinitionOfReady.getFrom(mockedTsukuyomiApi);
+            InteractionCompletedWaiter interactionCompletedWaiter = InteractionCompletedWaiter.getFrom(mockedTsukuyomiApi);
             given(mockedTsukuyomiApi.getReceived()).willReturn(List.of());
             given(mockedTsukuyomiApi.isActive()).willReturn(true, false);
 
-            definitionOfReady.await();
+            interactionCompletedWaiter.await();
         });
     }
     @Test
     void doesNotWaitIfInvokedAfterInterrupting() {
         assertTimeoutPreemptively(Duration.ofSeconds(3), () -> {
-            DefinitionOfReady definitionOfReady = DefinitionOfReady.getFrom(mockedTsukuyomiApi);
+            InteractionCompletedWaiter interactionCompletedWaiter = InteractionCompletedWaiter.getFrom(mockedTsukuyomiApi);
             given(mockedTsukuyomiApi.getReceived()).willReturn(List.of());
 
             Thread interruptedThread = Thread.currentThread();
@@ -87,8 +86,8 @@ class DefinitionOfReadyTest {
                 }
             });
             interrupterThread.start();
-            definitionOfReady.await();
-            definitionOfReady.await();
+            interactionCompletedWaiter.await();
+            interactionCompletedWaiter.await();
         });
     }
 

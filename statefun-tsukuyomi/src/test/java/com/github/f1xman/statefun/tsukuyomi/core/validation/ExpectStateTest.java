@@ -1,6 +1,7 @@
 package com.github.f1xman.statefun.tsukuyomi.core.validation;
 
 import com.github.f1xman.statefun.tsukuyomi.core.capture.ManagedStateAccessor;
+import com.github.f1xman.statefun.tsukuyomi.core.dispatcher.InteractionCompletedWaiter;
 import com.github.f1xman.statefun.tsukuyomi.core.dispatcher.TsukuyomiApi;
 import org.apache.flink.statefun.sdk.java.ValueSpec;
 import org.junit.jupiter.api.Test;
@@ -24,7 +25,7 @@ class ExpectStateTest {
     @Mock
     ManagedStateAccessor mockedStateAccessor;
     @Mock
-    DefinitionOfReady mockedDefinitionOfReady;
+    InteractionCompletedWaiter mockedInteractionCompletedWaiter;
 
     @Test
     void throwsAssertionErrorIfStateDoesNotMatch() {

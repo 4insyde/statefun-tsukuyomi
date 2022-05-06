@@ -8,5 +8,7 @@ public interface GivenFunction {
 
     void expect(ChangeMatcher... matchers);
 
+    void expect(Criterion... criteria);
+
     void stop();
 }

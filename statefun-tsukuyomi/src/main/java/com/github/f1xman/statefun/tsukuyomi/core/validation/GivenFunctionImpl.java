@@ -1,8 +1,10 @@
 package com.github.f1xman.statefun.tsukuyomi.core.validation;
 
+import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
 import com.github.f1xman.statefun.tsukuyomi.core.capture.FunctionDefinition;
 import com.github.f1xman.statefun.tsukuyomi.core.capture.StateSetter;
 import com.github.f1xman.statefun.tsukuyomi.core.capture.StatefunModule;
+import com.github.f1xman.statefun.tsukuyomi.core.dispatcher.InteractionCompletedWaiter;
 import com.github.f1xman.statefun.tsukuyomi.core.dispatcher.TsukuyomiApi;
 import com.github.f1xman.statefun.tsukuyomi.core.validation.Target.Type;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +15,7 @@ import lombok.val;
 import org.apache.flink.statefun.sdk.java.TypeName;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import static com.github.f1xman.statefun.tsukuyomi.core.validation.Target.Type.EGRESS;
 import static com.github.f1xman.statefun.tsukuyomi.core.validation.Target.Type.FUNCTION;
@@ -62,10 +65,22 @@ public class GivenFunctionImpl implements GivenFunction {
 
     @Override
     public void expect(ChangeMatcher... matchers) {
-        DefinitionOfReady definitionOfReady = DefinitionOfReady.getFrom(tsukuyomi);
-        definitionOfReady.await();
+        InteractionCompletedWaiter interactionCompletedWaiter = InteractionCompletedWaiter.getFrom(tsukuyomi);
+        interactionCompletedWaiter.await();
         matchState(matchers);
         matchMessages(matchers);
+    }
+
+    @Override
+    public void expect(Criterion... criteria) {
+        Stream<EnvelopeCriterion> envelopeCriteria = Arrays.stream(criteria)
+                .filter(EnvelopeCriterion.class::isInstance)
+                .map(EnvelopeCriterion.class::cast);
+        Map<Envelope, EnvelopeMatcher> envelopeMatchers = envelopeCriteria.collect(
+                groupingBy(EnvelopeCriterion::getEnvelope,
+                        collectingAndThen(toList(),
+                                EnvelopeMatcher::of)));
+        envelopeMatchers.values().forEach(m -> m.match(tsukuyomi));
     }
 
     private void matchState(ChangeMatcher[] matchers) {

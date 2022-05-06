@@ -27,17 +27,25 @@ class DispatcherBasedTsukuyomiTest {
     ManagedStateAccessor mockedStateAccessor;
 
     @Test
-    void sendsEnvelope() {
+    void sendsEnvelopeAndWaitsUntilMessageReceived() {
         DispatcherBasedTsukuyomi tsukuyomi = DispatcherBasedTsukuyomi.of(mockedClient, null, () -> true);
         Envelope envelope = Envelope.builder()
                 .from(TypeName.typeNameFromString("foo/from"), "from")
                 .to(TypeName.typeNameFromString("foo/to"), "to")
                 .data(Types.stringType(), "foobar")
                 .build();
+        InvocationReport invocationReport = InvocationReport.of(1, List.of(envelope));
+        Envelope reportEnvelope = Envelope.builder()
+                .from(TypeName.typeNameFromString("foo/from"), "from")
+                .to(TypeName.typeNameFromString("foo/to"), "to")
+                .data(InvocationReport.TYPE, invocationReport)
+                .build();
+        given(mockedClient.getReceived()).willReturn(List.of(reportEnvelope), List.of(reportEnvelope, envelope));
 
         tsukuyomi.send(envelope);
 
         then(mockedClient).should().send(envelope);
+        then(mockedClient).should(times(2)).getReceived();
     }
 
     @Test

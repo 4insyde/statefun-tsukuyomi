@@ -1,9 +1,6 @@
 package com.github.f1xman.statefun.tsukuyomi.core.validation;
 
-import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
-import com.github.f1xman.statefun.tsukuyomi.core.capture.FunctionDefinition;
-import com.github.f1xman.statefun.tsukuyomi.core.capture.StateSetter;
-import com.github.f1xman.statefun.tsukuyomi.core.capture.StatefunModule;
+import com.github.f1xman.statefun.tsukuyomi.core.capture.*;
 import com.github.f1xman.statefun.tsukuyomi.core.dispatcher.TsukuyomiApi;
 import org.apache.flink.statefun.sdk.java.Context;
 import org.apache.flink.statefun.sdk.java.StatefulFunction;
@@ -17,8 +14,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -123,7 +122,7 @@ class GivenFunctionImplTest {
         Envelope envelope = envelope();
         given(mockedTsukuyomiApi.getReceived()).willReturn(List.of(envelope));
 
-        Assertions.assertThatThrownBy(() -> function.expect(
+        assertThatThrownBy(() -> function.expect(
                 ExpectMessageInAnyOrder.of(envelope, Target.Type.FUNCTION),
                 ExpectMessageInAnyOrder.of(envelope, Target.Type.FUNCTION)
         ));
@@ -143,10 +142,40 @@ class GivenFunctionImplTest {
         then(mockedTsukuyomiManager).should().stop();
     }
 
+    @Test
+    void validatesEnvelopeCriterionAndThrowsExceptionWhileValidatingTheSecondEnvelope() {
+        Envelope envelope0 = envelope();
+        Envelope envelope1 = envelope1();
+        GivenFunctionImpl givenFunction = GivenFunctionImpl.of(
+                TypedFunctionImpl.of(FooBar.TYPE_NAME, new FooBar()),
+                new StateSetter[]{},
+                mockedTsukuyomiManager
+        );
+        givenFunction.setTsukuyomi(mockedTsukuyomiApi);
+        given(mockedTsukuyomiApi.getInvocationReport())
+                .willReturn(Optional.of(InvocationReport.of(0, List.of(envelope0))));
+        given(mockedTsukuyomiApi.getReceived()).willReturn(List.of(envelope0));
+
+
+        assertThatThrownBy(() -> givenFunction.expect(
+                EnvelopeCriterion.unordered(envelope0),
+                EnvelopeCriterion.unordered(envelope1)
+        ))
+                .isInstanceOf(AssertionError.class)
+                .hasMessageContaining("barbarbar");
+    }
+
     private Envelope envelope() {
         return Envelope.builder()
                 .to(FooBar.TYPE_NAME, ID)
                 .data(Types.stringType(), "foobarbaz")
+                .build();
+    }
+
+    private Envelope envelope1() {
+        return Envelope.builder()
+                .to(FooBar.TYPE_NAME, ID)
+                .data(Types.stringType(), "barbarbar")
                 .build();
     }
 
