@@ -7,11 +7,9 @@ import com.github.f1xman.statefun.tsukuyomi.core.capture.StatefunModule;
 import com.github.f1xman.statefun.tsukuyomi.core.dispatcher.InteractionCompletedWaiter;
 import com.github.f1xman.statefun.tsukuyomi.core.dispatcher.TsukuyomiApi;
 import com.github.f1xman.statefun.tsukuyomi.core.validation.Target.Type;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
-import lombok.val;
 import org.apache.flink.statefun.sdk.java.TypeName;
 
 import java.util.*;
@@ -23,6 +21,8 @@ import static java.util.stream.Collectors.*;
 import static lombok.AccessLevel.PRIVATE;
 
 @RequiredArgsConstructor(staticName = "of")
+@AllArgsConstructor(access = PRIVATE)
+@Builder
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 public class GivenFunctionImpl implements GivenFunction {
 

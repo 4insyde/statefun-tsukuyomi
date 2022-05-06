@@ -7,17 +7,18 @@ import org.apache.flink.statefun.sdk.java.StatefulFunction;
 import org.apache.flink.statefun.sdk.java.TypeName;
 import org.apache.flink.statefun.sdk.java.message.Message;
 import org.apache.flink.statefun.sdk.java.types.Types;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -29,6 +30,8 @@ class GivenFunctionImplTest {
     static final TypeName COLLABORATOR = TypeName.typeNameFromString("foo/collaborator");
     static final TypeName EGRESS = TypeName.typeNameFromString("foo/egress");
     static final String ID = "foobar";
+    public static final int INCORRECT_ORDER = Integer.MAX_VALUE;
+    public static final int CORRECT_ORDER = 0;
 
     @Mock
     TsukuyomiManager mockedTsukuyomiManager;
@@ -44,6 +47,7 @@ class GivenFunctionImplTest {
     MessageMatcher mockedChangeMatcherB;
     @Mock
     MessageMatcher mockedChangeMatcherC;
+    private int order;
 
     @Test
     void startsTsukuyomi() {
@@ -143,26 +147,55 @@ class GivenFunctionImplTest {
     }
 
     @Test
-    void validatesEnvelopeCriterionAndThrowsExceptionWhileValidatingTheSecondEnvelope() {
-        Envelope envelope0 = envelope();
-        Envelope envelope1 = envelope1();
-        GivenFunctionImpl givenFunction = GivenFunctionImpl.of(
-                TypedFunctionImpl.of(FooBar.TYPE_NAME, new FooBar()),
-                new StateSetter[]{},
-                mockedTsukuyomiManager
-        );
-        givenFunction.setTsukuyomi(mockedTsukuyomiApi);
-        given(mockedTsukuyomiApi.getInvocationReport())
-                .willReturn(Optional.of(InvocationReport.of(0, List.of(envelope0))));
-        given(mockedTsukuyomiApi.getReceived()).willReturn(List.of(envelope0));
+    void throwsAssertionErrorIfEnvelopeHasIncorrectOrder() {
+        GivenFunctionImpl givenFunction = GivenFunctionImpl.builder()
+                .typedFunction(TypedFunctionImpl.of(FooBar.TYPE_NAME, new FooBar()))
+                .manager(mockedTsukuyomiManager)
+                .tsukuyomi(mockedTsukuyomiApi)
+                .build();
+        Envelope envelope = envelope();
+        givenEnvelopesReceived(envelope);
 
+        assertThatThrownBy(
+                () -> givenFunction.expect(EnvelopeCriterion.ordered(INCORRECT_ORDER, envelope)))
+                .isInstanceOf(AssertionError.class);
+    }
+
+    @Test
+    void throwsNothingIfEnvelopeHasCorrectOrder() {
+        GivenFunctionImpl givenFunction = GivenFunctionImpl.builder()
+                .typedFunction(TypedFunctionImpl.of(FooBar.TYPE_NAME, new FooBar()))
+                .manager(mockedTsukuyomiManager)
+                .tsukuyomi(mockedTsukuyomiApi)
+                .build();
+        Envelope envelope = envelope();
+        givenEnvelopesReceived(envelope);
+
+        assertThatNoException()
+                .isThrownBy(() -> givenFunction.expect(EnvelopeCriterion.ordered(CORRECT_ORDER, envelope)));
+    }
+
+    @Test
+    void throwsAssertionErrorIfFewCriteriaRelatesToTheSameEnvelopeAndTheLastOneIsInvalid() {
+        GivenFunctionImpl givenFunction = GivenFunctionImpl.builder()
+                .typedFunction(TypedFunctionImpl.of(FooBar.TYPE_NAME, new FooBar()))
+                .manager(mockedTsukuyomiManager)
+                .tsukuyomi(mockedTsukuyomiApi)
+                .build();
+        Envelope envelope = envelope();
+        givenEnvelopesReceived(envelope);
 
         assertThatThrownBy(() -> givenFunction.expect(
-                EnvelopeCriterion.unordered(envelope0),
-                EnvelopeCriterion.unordered(envelope1)
-        ))
-                .isInstanceOf(AssertionError.class)
-                .hasMessageContaining("barbarbar");
+                EnvelopeCriterion.ordered(CORRECT_ORDER, envelope),
+                EnvelopeCriterion.unordered(envelope)
+        )).isInstanceOf(AssertionError.class);
+    }
+
+    private void givenEnvelopesReceived(Envelope... envelopes) {
+        List<Envelope> envelopesList = Arrays.asList(envelopes);
+        InvocationReport report = InvocationReport.of(envelopes.length, envelopesList);
+        given(mockedTsukuyomiApi.getInvocationReport()).willReturn(Optional.of(report));
+        given(mockedTsukuyomiApi.getReceived()).willReturn(envelopesList);
     }
 
     private Envelope envelope() {
