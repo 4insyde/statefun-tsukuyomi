@@ -28,13 +28,12 @@ class ReportableContextImplTest {
     static final Address SELF = new Address(TypeName.typeNameFromString("foo/self"), "baz");
     static final Address CALLER = new Address(TypeName.typeNameFromString("foo/caller"), "baz");
     static final Address TARGET = new Address(TypeName.typeNameFromString("foo/target"), "foobaz");
+    static final TypeName EGRESS = TypeName.typeNameFromString("foo/egress");
     static final String CANCELLATION_TOKEN = "CANCELLATION_TOKEN";
     static final String VALUE = "foobarbaz";
 
     @Mock
     Message mockedMessage;
-    @Mock
-    EgressMessage mockedEgressMessage;
 
     @Test
     void returnsSelfFromContext() {
@@ -137,11 +136,14 @@ class ReportableContextImplTest {
     void sendsAnEgressMessageAndIncrementsCountOfOutgoingMessages() {
         TestContext context = TestContext.forTarget(SELF);
         ReportableContextImpl reportableContext = ReportableContextImpl.spyOn(context);
+        EgressMessage egressMessage = EgressMessageBuilder.forEgress(EGRESS)
+                .withValue(VALUE)
+                .build();
 
-        reportableContext.send(mockedEgressMessage);
+        reportableContext.send(egressMessage);
 
         assertThat(reportableContext.getNumberOfOutgoingMessages()).isEqualTo(1);
-        assertThat(context.getSentEgressMessages()).contains(new SideEffects.EgressSideEffect(mockedEgressMessage));
+        assertThat(context.getSentEgressMessages()).contains(new SideEffects.EgressSideEffect(egressMessage));
     }
 
     @Test
@@ -167,16 +169,20 @@ class ReportableContextImplTest {
         ReportableContextImpl reportableContext = ReportableContextImpl.spyOn(context);
         Envelope envelope = Envelope.builder()
                 .toEgress(Egresses.CAPTURED_MESSAGES)
-                .data(InvocationReport.TYPE, InvocationReport.of(1, List.of(envelope())))
+                .data(InvocationReport.TYPE, InvocationReport.of(2, List.of(envelope(), egressEnvelope())))
                 .build();
         EgressMessage expectedMessage = EgressMessageBuilder.forEgress(Egresses.CAPTURED_MESSAGES)
                 .withCustomType(Envelope.TYPE, envelope)
                 .build();
+
         Message message = MessageBuilder.forAddress(TARGET)
                 .withValue(VALUE)
                 .build();
-
         reportableContext.send(message);
+        EgressMessage egressMessage = EgressMessageBuilder.forEgress(EGRESS)
+                .withValue(VALUE)
+                .build();
+        reportableContext.send(egressMessage);
         reportableContext.report();
 
         assertThat(context.getSentEgressMessages()).contains(new SideEffects.EgressSideEffect(expectedMessage));
@@ -186,6 +192,13 @@ class ReportableContextImplTest {
         return Envelope.builder()
                 .from(SELF.type(), SELF.id())
                 .to(TARGET.type(), TARGET.id())
+                .data(Types.stringType(), VALUE)
+                .build();
+    }
+
+    private Envelope egressEnvelope() {
+        return Envelope.builder()
+                .toEgress(EGRESS)
                 .data(Types.stringType(), VALUE)
                 .build();
     }

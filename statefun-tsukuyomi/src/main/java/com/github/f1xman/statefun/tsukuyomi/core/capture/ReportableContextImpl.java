@@ -61,6 +61,14 @@ public class ReportableContextImpl implements ReportableContext {
     }
 
     @Override
+    public void send(EgressMessage message) {
+        Envelope envelope = Envelope.fromMessage(self(), message);
+        envelopes.add(envelope);
+        context.send(message);
+        numberOfOutgoingMessages.incrementAndGet();
+    }
+
+    @Override
     public void sendAfter(Duration duration, Message message) {
         context.sendAfter(duration, message);
         numberOfOutgoingMessages.incrementAndGet();
@@ -76,12 +84,6 @@ public class ReportableContextImpl implements ReportableContext {
     public void cancelDelayedMessage(String cancellationToken) {
         context.cancelDelayedMessage(cancellationToken);
         cancellationTokens.remove(cancellationToken);
-    }
-
-    @Override
-    public void send(EgressMessage message) {
-        context.send(message);
-        numberOfOutgoingMessages.incrementAndGet();
     }
 
     @Override

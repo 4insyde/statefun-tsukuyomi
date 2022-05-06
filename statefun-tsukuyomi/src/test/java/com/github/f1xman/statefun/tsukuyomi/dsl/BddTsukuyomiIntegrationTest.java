@@ -17,7 +17,7 @@ import java.util.concurrent.CompletableFuture;
 import static com.github.f1xman.statefun.tsukuyomi.core.capture.StateValue.empty;
 import static com.github.f1xman.statefun.tsukuyomi.core.capture.StateValue.havingValue;
 import static com.github.f1xman.statefun.tsukuyomi.dsl.BddTsukuyomi.*;
-import static com.github.f1xman.statefun.tsukuyomi.dsl.Expectations.*;
+import static com.github.f1xman.statefun.tsukuyomi.dsl.Criteria.*;
 import static org.hamcrest.Matchers.is;
 
 @IntegrationTest
@@ -52,8 +52,8 @@ class BddTsukuyomiIntegrationTest {
         ).then(
                 // Then expect it sends the following messages
                 expectMessageInExactOrder(expectedToFunction),
-                expectEgressMessageInExactOrder(expectedToEgress),
                 expectMessageInExactOrder(expectedToSelf),
+                expectEgressMessageInExactOrder(expectedToEgress),
                 // and has the following state value after invocation
                 expectState(Testee.FOO, is("foo"))
         );

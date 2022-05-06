@@ -101,19 +101,19 @@ class BddTsukuyomiTest {
     void throwsMissingExpectationsExceptionIfNothingPassed() {
         assertThatThrownBy(() -> when(given(function(Testee.TYPE, new Testee())), receives(incomingEnvelope())).then())
                 .isInstanceOf(MissingExpectationsException.class)
-                .hasMessage("Nothing to verify. Define your expectations using Expectations.*() in a then(..) block");
+                .hasMessage("Nothing to verify. Define your expectations using Criteria.*() in a then(..) block");
     }
 
     @Test
     void throwsNullExpectationsExceptionIfNullPassed() {
         assertThatThrownBy(() -> when(given(function(Testee.TYPE, new Testee())), receives(incomingEnvelope())).then(null))
                 .isInstanceOf(NullExpectationsException.class)
-                .hasMessage("Nothing to verify. Define your expectations using Expectations.*() in a then(..) block");
+                .hasMessage("Nothing to verify. Define your expectations using Criteria.*() in a then(..) block");
     }
 
     @Test
     void throwsNullExpectationExceptionIfNullPassed() {
-        assertThatThrownBy(() -> when(given(function(Testee.TYPE, new Testee())), receives(incomingEnvelope())).then(new ChangeMatcher[]{null}))
+        assertThatThrownBy(() -> when(given(function(Testee.TYPE, new Testee())), receives(incomingEnvelope())).thenOld(new ChangeMatcher[]{null}))
                 .isInstanceOf(NullExpectationException.class)
                 .hasMessage("At least one expectation is null. Define your expectations using Expectations.*() in a then(..) block");
     }

@@ -6,8 +6,8 @@ import com.github.f1xman.statefun.tsukuyomi.util.SerDe;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.apache.flink.statefun.sdk.java.Address;
-import org.apache.flink.statefun.sdk.java.Context;
 import org.apache.flink.statefun.sdk.java.TypeName;
+import org.apache.flink.statefun.sdk.java.message.EgressMessage;
 import org.apache.flink.statefun.sdk.java.message.Message;
 import org.apache.flink.statefun.sdk.java.slice.Slices;
 import org.apache.flink.statefun.sdk.java.types.SimpleType;
@@ -58,6 +58,15 @@ public class Envelope implements Serializable {
         return Envelope.builder()
                 .from(from.type(), from.id())
                 .to(message.targetAddress().type(), message.targetAddress().id())
+                .data(Data.of(type, value))
+                .build();
+    }
+
+    public static Envelope fromMessage(Address from, EgressMessage message) {
+        String type = message.egressMessageValueType().asTypeNameString();
+        String value = Base64.getEncoder().encodeToString(message.egressMessageValueBytes().toByteArray());
+        return Envelope.builder()
+                .toEgress(message.targetEgressId())
                 .data(Data.of(type, value))
                 .build();
     }

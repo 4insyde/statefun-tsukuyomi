@@ -14,6 +14,7 @@ import org.apache.flink.statefun.sdk.java.ValueSpec;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.stream.IntStream;
 
 import static lombok.AccessLevel.PRIVATE;
 
@@ -83,7 +84,8 @@ public class BddTsukuyomi {
         GivenFunction function;
         Interactor interactor;
 
-        void then(ChangeMatcher... matchers) {
+        @Deprecated
+        void thenOld(ChangeMatcher... matchers) {
             if (matchers == null) {
                 throw new NullExpectationsException(
                         "Nothing to verify. Define your expectations using Expectations.*() in a then(..) block");
@@ -100,6 +102,28 @@ public class BddTsukuyomi {
             }
             ValidationRunnerImpl runner = ValidationRunnerImpl.of(function, interactor);
             runner.validate(matchers);
+        }
+
+        void then(CriterionFactory... criterionFactories) {
+            if (criterionFactories == null) {
+                throw new NullExpectationsException(
+                        "Nothing to verify. Define your expectations using Criteria.*() in a then(..) block");
+            }
+            if (criterionFactories.length == 0) {
+                throw new MissingExpectationsException(
+                        "Nothing to verify. Define your expectations using Criteria.*() in a then(..) block");
+            }
+            boolean hasNullMatcher = Arrays.stream(criterionFactories)
+                    .anyMatch(Objects::isNull);
+            if (hasNullMatcher) {
+                throw new NullExpectationException(
+                        "At least one expectation is null. Define your expectations using Criteria.*() in a then(..) block");
+            }
+            ValidationRunnerImpl runner = ValidationRunnerImpl.of(function, interactor);
+            Criterion[] criteria = IntStream.range(0, criterionFactories.length)
+                    .mapToObj(i -> criterionFactories[i].create(i))
+                    .toArray(Criterion[]::new);
+            runner.validate(criteria);
         }
 
     }
