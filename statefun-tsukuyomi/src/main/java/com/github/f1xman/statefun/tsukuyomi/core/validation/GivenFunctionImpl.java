@@ -13,6 +13,7 @@ import lombok.experimental.NonFinal;
 import org.apache.flink.statefun.sdk.java.TypeName;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.github.f1xman.statefun.tsukuyomi.core.validation.Target.Type.EGRESS;
@@ -74,6 +75,21 @@ public class GivenFunctionImpl implements GivenFunction {
 
     @Override
     public void expect(Criterion... criteria) {
+        validateEnvelopes(criteria);
+        validateState(criteria);
+    }
+
+    private void validateState(Criterion[] criteria) {
+        Stream<StateCriterion> stateCriteria = Arrays.stream(criteria)
+                .filter(StateCriterion.class::isInstance)
+                .map(StateCriterion.class::cast);
+        StateMatcher stateMatcher = stateCriteria.collect(
+                collectingAndThen(toUnmodifiableList(),
+                        StateMatcher::of));
+        stateMatcher.match(tsukuyomi);
+    }
+
+    private void validateEnvelopes(Criterion[] criteria) {
         Stream<EnvelopeCriterion> envelopeCriteria = Arrays.stream(criteria)
                 .filter(EnvelopeCriterion.class::isInstance)
                 .map(EnvelopeCriterion.class::cast);

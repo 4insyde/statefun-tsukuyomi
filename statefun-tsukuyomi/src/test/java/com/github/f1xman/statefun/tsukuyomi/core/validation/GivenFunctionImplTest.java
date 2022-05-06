@@ -5,8 +5,10 @@ import com.github.f1xman.statefun.tsukuyomi.core.dispatcher.TsukuyomiApi;
 import org.apache.flink.statefun.sdk.java.Context;
 import org.apache.flink.statefun.sdk.java.StatefulFunction;
 import org.apache.flink.statefun.sdk.java.TypeName;
+import org.apache.flink.statefun.sdk.java.ValueSpec;
 import org.apache.flink.statefun.sdk.java.message.Message;
 import org.apache.flink.statefun.sdk.java.types.Types;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -19,6 +21,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -32,6 +35,9 @@ class GivenFunctionImplTest {
     static final String ID = "foobar";
     public static final int INCORRECT_ORDER = Integer.MAX_VALUE;
     public static final int CORRECT_ORDER = 0;
+    public static final ValueSpec<String> FOO_VALUE_SPEC = ValueSpec.named("foo").withUtf8StringType();
+    public static final String FOO = "foo";
+    public static final String BAR = "bar";
 
     @Mock
     TsukuyomiManager mockedTsukuyomiManager;
@@ -47,7 +53,8 @@ class GivenFunctionImplTest {
     MessageMatcher mockedChangeMatcherB;
     @Mock
     MessageMatcher mockedChangeMatcherC;
-    private int order;
+    @Mock
+    ManagedStateAccessor mockedStateAccessor;
 
     @Test
     void startsTsukuyomi() {
@@ -189,6 +196,20 @@ class GivenFunctionImplTest {
                 EnvelopeCriterion.ordered(CORRECT_ORDER, envelope),
                 EnvelopeCriterion.unordered(envelope)
         )).isInstanceOf(AssertionError.class);
+    }
+
+    @Test
+    void throwsAssertionErrorIfExpectedStateDoesNotMatch() {
+        GivenFunctionImpl givenFunction = GivenFunctionImpl.builder()
+                .typedFunction(TypedFunctionImpl.of(FooBar.TYPE_NAME, new FooBar()))
+                .manager(mockedTsukuyomiManager)
+                .tsukuyomi(mockedTsukuyomiApi)
+                .build();
+        given(mockedTsukuyomiApi.getStateAccessor()).willReturn(mockedStateAccessor);
+        given(mockedStateAccessor.getStateValue(FOO_VALUE_SPEC)).willReturn(Optional.of(FOO));
+
+        assertThatThrownBy(() -> givenFunction.expect(StateCriterion.of(FOO_VALUE_SPEC, is(BAR))))
+                .isInstanceOf(AssertionError.class);
     }
 
     private void givenEnvelopesReceived(Envelope... envelopes) {
