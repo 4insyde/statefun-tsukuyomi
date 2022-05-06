@@ -35,17 +35,6 @@ public class GivenFunctionImpl implements GivenFunction {
     TsukuyomiApi tsukuyomi;
 
     @Override
-    @Deprecated
-    public void start(ChangeMatcher[] matchers) {
-        Set<Target> targets = Arrays.stream(matchers)
-                .filter(MessageMatcher.class::isInstance)
-                .map(MessageMatcher.class::cast)
-                .map(MessageMatcher::getTarget)
-                .collect(toSet());
-        doStart(targets);
-    }
-
-    @Override
     public void start(Criterion... criteria) {
         Set<Target> targets = Arrays.stream(criteria)
                 .filter(EnvelopeCriterion.class::isInstance)
@@ -80,15 +69,6 @@ public class GivenFunctionImpl implements GivenFunction {
     }
 
     @Override
-    @Deprecated
-    public void expect(ChangeMatcher... matchers) {
-        InteractionCompletedWaiter interactionCompletedWaiter = InteractionCompletedWaiter.getFrom(tsukuyomi);
-        interactionCompletedWaiter.await();
-        matchState(matchers);
-        matchMessages(matchers);
-    }
-
-    @Override
     public void expect(Criterion... criteria) {
         validateEnvelopes(criteria);
         validateState(criteria);
@@ -113,30 +93,6 @@ public class GivenFunctionImpl implements GivenFunction {
                         collectingAndThen(toList(),
                                 EnvelopeMatcher::of)));
         envelopeMatchers.values().forEach(m -> m.match(tsukuyomi));
-    }
-
-    private void matchState(ChangeMatcher[] matchers) {
-        Arrays.stream(matchers)
-                .filter(StateMatcherOld.class::isInstance)
-                .map(StateMatcherOld.class::cast)
-                .forEach(m -> m.match(tsukuyomi));
-    }
-
-    private void matchMessages(ChangeMatcher[] matchers) {
-        Map<Target, List<MessageMatcher>> matchersByTarget = Arrays.stream(matchers)
-                .filter(MessageMatcher.class::isInstance)
-                .map(MessageMatcher.class::cast)
-                .collect(
-                        groupingBy(
-                                MessageMatcher::getTarget));
-        val indexBlacklist = new HashSet<Integer>();
-        for (List<MessageMatcher> sameTargetMatchers : matchersByTarget.values()) {
-            for (int order = 0; order < sameTargetMatchers.size(); order++) {
-                MessageMatcher orderedMatcher = sameTargetMatchers.get(order);
-                Integer matchedIndex = orderedMatcher.match(order, tsukuyomi, indexBlacklist);
-                indexBlacklist.add(matchedIndex);
-            }
-        }
     }
 
     @Override

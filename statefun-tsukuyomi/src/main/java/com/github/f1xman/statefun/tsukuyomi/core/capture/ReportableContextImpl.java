@@ -62,7 +62,7 @@ public class ReportableContextImpl implements ReportableContext {
 
     @Override
     public void send(EgressMessage message) {
-        Envelope envelope = Envelope.fromMessage(self(), message);
+        Envelope envelope = Envelope.fromMessage(message);
         envelopes.add(envelope);
         context.send(message);
         numberOfOutgoingMessages.incrementAndGet();

@@ -2,7 +2,6 @@ package com.github.f1xman.statefun.tsukuyomi.dsl;
 
 import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
 import com.github.f1xman.statefun.tsukuyomi.core.capture.StateSetter;
-import com.github.f1xman.statefun.tsukuyomi.core.validation.ChangeMatcher;
 import com.github.f1xman.statefun.tsukuyomi.core.validation.TypedFunction;
 import org.apache.flink.statefun.sdk.java.Context;
 import org.apache.flink.statefun.sdk.java.StatefulFunction;
@@ -109,13 +108,6 @@ class BddTsukuyomiTest {
         assertThatThrownBy(() -> when(given(function(Testee.TYPE, new Testee())), receives(incomingEnvelope())).then(null))
                 .isInstanceOf(NullExpectationsException.class)
                 .hasMessage("Nothing to verify. Define your expectations using Criteria.*() in a then(..) block");
-    }
-
-    @Test
-    void throwsNullExpectationExceptionIfNullPassed() {
-        assertThatThrownBy(() -> when(given(function(Testee.TYPE, new Testee())), receives(incomingEnvelope())).thenOld(new ChangeMatcher[]{null}))
-                .isInstanceOf(NullExpectationException.class)
-                .hasMessage("At least one expectation is null. Define your expectations using Expectations.*() in a then(..) block");
     }
 
     private Envelope outgoingEnvelopeToEgress() {

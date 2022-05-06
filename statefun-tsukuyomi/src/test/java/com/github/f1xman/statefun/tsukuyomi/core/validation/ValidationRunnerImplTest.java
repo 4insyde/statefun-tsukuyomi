@@ -16,29 +16,27 @@ class ValidationRunnerImplTest {
     @Mock
     Interactor mockedInteractor;
     @Mock
-    ChangeMatcher mockedChangeMatcher;
+    Criterion mockedCriterion;
 
     @Test
     void startsFunctionThenInteractsThenExpectsThenStops() {
         ValidationRunnerImpl then = ValidationRunnerImpl.of(mockedGivenFunction, mockedInteractor);
 
-        then.validate(mockedChangeMatcher);
+        then.validate(mockedCriterion);
 
-        then(mockedGivenFunction).should().start(new ChangeMatcher[]{mockedChangeMatcher});
+        then(mockedGivenFunction).should().start(mockedCriterion);
         then(mockedGivenFunction).should().interact(mockedInteractor);
-        then(mockedGivenFunction).should().expect(mockedChangeMatcher);
+        then(mockedGivenFunction).should().expect(mockedCriterion);
         then(mockedGivenFunction).should().stop();
     }
 
     @Test
     void shutsDownIfExceptionOccurredDuringInteraction() {
         ValidationRunnerImpl then = ValidationRunnerImpl.of(mockedGivenFunction, mockedInteractor);
-        willThrow(RuntimeException.class).given(mockedGivenFunction).start(
-                new ChangeMatcher[]{mockedChangeMatcher}
-        );
+        willThrow(RuntimeException.class).given(mockedGivenFunction).start(mockedCriterion);
 
         try {
-            then.validate(mockedChangeMatcher);
+            then.validate(mockedCriterion);
         } catch (Exception ignore) {
             // noop
         }

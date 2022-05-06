@@ -84,26 +84,6 @@ public class BddTsukuyomi {
         GivenFunction function;
         Interactor interactor;
 
-        @Deprecated
-        void thenOld(ChangeMatcher... matchers) {
-            if (matchers == null) {
-                throw new NullExpectationsException(
-                        "Nothing to verify. Define your expectations using Expectations.*() in a then(..) block");
-            }
-            if (matchers.length == 0) {
-                throw new MissingExpectationsException(
-                        "Nothing to verify. Define your expectations using Expectations.*() in a then(..) block");
-            }
-            boolean hasNullMatcher = Arrays.stream(matchers)
-                    .anyMatch(Objects::isNull);
-            if (hasNullMatcher) {
-                throw new NullExpectationException(
-                        "At least one expectation is null. Define your expectations using Expectations.*() in a then(..) block");
-            }
-            ValidationRunnerImpl runner = ValidationRunnerImpl.of(function, interactor);
-            runner.validate(matchers);
-        }
-
         void then(CriterionFactory... criterionFactories) {
             if (criterionFactories == null) {
                 throw new NullExpectationsException(

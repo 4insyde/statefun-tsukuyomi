@@ -14,18 +14,6 @@ class ValidationRunnerImpl implements ValidationRunner {
     Interactor interactor;
 
     @Override
-    @Deprecated
-    public void validate(ChangeMatcher... matchers) {
-        try {
-            givenFunction.start(matchers);
-            givenFunction.interact(interactor);
-            givenFunction.expect(matchers);
-        } finally {
-            givenFunction.stop();
-        }
-    }
-
-    @Override
     public void validate(Criterion... criteria) {
         try {
             givenFunction.start(criteria);

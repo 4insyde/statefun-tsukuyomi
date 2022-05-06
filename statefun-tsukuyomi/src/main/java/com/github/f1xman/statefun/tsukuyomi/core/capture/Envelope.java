@@ -62,7 +62,7 @@ public class Envelope implements Serializable {
                 .build();
     }
 
-    public static Envelope fromMessage(Address from, EgressMessage message) {
+    public static Envelope fromMessage(EgressMessage message) {
         String type = message.egressMessageValueType().asTypeNameString();
         String value = Base64.getEncoder().encodeToString(message.egressMessageValueBytes().toByteArray());
         return Envelope.builder()

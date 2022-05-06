@@ -21,8 +21,6 @@ import java.util.concurrent.CompletableFuture;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
@@ -49,41 +47,7 @@ class GivenFunctionImplTest {
     @Mock
     Interactor mockedInteractor;
     @Mock
-    MessageMatcher mockedChangeMatcherA;
-    @Mock
-    MessageMatcher mockedChangeMatcherB;
-    @Mock
-    MessageMatcher mockedChangeMatcherC;
-    @Mock
     ManagedStateAccessor mockedStateAccessor;
-
-    @Test
-    void startsTsukuyomi() {
-        FooBar instance = new FooBar();
-        GivenFunctionImpl function = GivenFunctionImpl.of(
-                TypedFunctionImpl.of(FooBar.TYPE_NAME, instance),
-                new StateSetter[]{mockedStateSetter},
-                mockedTsukuyomiManager
-        );
-        FunctionDefinition functionDefinition = FunctionDefinition.builder()
-                .typeName(FooBar.TYPE_NAME)
-                .instance(instance)
-                .stateSetters(List.of(mockedStateSetter))
-                .build();
-        StatefunModule statefunModule = StatefunModule.builder()
-                .functionUnderTest(functionDefinition)
-                .collaborator(COLLABORATOR)
-                .egress(EGRESS)
-                .build();
-        given(mockedChangeMatcherA.getTarget())
-                .willReturn(Target.of(COLLABORATOR, Target.Type.FUNCTION));
-        given(mockedChangeMatcherB.getTarget())
-                .willReturn(Target.of(EGRESS, Target.Type.EGRESS));
-
-        function.start(new ChangeMatcher[]{mockedChangeMatcherA, mockedChangeMatcherB});
-
-        then(mockedTsukuyomiManager).should().start(statefunModule);
-    }
 
     @Test
     void startsTsukuyomiFromCriteria() {
@@ -126,46 +90,6 @@ class GivenFunctionImplTest {
         function.interact(mockedInteractor);
 
         then(mockedInteractor).should().interact(mockedTsukuyomiApi);
-    }
-
-    @Test
-    void validatesExpectations() {
-        FooBar instance = new FooBar();
-        GivenFunctionImpl function = GivenFunctionImpl.of(
-                TypedFunctionImpl.of(FooBar.TYPE_NAME, instance),
-                new StateSetter[]{mockedStateSetter},
-                mockedTsukuyomiManager
-        );
-        function.setTsukuyomi(mockedTsukuyomiApi);
-        given(mockedChangeMatcherA.getTarget())
-                .willReturn(Target.of(COLLABORATOR, Target.Type.FUNCTION));
-        given(mockedChangeMatcherB.getTarget())
-                .willReturn(Target.of(EGRESS, Target.Type.EGRESS));
-        given(mockedChangeMatcherC.getTarget())
-                .willReturn(Target.of(COLLABORATOR, Target.Type.FUNCTION));
-
-        function.expect(mockedChangeMatcherA, mockedChangeMatcherB, mockedChangeMatcherC);
-
-        then(mockedChangeMatcherA).should().match(eq(0), eq(mockedTsukuyomiApi), any());
-        then(mockedChangeMatcherB).should().match(eq(0), eq(mockedTsukuyomiApi), any());
-        then(mockedChangeMatcherC).should().match(eq(1), eq(mockedTsukuyomiApi), any());
-    }
-
-    @Test
-    void throwsAssertionErrorIfMultipleMatchersExpectTheSameEnvelope() {
-        GivenFunctionImpl function = GivenFunctionImpl.of(
-                TypedFunctionImpl.of(FooBar.TYPE_NAME, new FooBar()),
-                new StateSetter[]{},
-                mockedTsukuyomiManager
-        );
-        function.setTsukuyomi(mockedTsukuyomiApi);
-        Envelope envelope = envelope();
-        given(mockedTsukuyomiApi.getReceived()).willReturn(List.of(envelope));
-
-        assertThatThrownBy(() -> function.expect(
-                ExpectMessageInAnyOrder.of(envelope, Target.Type.FUNCTION),
-                ExpectMessageInAnyOrder.of(envelope, Target.Type.FUNCTION)
-        ));
     }
 
     @Test
