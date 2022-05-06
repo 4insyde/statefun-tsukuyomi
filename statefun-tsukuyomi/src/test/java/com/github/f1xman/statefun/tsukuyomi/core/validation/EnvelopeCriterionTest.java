@@ -9,24 +9,36 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class EnvelopeCriterionTest {
 
+    public static final TypeName TO_TYPE_NAME = TypeName.typeNameFromString("foo/baz");
+
     @Test
     void isOrderedReturnsTrueIfCriterionIsOrdered() {
-        EnvelopeCriterion criterion = EnvelopeCriterion.ordered(0, envelope());
+        EnvelopeCriterion criterion = EnvelopeCriterion.toFunction(0, envelope());
 
         assertThat(criterion.isOrdered()).isTrue();
     }
 
     @Test
     void isOrderedReturnsFalseIfCriterionIsUnordered() {
-        EnvelopeCriterion criterion = EnvelopeCriterion.unordered(envelope());
+        EnvelopeCriterion criterion = EnvelopeCriterion.toFunction(envelope());
 
         assertThat(criterion.isOrdered()).isFalse();
+    }
+
+    @Test
+    void returnsTargetWithTypeNameOfToAndGivenType() {
+        EnvelopeCriterion criterion = EnvelopeCriterion.toEgress(envelope());
+
+        Target target = criterion.getTarget();
+
+        assertThat(target.getTypeName()).isEqualTo(TO_TYPE_NAME);
+        assertThat(target.getType()).isEqualTo(Target.Type.EGRESS);
     }
 
     private Envelope envelope() {
         return Envelope.builder()
                 .from(TypeName.typeNameFromString("foo/bar"), "foobar")
-                .to(TypeName.typeNameFromString("foo/baz"), "foobaz")
+                .to(TO_TYPE_NAME, "foobaz")
                 .data(Types.stringType(), "foobarbaz")
                 .build();
     }

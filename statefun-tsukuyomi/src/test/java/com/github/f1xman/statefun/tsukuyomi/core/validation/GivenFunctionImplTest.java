@@ -8,7 +8,6 @@ import org.apache.flink.statefun.sdk.java.TypeName;
 import org.apache.flink.statefun.sdk.java.ValueSpec;
 import org.apache.flink.statefun.sdk.java.message.Message;
 import org.apache.flink.statefun.sdk.java.types.Types;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -21,7 +20,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -31,13 +30,15 @@ import static org.mockito.BDDMockito.then;
 class GivenFunctionImplTest {
 
     static final TypeName COLLABORATOR = TypeName.typeNameFromString("foo/collaborator");
-    static final TypeName EGRESS = TypeName.typeNameFromString("foo/egress");
     static final String ID = "foobar";
     public static final int INCORRECT_ORDER = Integer.MAX_VALUE;
     public static final int CORRECT_ORDER = 0;
     public static final ValueSpec<String> FOO_VALUE_SPEC = ValueSpec.named("foo").withUtf8StringType();
     public static final String FOO = "foo";
     public static final String BAR = "bar";
+    public static final TypeName ANOTHER_TYPE_NAME = TypeName.typeNameFromString("foo/another");
+    public static final TypeName EGRESS_TYPE_NAME = TypeName.typeNameFromString("foo/egress");
+    static final TypeName EGRESS = EGRESS_TYPE_NAME;
 
     @Mock
     TsukuyomiManager mockedTsukuyomiManager;
@@ -82,6 +83,34 @@ class GivenFunctionImplTest {
         function.start(new ChangeMatcher[]{mockedChangeMatcherA, mockedChangeMatcherB});
 
         then(mockedTsukuyomiManager).should().start(statefunModule);
+    }
+
+    @Test
+    void startsTsukuyomiFromCriteria() {
+        FooBar instance = new FooBar();
+        StateSetter<String> stateSetter = StateSetterImpl.of(FOO_VALUE_SPEC, FOO);
+        GivenFunctionImpl givenFunction = GivenFunctionImpl.builder()
+                .typedFunction(TypedFunctionImpl.of(FooBar.TYPE_NAME, instance))
+                .manager(mockedTsukuyomiManager)
+                .tsukuyomi(mockedTsukuyomiApi)
+                .stateSetters(new StateSetter[]{stateSetter})
+                .build();
+        StatefunModule expectedStatefunModule = StatefunModule.builder()
+                .functionUnderTest(FunctionDefinition.builder()
+                        .typeName(FooBar.TYPE_NAME)
+                        .instance(instance)
+                        .stateSetter(stateSetter)
+                        .build())
+                .collaborator(ANOTHER_TYPE_NAME)
+                .egress(EGRESS_TYPE_NAME)
+                .build();
+
+        givenFunction.start(
+                EnvelopeCriterion.toFunction(envelopeToAnotherFunction()),
+                EnvelopeCriterion.toEgress(envelopeToEgress())
+        );
+
+        then(mockedTsukuyomiManager).should().start(expectedStatefunModule);
     }
 
     @Test
@@ -164,7 +193,7 @@ class GivenFunctionImplTest {
         givenEnvelopesReceived(envelope);
 
         assertThatThrownBy(
-                () -> givenFunction.expect(EnvelopeCriterion.ordered(INCORRECT_ORDER, envelope)))
+                () -> givenFunction.expect(EnvelopeCriterion.toFunction(INCORRECT_ORDER, envelope)))
                 .isInstanceOf(AssertionError.class);
     }
 
@@ -179,7 +208,7 @@ class GivenFunctionImplTest {
         givenEnvelopesReceived(envelope);
 
         assertThatNoException()
-                .isThrownBy(() -> givenFunction.expect(EnvelopeCriterion.ordered(CORRECT_ORDER, envelope)));
+                .isThrownBy(() -> givenFunction.expect(EnvelopeCriterion.toFunction(CORRECT_ORDER, envelope)));
     }
 
     @Test
@@ -193,8 +222,8 @@ class GivenFunctionImplTest {
         givenEnvelopesReceived(envelope);
 
         assertThatThrownBy(() -> givenFunction.expect(
-                EnvelopeCriterion.ordered(CORRECT_ORDER, envelope),
-                EnvelopeCriterion.unordered(envelope)
+                EnvelopeCriterion.toFunction(CORRECT_ORDER, envelope),
+                EnvelopeCriterion.toFunction(envelope)
         )).isInstanceOf(AssertionError.class);
     }
 
@@ -230,6 +259,20 @@ class GivenFunctionImplTest {
         return Envelope.builder()
                 .to(FooBar.TYPE_NAME, ID)
                 .data(Types.stringType(), "barbarbar")
+                .build();
+    }
+
+    private Envelope envelopeToAnotherFunction() {
+        return Envelope.builder()
+                .to(ANOTHER_TYPE_NAME, ID)
+                .data(Types.stringType(), "foobarbaz")
+                .build();
+    }
+
+    private Envelope envelopeToEgress() {
+        return Envelope.builder()
+                .to(EGRESS_TYPE_NAME, ID)
+                .data(Types.stringType(), "foobarbaz")
                 .build();
     }
 

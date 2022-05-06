@@ -35,17 +35,32 @@ public class GivenFunctionImpl implements GivenFunction {
     TsukuyomiApi tsukuyomi;
 
     @Override
+    @Deprecated
     public void start(ChangeMatcher[] matchers) {
-        FunctionDefinition functionDefinition = FunctionDefinition.builder()
-                .typeName(typedFunction.getTypeName())
-                .instance(typedFunction.getInstance())
-                .stateSetters(List.of(stateSetters))
-                .build();
         Set<Target> targets = Arrays.stream(matchers)
                 .filter(MessageMatcher.class::isInstance)
                 .map(MessageMatcher.class::cast)
                 .map(MessageMatcher::getTarget)
                 .collect(toSet());
+        doStart(targets);
+    }
+
+    @Override
+    public void start(Criterion... criteria) {
+        Set<Target> targets = Arrays.stream(criteria)
+                .filter(EnvelopeCriterion.class::isInstance)
+                .map(EnvelopeCriterion.class::cast)
+                .map(EnvelopeCriterion::getTarget)
+                .collect(toUnmodifiableSet());
+        doStart(targets);
+    }
+
+    private void doStart(Set<Target> targets) {
+        FunctionDefinition functionDefinition = FunctionDefinition.builder()
+                .typeName(typedFunction.getTypeName())
+                .instance(typedFunction.getInstance())
+                .stateSetters(List.of(stateSetters))
+                .build();
         Map<Type, Set<TypeName>> targetsByType = targets.stream()
                 .collect(
                         groupingBy(Target::getType,

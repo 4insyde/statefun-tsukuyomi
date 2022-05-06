@@ -11,4 +11,6 @@ public interface GivenFunction {
     void expect(Criterion... criteria);
 
     void stop();
+
+    void start(Criterion... criteria);
 }

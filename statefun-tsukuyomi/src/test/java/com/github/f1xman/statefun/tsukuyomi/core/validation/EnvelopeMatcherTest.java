@@ -26,7 +26,7 @@ class EnvelopeMatcherTest {
     @Test
     void throwsAssertionErrorIfIndexesDoesNotMatch() {
         Envelope envelope1 = envelope1();
-        EnvelopeMatcher matcher = EnvelopeMatcher.of(List.of(EnvelopeCriterion.ordered(0, envelope1)));
+        EnvelopeMatcher matcher = EnvelopeMatcher.of(List.of(EnvelopeCriterion.toFunction(0, envelope1)));
         InvocationReport invocationReport = InvocationReport.of(2, List.of(envelope0(), envelope1));
         given(tsukuyomi.getInvocationReport())
                 .willReturn(Optional.of(invocationReport));
@@ -45,8 +45,8 @@ class EnvelopeMatcherTest {
     void throwsAssertionErrorIfUnorderedEnvelopeIsMissingWhileTheSameOrderedEnvelopeIsPresent() {
         Envelope envelope1 = envelope1();
         EnvelopeMatcher matcher = EnvelopeMatcher.of(List.of(
-                EnvelopeCriterion.unordered(envelope1),
-                EnvelopeCriterion.ordered(0, envelope1))
+                EnvelopeCriterion.toFunction(envelope1),
+                EnvelopeCriterion.toFunction(0, envelope1))
         );
         InvocationReport invocationReport = InvocationReport.of(1, List.of(envelope1));
         given(tsukuyomi.getInvocationReport())
@@ -66,8 +66,8 @@ class EnvelopeMatcherTest {
     void throwsNothingWhenCriteriaMatched() {
         Envelope envelope = envelope0();
         EnvelopeMatcher matcher = EnvelopeMatcher.of(List.of(
-                EnvelopeCriterion.ordered(0, envelope),
-                EnvelopeCriterion.unordered(envelope)
+                EnvelopeCriterion.toFunction(0, envelope),
+                EnvelopeCriterion.toFunction(envelope)
         ));
         InvocationReport invocationReport = InvocationReport.of(2, List.of(envelope, envelope));
         given(tsukuyomi.getInvocationReport())
