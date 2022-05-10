@@ -35,21 +35,8 @@ public class InvocationReport {
     @JsonProperty("envelopes")
     List<Envelope> envelopes;
 
-    public boolean isRegular(Envelope envelope) {
-        return envelopes.contains(envelope);
-    }
-
     public boolean containsAt(Envelope envelope, int index) {
         return envelopes.indexOf(envelope) == index;
-    }
-
-    public int indexOf(Envelope envelope, Set<Integer> exclude) {
-        return IntStream.range(0, envelopes.size())
-                .boxed()
-                .filter(not(exclude::contains))
-                .filter(i -> envelopes.get(i).equals(envelope))
-                .findAny()
-                .orElse(-1);
     }
 
     public List<EnvelopeMeta> find(Envelope envelope) {
