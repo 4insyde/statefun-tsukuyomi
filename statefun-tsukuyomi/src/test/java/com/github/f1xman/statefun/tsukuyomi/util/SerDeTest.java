@@ -2,7 +2,6 @@ package com.github.f1xman.statefun.tsukuyomi.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.github.f1xman.statefun.tsukuyomi.util.SerDe;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

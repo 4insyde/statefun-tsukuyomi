@@ -32,6 +32,13 @@ public class DispatcherContainer extends GenericContainer<DispatcherContainer> {
     @NonNull
     StatefunModule statefunModule;
 
+    @Builder
+    private DispatcherContainer(DockerImageName image, Integer statefunPort, StatefunModule statefunModule) {
+        super(requireNonNullElse(image, DispatcherImageName.INSTANCE));
+        this.statefunPort = statefunPort;
+        this.statefunModule = statefunModule;
+    }
+
     public DispatcherClient createClient() {
         String host = this.getHost();
         int dispatcherPort = this.getMappedPort(DISPATCHER_PORT);
@@ -51,12 +58,5 @@ public class DispatcherContainer extends GenericContainer<DispatcherContainer> {
         this.addEnv(ENDPOINT_ENV, String.format("http://host.testcontainers.internal:%d", statefunPort));
         this.addEnv(EGRESSES_ENV, statefunModule.generateEgressesString());
         this.withLogConsumer(new Slf4jLogConsumer(log));
-    }
-
-    @Builder
-    private DispatcherContainer(DockerImageName image, Integer statefunPort, StatefunModule statefunModule) {
-        super(requireNonNullElse(image, DispatcherImageName.INSTANCE));
-        this.statefunPort = statefunPort;
-        this.statefunModule = statefunModule;
     }
 }

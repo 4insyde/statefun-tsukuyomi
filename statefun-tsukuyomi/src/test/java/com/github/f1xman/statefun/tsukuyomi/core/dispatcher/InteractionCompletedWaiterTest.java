@@ -70,6 +70,7 @@ class InteractionCompletedWaiterTest {
             interactionCompletedWaiter.await();
         });
     }
+
     @Test
     void doesNotWaitIfInvokedAfterInterrupting() {
         assertTimeoutPreemptively(Duration.ofSeconds(3), () -> {

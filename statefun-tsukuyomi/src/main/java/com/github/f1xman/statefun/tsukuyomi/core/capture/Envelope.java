@@ -29,12 +29,11 @@ import static lombok.AccessLevel.PRIVATE;
 @ToString
 public class Envelope implements Serializable {
 
-    private static Map<String, ValueRenderer> renderersByType = new ConcurrentHashMap<>();
-
     public static final Type<Envelope> TYPE = SimpleType.simpleImmutableTypeFrom(
             TypeName.typeNameFromString("com.github.f1xman.statefun.tsukuyomi/envelope"),
             Envelope::toJson, Envelope::fromJson
     );
+    private static Map<String, ValueRenderer> renderersByType = new ConcurrentHashMap<>();
     @JsonProperty("from")
     NodeAddress from;
     @JsonProperty("to")
@@ -90,6 +89,12 @@ public class Envelope implements Serializable {
 
     public boolean is(Type<?> type) {
         return data.type.equals(type.typeName().asTypeNameString());
+    }
+
+    private interface ValueRenderer {
+
+        String render(String value);
+
     }
 
     public static class EnvelopeBuilder {
@@ -181,12 +186,6 @@ public class Envelope implements Serializable {
                     ", value='" + renderer.render(value) + '\'' +
                     '}';
         }
-    }
-
-    private interface ValueRenderer {
-
-        String render(String value);
-
     }
 
     private static class NoOpValueRenderer implements ValueRenderer {

@@ -27,8 +27,6 @@ import static org.mockito.BDDMockito.then;
 @ExtendWith(MockitoExtension.class)
 class GivenFunctionImplTest {
 
-    static final TypeName COLLABORATOR = TypeName.typeNameFromString("foo/collaborator");
-    static final String ID = "foobar";
     public static final int INCORRECT_ORDER = Integer.MAX_VALUE;
     public static final int CORRECT_ORDER = 0;
     public static final ValueSpec<String> FOO_VALUE_SPEC = ValueSpec.named("foo").withUtf8StringType();
@@ -36,6 +34,8 @@ class GivenFunctionImplTest {
     public static final String BAR = "bar";
     public static final TypeName ANOTHER_TYPE_NAME = TypeName.typeNameFromString("foo/another");
     public static final TypeName EGRESS_TYPE_NAME = TypeName.typeNameFromString("foo/egress");
+    static final TypeName COLLABORATOR = TypeName.typeNameFromString("foo/collaborator");
+    static final String ID = "foobar";
     static final TypeName EGRESS = EGRESS_TYPE_NAME;
 
     @Mock

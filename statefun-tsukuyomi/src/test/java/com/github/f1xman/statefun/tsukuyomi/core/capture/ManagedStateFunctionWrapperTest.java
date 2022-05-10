@@ -2,7 +2,6 @@ package com.github.f1xman.statefun.tsukuyomi.core.capture;
 
 import org.apache.flink.statefun.sdk.java.*;
 import org.apache.flink.statefun.sdk.java.message.EgressMessage;
-import org.apache.flink.statefun.sdk.java.message.EgressMessageBuilder;
 import org.apache.flink.statefun.sdk.java.message.Message;
 import org.apache.flink.statefun.sdk.java.testing.TestContext;
 import org.junit.jupiter.api.BeforeEach;

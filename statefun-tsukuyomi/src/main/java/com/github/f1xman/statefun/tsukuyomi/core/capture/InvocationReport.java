@@ -12,10 +12,8 @@ import org.apache.flink.statefun.sdk.java.types.Type;
 import org.javatuples.Pair;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.IntStream;
 
-import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toUnmodifiableList;
 
 @RequiredArgsConstructor(staticName = "of", onConstructor_ = {@JsonCreator})
@@ -34,10 +32,6 @@ public class InvocationReport {
     Integer outgoingMessagesCount;
     @JsonProperty("envelopes")
     List<Envelope> envelopes;
-
-    public boolean containsAt(Envelope envelope, int index) {
-        return envelopes.indexOf(envelope) == index;
-    }
 
     public List<EnvelopeMeta> find(Envelope envelope) {
         return IntStream.range(0, envelopes.size())

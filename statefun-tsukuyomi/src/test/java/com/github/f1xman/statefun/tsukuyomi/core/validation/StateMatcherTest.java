@@ -21,13 +21,12 @@ import static org.mockito.BDDMockito.given;
 @ExtendWith(MockitoExtension.class)
 class StateMatcherTest {
 
+    public static final String FOO = "foo";
+    public static final ValueSpec<String> VALUE_SPEC = ValueSpec.named(FOO).withUtf8StringType();
     @Mock
     TsukuyomiApi tsukuyomi;
     @Mock
     ManagedStateAccessor stateAccessor;
-
-    public static final String FOO = "foo";
-    public static final ValueSpec<String> VALUE_SPEC = ValueSpec.named(FOO).withUtf8StringType();
 
     @BeforeEach
     void setUp() {

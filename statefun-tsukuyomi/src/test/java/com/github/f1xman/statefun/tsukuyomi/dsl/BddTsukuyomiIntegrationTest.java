@@ -82,6 +82,7 @@ class BddTsukuyomiIntegrationTest {
                 expectState(Testee.FOO, is("foo"))
         );
     }
+
     private Envelope outgoingEnvelopeToEgress() {
         return Envelope.builder()
                 .toEgress(EGRESS)

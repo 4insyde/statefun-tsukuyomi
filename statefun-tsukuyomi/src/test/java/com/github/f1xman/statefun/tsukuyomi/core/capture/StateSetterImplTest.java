@@ -1,6 +1,5 @@
 package com.github.f1xman.statefun.tsukuyomi.core.capture;
 
-import com.github.f1xman.statefun.tsukuyomi.core.capture.StateSetterImpl;
 import org.apache.flink.statefun.sdk.java.AddressScopedStorage;
 import org.apache.flink.statefun.sdk.java.ValueSpec;
 import org.junit.jupiter.api.Test;

@@ -1,7 +1,8 @@
 package com.github.f1xman.statefun.tsukuyomi.dsl;
 
 import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
-import com.github.f1xman.statefun.tsukuyomi.core.validation.*;
+import com.github.f1xman.statefun.tsukuyomi.core.validation.EnvelopeCriterion;
+import com.github.f1xman.statefun.tsukuyomi.core.validation.StateCriterion;
 import lombok.NoArgsConstructor;
 import org.apache.flink.statefun.sdk.java.ValueSpec;
 import org.hamcrest.Matcher;

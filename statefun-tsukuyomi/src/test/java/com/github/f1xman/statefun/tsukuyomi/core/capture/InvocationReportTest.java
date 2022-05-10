@@ -6,35 +6,10 @@ import org.apache.flink.statefun.sdk.java.types.Types;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class InvocationReportTest {
-
-    @Test
-    void returnsTrueIfEnvelopeHasGivenIndex() {
-        Envelope envelope = envelope();
-        InvocationReport report = InvocationReport.of(0, List.of(envelope));
-
-        assertThat(report.containsAt(envelope, 0)).isTrue();
-    }
-
-    @Test
-    void returnsFalseIfEnvelopeHasDifferentIndex() {
-        Envelope envelope = envelope();
-        InvocationReport report = InvocationReport.of(0, List.of(envelope));
-
-        assertThat(report.containsAt(envelope, 1)).isFalse();
-    }
-
-    @Test
-    void returnsFalseIfEnvelopeDoesNotExist() {
-        Envelope envelope = envelope();
-        InvocationReport report = InvocationReport.of(0, List.of());
-
-        assertThat(report.containsAt(envelope, 0)).isFalse();
-    }
 
     @Test
     void returnsListOfEnvelopeMetaByGivenEnvelope() {
