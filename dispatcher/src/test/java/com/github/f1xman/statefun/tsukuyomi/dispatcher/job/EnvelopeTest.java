@@ -2,7 +2,10 @@ package com.github.f1xman.statefun.tsukuyomi.dispatcher.job;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.Test;
+
+import java.time.Duration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -13,9 +16,10 @@ class EnvelopeTest {
         Envelope envelope = new Envelope(
                 new Envelope.NodeAddress("foo/from", "bar"),
                 new Envelope.NodeAddress("foo/to", "baz"),
-                new Envelope.Data("foo/data", "foobarbaz")
+                new Envelope.Data("foo/data", "foobarbaz"),
+                Duration.ofHours(1)
         );
-        String expected = JsonMapper.builder().build().writeValueAsString(envelope);
+        String expected = JsonMapper.builder().addModule(new JavaTimeModule()).build().writeValueAsString(envelope);
 
         String actual = envelope.toJson();
 
@@ -27,9 +31,10 @@ class EnvelopeTest {
         Envelope expected = new Envelope(
                 new Envelope.NodeAddress("foo/from", "bar"),
                 new Envelope.NodeAddress("foo/to", "baz"),
-                new Envelope.Data("foo/data", "foobarbaz")
+                new Envelope.Data("foo/data", "foobarbaz"),
+                Duration.ofHours(1)
         );
-        String json = JsonMapper.builder().build().writeValueAsString(expected);
+        String json = JsonMapper.builder().addModule(new JavaTimeModule()).build().writeValueAsString(expected);
 
         Envelope actual = Envelope.fromJson(json);
 

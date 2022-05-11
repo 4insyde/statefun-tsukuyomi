@@ -15,6 +15,7 @@ import org.apache.flink.statefun.sdk.java.types.Type;
 import org.apache.flink.statefun.sdk.java.types.TypeSerializer;
 
 import java.io.Serializable;
+import java.time.Duration;
 import java.util.Base64;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -42,6 +43,8 @@ public class Envelope implements Serializable {
     @JsonProperty("data")
     @NonNull
     Data data;
+    @JsonProperty("delay")
+    Duration delay;
 
     public static Envelope fromJson(byte[] bytes) {
         return SerDe.deserialize(bytes, Envelope.class);

@@ -12,6 +12,7 @@ import org.apache.flink.statefun.sdk.Address;
 import org.apache.flink.statefun.sdk.FunctionType;
 import org.apache.flink.statefun.sdk.reqreply.generated.TypedValue;
 
+import java.time.Duration;
 import java.util.Base64;
 import java.util.Optional;
 
@@ -31,6 +32,8 @@ public class Envelope {
     NodeAddress to;
     @JsonProperty("data")
     Data data;
+    @JsonProperty("delay")
+    Duration delay;
 
     public String toJson() {
         return SerDe.serializeAsString(this);
