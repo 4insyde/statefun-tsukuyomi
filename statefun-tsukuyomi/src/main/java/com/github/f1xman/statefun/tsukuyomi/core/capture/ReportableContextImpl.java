@@ -1,6 +1,7 @@
 package com.github.f1xman.statefun.tsukuyomi.core.capture;
 
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -12,11 +13,13 @@ import org.apache.flink.statefun.sdk.java.message.EgressMessageBuilder;
 import org.apache.flink.statefun.sdk.java.message.Message;
 
 import java.time.Duration;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static java.util.Collections.newSetFromMap;
+import static java.util.stream.Collectors.toUnmodifiableList;
 import static lombok.AccessLevel.PRIVATE;
 
 @RequiredArgsConstructor(staticName = "spyOn")
@@ -25,8 +28,7 @@ import static lombok.AccessLevel.PRIVATE;
 public class ReportableContextImpl implements ReportableContext {
 
     AtomicInteger numberOfOutgoingMessages = new AtomicInteger();
-    Set<String> cancellationTokens = newSetFromMap(new ConcurrentHashMap<>());
-    List<Envelope> envelopes = Collections.synchronizedList(new ArrayList<>());
+    List<EnvelopeEntry> envelopes = Collections.synchronizedList(new ArrayList<>());
     @NonNull
     Context context;
 
@@ -34,12 +36,18 @@ public class ReportableContextImpl implements ReportableContext {
     public void report() {
         Envelope envelope = Envelope.builder()
                 .toEgress(Egresses.CAPTURED_MESSAGES)
-                .data(InvocationReport.TYPE, InvocationReport.of(getNumberOfOutgoingMessages(), envelopes))
+                .data(InvocationReport.TYPE, InvocationReport.of(getNumberOfOutgoingMessages(), extractEnvelopes()))
                 .build();
         EgressMessage message = EgressMessageBuilder.forEgress(Egresses.CAPTURED_MESSAGES)
                 .withCustomType(Envelope.TYPE, envelope)
                 .build();
         context.send(message);
+    }
+
+    private List<Envelope> extractEnvelopes() {
+        return envelopes.stream()
+                .map(EnvelopeEntry::getEnvelope)
+                .collect(toUnmodifiableList());
     }
 
     @Override
@@ -55,7 +63,7 @@ public class ReportableContextImpl implements ReportableContext {
     @Override
     public void send(Message message) {
         Envelope envelope = Envelope.fromMessage(self(), message);
-        envelopes.add(envelope);
+        envelopes.add(EnvelopeEntry.permanent(envelope));
         context.send(message);
         numberOfOutgoingMessages.incrementAndGet();
     }
@@ -63,7 +71,7 @@ public class ReportableContextImpl implements ReportableContext {
     @Override
     public void send(EgressMessage message) {
         Envelope envelope = Envelope.fromMessage(message);
-        envelopes.add(envelope);
+        envelopes.add(EnvelopeEntry.permanent(envelope));
         context.send(message);
         numberOfOutgoingMessages.incrementAndGet();
     }
@@ -72,18 +80,25 @@ public class ReportableContextImpl implements ReportableContext {
     public void sendAfter(Duration duration, Message message) {
         context.sendAfter(duration, message);
         numberOfOutgoingMessages.incrementAndGet();
+        Envelope envelope = Envelope.fromMessage(self(), message).toBuilder()
+                .delay(duration)
+                .build();
+        envelopes.add(EnvelopeEntry.permanent(envelope));
     }
 
     @Override
     public void sendAfter(Duration duration, String cancellationToken, Message message) {
         context.sendAfter(duration, cancellationToken, message);
-        cancellationTokens.add(cancellationToken);
+        Envelope envelope = Envelope.fromMessage(self(), message).toBuilder()
+                .delay(duration)
+                .build();
+        envelopes.add(EnvelopeEntry.cancellable(envelope, cancellationToken));
     }
 
     @Override
     public void cancelDelayedMessage(String cancellationToken) {
         context.cancelDelayedMessage(cancellationToken);
-        cancellationTokens.remove(cancellationToken);
+        envelopes.removeIf(e -> cancellationToken.equals(e.cancellationToken));
     }
 
     @Override
@@ -92,6 +107,25 @@ public class ReportableContextImpl implements ReportableContext {
     }
 
     public Integer getNumberOfOutgoingMessages() {
-        return numberOfOutgoingMessages.get() + cancellationTokens.size();
+        return envelopes.size();
+    }
+
+    @RequiredArgsConstructor(access = PRIVATE)
+    @FieldDefaults(level = PRIVATE, makeFinal = true)
+    @EqualsAndHashCode
+    private static class EnvelopeEntry {
+
+        @Getter
+        Envelope envelope;
+        String cancellationToken;
+
+        static EnvelopeEntry permanent(Envelope envelope) {
+            return new EnvelopeEntry(envelope, null);
+        }
+
+        static EnvelopeEntry cancellable(Envelope envelope, String cancellationToken) {
+            return new EnvelopeEntry(envelope, cancellationToken);
+        }
+
     }
 }

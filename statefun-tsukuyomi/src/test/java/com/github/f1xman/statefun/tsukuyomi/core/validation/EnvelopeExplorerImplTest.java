@@ -10,6 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,11 +39,33 @@ class EnvelopeExplorerImplTest {
         assertThat(summary.getTotalReceived()).isEqualTo(1);
     }
 
+    @Test
+    void includesEqualEnvelopeToSummaryEvenThoughDelayIsMissing() {
+        Envelope envelopeWithDelay = envelopeWithDelay();
+        Envelope envelopeWithoutDelay = envelope();
+        InvocationReport invocationReport = InvocationReport.of(1, List.of(envelopeWithDelay));
+        given(tsukuyomi.getInvocationReport()).willReturn(Optional.of(invocationReport));
+        List<Envelope> receivedEnvelopes = List.of(envelopeWithoutDelay);
+        given(tsukuyomi.getReceived()).willReturn(receivedEnvelopes);
+        EnvelopeExplorer explorer = EnvelopeExplorerImpl.of(tsukuyomi);
+
+        EnvelopeSummary summary = explorer.explore(envelopeWithDelay);
+
+        assertThat(summary.getEnvelopeMetas()).containsExactly(EnvelopeMeta.of(0));
+        assertThat(summary.getTotalReceived()).isEqualTo(1);
+    }
+
     private Envelope envelope() {
         return Envelope.builder()
                 .from(TypeName.typeNameFromString("foo/bar"), "foobar")
                 .to(TypeName.typeNameFromString("foo/baz"), "foobaz")
                 .data(Types.stringType(), "foobarbaz")
+                .build();
+    }
+
+    private Envelope envelopeWithDelay() {
+        return envelope().toBuilder()
+                .delay(Duration.ofSeconds(1))
                 .build();
     }
 

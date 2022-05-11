@@ -31,6 +31,7 @@ class ReportableContextImplTest {
     static final TypeName EGRESS = TypeName.typeNameFromString("foo/egress");
     static final String CANCELLATION_TOKEN = "CANCELLATION_TOKEN";
     static final String VALUE = "foobarbaz";
+    public static final Duration DELAY = Duration.ofHours(1);
 
     @Mock
     Message mockedMessage;
@@ -96,13 +97,16 @@ class ReportableContextImplTest {
     void sendsADelayedMessageAndIncrementsCountOfOutgoingMessages() {
         TestContext context = TestContext.forTarget(SELF);
         ReportableContextImpl reportableContext = ReportableContextImpl.spyOn(context);
+        Message message = MessageBuilder.forAddress(SELF)
+                .withValue(VALUE)
+                .build();
 
-        reportableContext.sendAfter(Duration.ofHours(1), mockedMessage);
+        reportableContext.sendAfter(DELAY, message);
 
         assertThat(reportableContext.getNumberOfOutgoingMessages()).isEqualTo(1);
         assertThat(context.getSentDelayedMessages())
                 .contains(
-                        new SideEffects.SendAfterSideEffect(Duration.ofHours(1), mockedMessage)
+                        new SideEffects.SendAfterSideEffect(DELAY, message)
                 );
     }
 
@@ -110,13 +114,16 @@ class ReportableContextImplTest {
     void sendsADelayedMessageWithCancellationTokenAndIncrementsCountOfOutgoingMessages() {
         TestContext context = TestContext.forTarget(SELF);
         ReportableContextImpl reportableContext = ReportableContextImpl.spyOn(context);
+        Message message = MessageBuilder.forAddress(SELF)
+                .withValue(VALUE)
+                .build();
 
-        reportableContext.sendAfter(Duration.ofHours(1), CANCELLATION_TOKEN, mockedMessage);
+        reportableContext.sendAfter(DELAY, CANCELLATION_TOKEN, message);
 
         assertThat(reportableContext.getNumberOfOutgoingMessages()).isEqualTo(1);
         assertThat(context.getSentDelayedMessages())
                 .contains(
-                        new SideEffects.SendAfterSideEffect(Duration.ofHours(1), mockedMessage, CANCELLATION_TOKEN)
+                        new SideEffects.SendAfterSideEffect(DELAY, message, CANCELLATION_TOKEN)
                 );
     }
 
@@ -124,8 +131,11 @@ class ReportableContextImplTest {
     void cancelsADelayedMessageAndDecrementsCountOfOutgoingMessages() {
         TestContext context = TestContext.forTarget(SELF);
         ReportableContextImpl reportableContext = ReportableContextImpl.spyOn(context);
+        Message message = MessageBuilder.forAddress(SELF)
+                .withValue(VALUE)
+                .build();
 
-        reportableContext.sendAfter(Duration.ofHours(1), CANCELLATION_TOKEN, mockedMessage);
+        reportableContext.sendAfter(DELAY, CANCELLATION_TOKEN, message);
         reportableContext.cancelDelayedMessage(CANCELLATION_TOKEN);
 
         assertThat(reportableContext.getNumberOfOutgoingMessages()).isZero();
@@ -164,12 +174,12 @@ class ReportableContextImplTest {
     }
 
     @Test
-    void sendsReportWithEnvelopesIncluded() {
+    void sendsReportWithRegularEnvelopesIncluded() {
         TestContext context = TestContext.forTarget(SELF);
         ReportableContextImpl reportableContext = ReportableContextImpl.spyOn(context);
         Envelope envelope = Envelope.builder()
                 .toEgress(Egresses.CAPTURED_MESSAGES)
-                .data(InvocationReport.TYPE, InvocationReport.of(2, List.of(envelope(), egressEnvelope())))
+                .data(InvocationReport.TYPE, InvocationReport.of(1, List.of(envelope())))
                 .build();
         EgressMessage expectedMessage = EgressMessageBuilder.forEgress(Egresses.CAPTURED_MESSAGES)
                 .withCustomType(Envelope.TYPE, envelope)
@@ -179,10 +189,91 @@ class ReportableContextImplTest {
                 .withValue(VALUE)
                 .build();
         reportableContext.send(message);
+        reportableContext.report();
+
+        assertThat(context.getSentEgressMessages()).contains(new SideEffects.EgressSideEffect(expectedMessage));
+    }
+
+    @Test
+    void sendsReportWithEgressEnvelopesIncluded() {
+        TestContext context = TestContext.forTarget(SELF);
+        ReportableContextImpl reportableContext = ReportableContextImpl.spyOn(context);
+        Envelope envelope = Envelope.builder()
+                .toEgress(Egresses.CAPTURED_MESSAGES)
+                .data(InvocationReport.TYPE, InvocationReport.of(1, List.of(egressEnvelope())))
+                .build();
+        EgressMessage expectedMessage = EgressMessageBuilder.forEgress(Egresses.CAPTURED_MESSAGES)
+                .withCustomType(Envelope.TYPE, envelope)
+                .build();
+
         EgressMessage egressMessage = EgressMessageBuilder.forEgress(EGRESS)
                 .withValue(VALUE)
                 .build();
         reportableContext.send(egressMessage);
+        reportableContext.report();
+
+        assertThat(context.getSentEgressMessages()).contains(new SideEffects.EgressSideEffect(expectedMessage));
+    }
+
+    @Test
+    void sendsReportWithDelayedEnvelopesIncluded() {
+        TestContext context = TestContext.forTarget(SELF);
+        ReportableContextImpl reportableContext = ReportableContextImpl.spyOn(context);
+        Envelope envelope = Envelope.builder()
+                .toEgress(Egresses.CAPTURED_MESSAGES)
+                .data(InvocationReport.TYPE, InvocationReport.of(1, List.of(delayedEnvelope())))
+                .build();
+        EgressMessage expectedMessage = EgressMessageBuilder.forEgress(Egresses.CAPTURED_MESSAGES)
+                .withCustomType(Envelope.TYPE, envelope)
+                .build();
+
+        Message message = MessageBuilder.forAddress(TARGET)
+                .withValue(VALUE)
+                .build();
+        reportableContext.sendAfter(DELAY, message);
+        reportableContext.report();
+
+        assertThat(context.getSentEgressMessages()).contains(new SideEffects.EgressSideEffect(expectedMessage));
+    }
+
+    @Test
+    void sendsReportWithDelayedEnvelopesHavingCancellationTokenIncluded() {
+        TestContext context = TestContext.forTarget(SELF);
+        ReportableContextImpl reportableContext = ReportableContextImpl.spyOn(context);
+        Envelope envelope = Envelope.builder()
+                .toEgress(Egresses.CAPTURED_MESSAGES)
+                .data(InvocationReport.TYPE, InvocationReport.of(1, List.of(delayedEnvelope())))
+                .build();
+        EgressMessage expectedMessage = EgressMessageBuilder.forEgress(Egresses.CAPTURED_MESSAGES)
+                .withCustomType(Envelope.TYPE, envelope)
+                .build();
+
+        Message message = MessageBuilder.forAddress(TARGET)
+                .withValue(VALUE)
+                .build();
+        reportableContext.sendAfter(DELAY, CANCELLATION_TOKEN, message);
+        reportableContext.report();
+
+        assertThat(context.getSentEgressMessages()).contains(new SideEffects.EgressSideEffect(expectedMessage));
+    }
+
+    @Test
+    void sendsEmptyReportIfAllDelayedEnvelopesCancelled() {
+        TestContext context = TestContext.forTarget(SELF);
+        ReportableContextImpl reportableContext = ReportableContextImpl.spyOn(context);
+        Envelope envelope = Envelope.builder()
+                .toEgress(Egresses.CAPTURED_MESSAGES)
+                .data(InvocationReport.TYPE, InvocationReport.of(0, List.of()))
+                .build();
+        EgressMessage expectedMessage = EgressMessageBuilder.forEgress(Egresses.CAPTURED_MESSAGES)
+                .withCustomType(Envelope.TYPE, envelope)
+                .build();
+
+        Message message = MessageBuilder.forAddress(TARGET)
+                .withValue(VALUE)
+                .build();
+        reportableContext.sendAfter(DELAY, CANCELLATION_TOKEN, message);
+        reportableContext.cancelDelayedMessage(CANCELLATION_TOKEN);
         reportableContext.report();
 
         assertThat(context.getSentEgressMessages()).contains(new SideEffects.EgressSideEffect(expectedMessage));
@@ -200,6 +291,15 @@ class ReportableContextImplTest {
         return Envelope.builder()
                 .toEgress(EGRESS)
                 .data(Types.stringType(), VALUE)
+                .build();
+    }
+
+    private Envelope delayedEnvelope() {
+        return Envelope.builder()
+                .from(SELF.type(), SELF.id())
+                .to(TARGET.type(), TARGET.id())
+                .data(Types.stringType(), VALUE)
+                .delay(DELAY)
                 .build();
     }
 }

@@ -23,9 +23,16 @@ public class EnvelopeExplorerImpl implements EnvelopeExplorer {
         InvocationReport invocationReport = tsukuyomi.getInvocationReport().orElseThrow();
         List<EnvelopeMeta> metas = invocationReport.find(envelope);
         Collection<Envelope> receivedEnvelopes = tsukuyomi.getReceived();
+        Envelope envelopeWithoutDelay = dropDelay(envelope);
         long count = receivedEnvelopes.stream()
-                .filter(isEqual(envelope))
+                .filter(isEqual(envelopeWithoutDelay))
                 .count();
         return EnvelopeSummary.of(metas, Math.toIntExact(count));
+    }
+
+    private Envelope dropDelay(Envelope envelope) {
+        return envelope.toBuilder()
+                .delay(null)
+                .build();
     }
 }

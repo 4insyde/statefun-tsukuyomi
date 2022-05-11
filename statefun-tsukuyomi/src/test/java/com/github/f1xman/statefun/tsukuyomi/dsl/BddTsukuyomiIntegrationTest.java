@@ -12,6 +12,7 @@ import org.apache.flink.statefun.sdk.java.types.Types;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
+import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 
 import static com.github.f1xman.statefun.tsukuyomi.core.capture.StateValue.empty;
@@ -29,15 +30,17 @@ class BddTsukuyomiIntegrationTest {
     static final String HELLO = "hello";
     static final String FUNCTION_ID = "functionId";
     static final String BAR = "bar";
+    public static final Duration DELAY = Duration.ofSeconds(1);
 
     @Test
     @Timeout(30)
-    void verifiesThatTheFunctionSendsMessagesInOrderTheyGoInThen() {
+    void verifiesThatTheFunctionSendsMessagesInOrderTheyExpected() {
         // Define your envelopes
         Envelope envelope = incomingEnvelope();
         Envelope expectedToFunction = outgoingEnvelopeToFunction();
         Envelope expectedToEgress = outgoingEnvelopeToEgress();
         Envelope expectedToSelf = outgoingEnvelopeToSelf().toBuilder().build();
+        Envelope expectedToFunctionDelayed = delayedEnvelopeToFunction();
         // Define function under test and its initial state
         GivenFunction testee = given(
                 function(Testee.TYPE, new Testee()),
@@ -54,6 +57,7 @@ class BddTsukuyomiIntegrationTest {
                 expectMessageInExactOrder(expectedToFunction),
                 expectMessageInExactOrder(expectedToSelf),
                 expectEgressMessageInExactOrder(expectedToEgress),
+                expectMessageInExactOrder(expectedToFunctionDelayed),
                 // and has the following state value after invocation
                 expectState(Testee.FOO, is("foo"))
         );
@@ -66,6 +70,7 @@ class BddTsukuyomiIntegrationTest {
         Envelope expectedToFunction = outgoingEnvelopeToFunction();
         Envelope expectedToEgress = outgoingEnvelopeToEgress();
         Envelope expectedToSelf = outgoingEnvelopeToSelf().toBuilder().build();
+        Envelope expectedToFunctionDelayed = delayedEnvelopeToFunction();
         GivenFunction testee = given(
                 function(Testee.TYPE, new Testee()),
                 withState(Testee.FOO, empty()),
@@ -79,6 +84,7 @@ class BddTsukuyomiIntegrationTest {
                 expectEgressMessageInAnyOrder(expectedToEgress),
                 expectMessageInAnyOrder(expectedToSelf),
                 expectMessageInAnyOrder(expectedToFunction),
+                expectMessageInAnyOrder(expectedToFunctionDelayed),
                 expectState(Testee.FOO, is("foo"))
         );
     }
@@ -95,6 +101,15 @@ class BddTsukuyomiIntegrationTest {
                 .from(Testee.TYPE, FUNCTION_ID)
                 .to(COLLABORATOR_2, FUNCTION_ID)
                 .data(Types.stringType(), HELLO + BAR)
+                .build();
+    }
+
+    private Envelope delayedEnvelopeToFunction() {
+        return Envelope.builder()
+                .from(Testee.TYPE, FUNCTION_ID)
+                .to(COLLABORATOR_2, FUNCTION_ID)
+                .data(Types.stringType(), HELLO + BAR)
+                .delay(DELAY)
                 .build();
     }
 
@@ -138,6 +153,7 @@ class BddTsukuyomiIntegrationTest {
                     .withValue(value)
                     .build();
             context.send(toEgress);
+            context.sendAfter(Duration.ofSeconds(1), toFunction);
             return context.done();
         }
     }
