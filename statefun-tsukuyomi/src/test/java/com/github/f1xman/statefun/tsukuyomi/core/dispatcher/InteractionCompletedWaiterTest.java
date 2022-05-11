@@ -32,7 +32,7 @@ class InteractionCompletedWaiterTest {
                 List.of(envelope, envelope)
         );
         given(mockedTsukuyomiApi.isActive()).willReturn(true);
-        InvocationReport report = InvocationReport.of(2, List.of());
+        InvocationReport report = InvocationReport.of(List.of(envelope, envelope));
         given(mockedTsukuyomiApi.getInvocationReport()).willReturn(Optional.of(report));
 
         interactionCompletedWaiter.await();

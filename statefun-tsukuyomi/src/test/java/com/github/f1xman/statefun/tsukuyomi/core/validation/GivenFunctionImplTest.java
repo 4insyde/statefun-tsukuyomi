@@ -167,7 +167,7 @@ class GivenFunctionImplTest {
 
     private void givenEnvelopesReceived(Envelope... envelopes) {
         List<Envelope> envelopesList = Arrays.asList(envelopes);
-        InvocationReport report = InvocationReport.of(envelopes.length, envelopesList);
+        InvocationReport report = InvocationReport.of(envelopesList);
         given(mockedTsukuyomiApi.getInvocationReport()).willReturn(Optional.of(report));
         given(mockedTsukuyomiApi.getReceived()).willReturn(envelopesList);
     }

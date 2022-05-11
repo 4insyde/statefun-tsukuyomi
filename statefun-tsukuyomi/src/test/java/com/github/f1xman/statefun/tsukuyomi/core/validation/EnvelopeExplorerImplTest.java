@@ -27,7 +27,7 @@ class EnvelopeExplorerImplTest {
     void returnsEnvelopeSummary() {
         Envelope envelope = envelope();
         Envelope envelope1 = envelope1();
-        InvocationReport invocationReport = InvocationReport.of(1, List.of(envelope, envelope1));
+        InvocationReport invocationReport = InvocationReport.of(List.of(envelope, envelope1));
         given(tsukuyomi.getInvocationReport()).willReturn(Optional.of(invocationReport));
         List<Envelope> receivedEnvelopes = List.of(envelope, envelope1);
         given(tsukuyomi.getReceived()).willReturn(receivedEnvelopes);
@@ -43,7 +43,7 @@ class EnvelopeExplorerImplTest {
     void includesEqualEnvelopeToSummaryEvenThoughDelayIsMissing() {
         Envelope envelopeWithDelay = envelopeWithDelay();
         Envelope envelopeWithoutDelay = envelope();
-        InvocationReport invocationReport = InvocationReport.of(1, List.of(envelopeWithDelay));
+        InvocationReport invocationReport = InvocationReport.of(List.of(envelopeWithDelay));
         given(tsukuyomi.getInvocationReport()).willReturn(Optional.of(invocationReport));
         List<Envelope> receivedEnvelopes = List.of(envelopeWithoutDelay);
         given(tsukuyomi.getReceived()).willReturn(receivedEnvelopes);

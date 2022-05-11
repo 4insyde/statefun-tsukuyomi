@@ -162,7 +162,7 @@ class ReportableContextImplTest {
         ReportableContextImpl reportableContext = ReportableContextImpl.spyOn(context);
         Envelope envelope = Envelope.builder()
                 .toEgress(Egresses.CAPTURED_MESSAGES)
-                .data(InvocationReport.TYPE, InvocationReport.of(0, List.of()))
+                .data(InvocationReport.TYPE, InvocationReport.of(List.of()))
                 .build();
         EgressMessage expectedMessage = EgressMessageBuilder.forEgress(Egresses.CAPTURED_MESSAGES)
                 .withCustomType(Envelope.TYPE, envelope)
@@ -179,7 +179,7 @@ class ReportableContextImplTest {
         ReportableContextImpl reportableContext = ReportableContextImpl.spyOn(context);
         Envelope envelope = Envelope.builder()
                 .toEgress(Egresses.CAPTURED_MESSAGES)
-                .data(InvocationReport.TYPE, InvocationReport.of(1, List.of(envelope())))
+                .data(InvocationReport.TYPE, InvocationReport.of(List.of(envelope())))
                 .build();
         EgressMessage expectedMessage = EgressMessageBuilder.forEgress(Egresses.CAPTURED_MESSAGES)
                 .withCustomType(Envelope.TYPE, envelope)
@@ -200,7 +200,7 @@ class ReportableContextImplTest {
         ReportableContextImpl reportableContext = ReportableContextImpl.spyOn(context);
         Envelope envelope = Envelope.builder()
                 .toEgress(Egresses.CAPTURED_MESSAGES)
-                .data(InvocationReport.TYPE, InvocationReport.of(1, List.of(egressEnvelope())))
+                .data(InvocationReport.TYPE, InvocationReport.of(List.of(egressEnvelope())))
                 .build();
         EgressMessage expectedMessage = EgressMessageBuilder.forEgress(Egresses.CAPTURED_MESSAGES)
                 .withCustomType(Envelope.TYPE, envelope)
@@ -221,7 +221,7 @@ class ReportableContextImplTest {
         ReportableContextImpl reportableContext = ReportableContextImpl.spyOn(context);
         Envelope envelope = Envelope.builder()
                 .toEgress(Egresses.CAPTURED_MESSAGES)
-                .data(InvocationReport.TYPE, InvocationReport.of(1, List.of(delayedEnvelope())))
+                .data(InvocationReport.TYPE, InvocationReport.of(List.of(delayedEnvelope())))
                 .build();
         EgressMessage expectedMessage = EgressMessageBuilder.forEgress(Egresses.CAPTURED_MESSAGES)
                 .withCustomType(Envelope.TYPE, envelope)
@@ -242,7 +242,7 @@ class ReportableContextImplTest {
         ReportableContextImpl reportableContext = ReportableContextImpl.spyOn(context);
         Envelope envelope = Envelope.builder()
                 .toEgress(Egresses.CAPTURED_MESSAGES)
-                .data(InvocationReport.TYPE, InvocationReport.of(1, List.of(delayedEnvelope())))
+                .data(InvocationReport.TYPE, InvocationReport.of(List.of(delayedEnvelope())))
                 .build();
         EgressMessage expectedMessage = EgressMessageBuilder.forEgress(Egresses.CAPTURED_MESSAGES)
                 .withCustomType(Envelope.TYPE, envelope)
@@ -263,7 +263,7 @@ class ReportableContextImplTest {
         ReportableContextImpl reportableContext = ReportableContextImpl.spyOn(context);
         Envelope envelope = Envelope.builder()
                 .toEgress(Egresses.CAPTURED_MESSAGES)
-                .data(InvocationReport.TYPE, InvocationReport.of(0, List.of()))
+                .data(InvocationReport.TYPE, InvocationReport.of(List.of()))
                 .build();
         EgressMessage expectedMessage = EgressMessageBuilder.forEgress(Egresses.CAPTURED_MESSAGES)
                 .withCustomType(Envelope.TYPE, envelope)

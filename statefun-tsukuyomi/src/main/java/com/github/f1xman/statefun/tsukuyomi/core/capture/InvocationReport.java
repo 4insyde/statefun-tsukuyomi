@@ -28,8 +28,6 @@ public class InvocationReport {
             SerDe::serialize, bytes -> SerDe.deserialize(bytes, InvocationReport.class)
     );
 
-    @JsonProperty("outgoingMessagesCount")
-    Integer outgoingMessagesCount;
     @JsonProperty("envelopes")
     List<Envelope> envelopes;
 
@@ -39,5 +37,9 @@ public class InvocationReport {
                 .filter(p -> p.getValue1().equals(envelope))
                 .map(p -> EnvelopeMeta.of(p.getValue0()))
                 .collect(toUnmodifiableList());
+    }
+
+    public int countOutgoingMessages() {
+        return envelopes.size();
     }
 }

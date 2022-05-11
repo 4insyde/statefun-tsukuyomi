@@ -14,11 +14,21 @@ class InvocationReportTest {
     @Test
     void returnsListOfEnvelopeMetaByGivenEnvelope() {
         Envelope envelope = envelope();
-        InvocationReport report = InvocationReport.of(0, List.of(envelope));
+        InvocationReport report = InvocationReport.of(List.of(envelope));
 
         List<EnvelopeMeta> metas = report.find(envelope);
 
         assertThat(metas).containsExactly(EnvelopeMeta.of(0));
+    }
+
+    @Test
+    void returnsNumberOfOutgoingMessages() {
+        Envelope envelope = envelope();
+        InvocationReport report = InvocationReport.of(List.of(envelope));
+
+        int count = report.countOutgoingMessages();
+
+        assertThat(count).isEqualTo(1);
     }
 
     private Envelope envelope() {

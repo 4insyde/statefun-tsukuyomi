@@ -27,7 +27,7 @@ public class InteractionCompletedWaiter {
 
     private boolean isCompleted() {
         Optional<InvocationReport> report = tsukuyomiApi.getInvocationReport();
-        return report.map(InvocationReport::getOutgoingMessagesCount)
+        return report.map(InvocationReport::countOutgoingMessages)
                 .filter(isEqual(tsukuyomiApi.getReceived().size()))
                 .isPresent();
     }

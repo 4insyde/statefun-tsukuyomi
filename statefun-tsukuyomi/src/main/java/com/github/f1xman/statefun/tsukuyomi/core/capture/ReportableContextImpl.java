@@ -36,7 +36,7 @@ public class ReportableContextImpl implements ReportableContext {
     public void report() {
         Envelope envelope = Envelope.builder()
                 .toEgress(Egresses.CAPTURED_MESSAGES)
-                .data(InvocationReport.TYPE, InvocationReport.of(getNumberOfOutgoingMessages(), extractEnvelopes()))
+                .data(InvocationReport.TYPE, InvocationReport.of(extractEnvelopes()))
                 .build();
         EgressMessage message = EgressMessageBuilder.forEgress(Egresses.CAPTURED_MESSAGES)
                 .withCustomType(Envelope.TYPE, envelope)
