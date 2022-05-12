@@ -12,7 +12,7 @@ import static lombok.AccessLevel.PRIVATE;
 @NoArgsConstructor(access = PRIVATE)
 public class Criteria {
 
-    public static <T> CriterionFactory expectState(ValueSpec<T> spec, Matcher<T> matcher) {
+    public static <T> CriterionFactory state(ValueSpec<T> spec, Matcher<T> matcher) {
         if (spec == null) {
             throw new NullValueSpecException("ValueSpec of a verifying state is null");
         }
@@ -23,7 +23,7 @@ public class Criteria {
         return order -> StateCriterion.of(spec, matcher);
     }
 
-    public static CriterionFactory expectMessageInExactOrder(Envelope expected) {
+    public static CriterionFactory sendsInExactOrder(Envelope expected) {
         if (expected == null) {
             throw new NullExpectedEnvelopeException(
                     "Expected envelope cannot be null. Use Envelope.builder() to build a message");
@@ -31,7 +31,7 @@ public class Criteria {
         return order -> EnvelopeCriterion.ofOrdered(order, expected);
     }
 
-    public static CriterionFactory expectMessageInAnyOrder(Envelope expected) {
+    public static CriterionFactory sendsInAnyOrder(Envelope expected) {
         if (expected == null) {
             throw new NullExpectedEnvelopeException(
                     "Expected envelope cannot be null. Use Envelope.builder() to build a message");

@@ -54,12 +54,12 @@ class BddTsukuyomiIntegrationTest {
                 receives(envelope)
         ).then(
                 // Then expect it sends the following messages
-                expectMessageInExactOrder(expectedToFunction),
-                expectMessageInExactOrder(expectedToSelf),
-                expectMessageInExactOrder(expectedToEgress),
-                expectMessageInExactOrder(expectedToFunctionDelayed),
+                sendsInExactOrder(expectedToFunction),
+                sendsInExactOrder(expectedToSelf),
+                sendsInExactOrder(expectedToEgress),
+                sendsInExactOrder(expectedToFunctionDelayed),
                 // and has the following state value after invocation
-                expectState(Testee.FOO, is("foo"))
+                state(Testee.FOO, is("foo"))
         );
     }
 
@@ -81,11 +81,11 @@ class BddTsukuyomiIntegrationTest {
                 testee,
                 receives(envelope)
         ).then(
-                expectMessageInAnyOrder(expectedToEgress),
-                expectMessageInAnyOrder(expectedToSelf),
-                expectMessageInAnyOrder(expectedToFunction),
-                expectMessageInAnyOrder(expectedToFunctionDelayed),
-                expectState(Testee.FOO, is("foo"))
+                sendsInAnyOrder(expectedToEgress),
+                sendsInAnyOrder(expectedToSelf),
+                sendsInAnyOrder(expectedToFunction),
+                sendsInAnyOrder(expectedToFunctionDelayed),
+                state(Testee.FOO, is("foo"))
         );
     }
 
