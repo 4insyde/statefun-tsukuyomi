@@ -23,7 +23,7 @@ public class Criteria {
         return order -> StateCriterion.of(spec, matcher);
     }
 
-    public static CriterionFactory sendsInExactOrder(Envelope expected) {
+    public static CriterionFactory sendsInOrder(Envelope expected) {
         if (expected == null) {
             throw new NullExpectedEnvelopeException(
                     "Expected envelope cannot be null. Use Envelope.builder() to build a message");

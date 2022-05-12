@@ -54,10 +54,10 @@ class BddTsukuyomiIntegrationTest {
                 receives(envelope)
         ).then(
                 // Then expect it sends the following messages
-                sendsInExactOrder(expectedToFunction),
-                sendsInExactOrder(expectedToSelf),
-                sendsInExactOrder(expectedToEgress),
-                sendsInExactOrder(expectedToFunctionDelayed),
+                sendsInOrder(expectedToFunction),
+                sendsInOrder(expectedToSelf),
+                sendsInOrder(expectedToEgress),
+                sendsInOrder(expectedToFunctionDelayed),
                 // and has the following state value after invocation
                 state(Testee.FOO, is("foo"))
         );
