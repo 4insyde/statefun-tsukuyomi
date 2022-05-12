@@ -39,7 +39,7 @@ class BddTsukuyomiIntegrationTest {
         Envelope envelope = incomingEnvelope();
         Envelope expectedToFunction = outgoingEnvelopeToFunction();
         Envelope expectedToEgress = outgoingEnvelopeToEgress();
-        Envelope expectedToSelf = outgoingEnvelopeToSelf().toBuilder().build();
+        Envelope expectedToSelf = outgoingEnvelopeToSelf();
         Envelope expectedToFunctionDelayed = delayedEnvelopeToFunction();
         // Define function under test and its initial state
         GivenFunction testee = given(
@@ -69,7 +69,7 @@ class BddTsukuyomiIntegrationTest {
         Envelope envelope = incomingEnvelope();
         Envelope expectedToFunction = outgoingEnvelopeToFunction();
         Envelope expectedToEgress = outgoingEnvelopeToEgress();
-        Envelope expectedToSelf = outgoingEnvelopeToSelf().toBuilder().build();
+        Envelope expectedToSelf = outgoingEnvelopeToSelf();
         Envelope expectedToFunctionDelayed = delayedEnvelopeToFunction();
         GivenFunction testee = given(
                 function(Testee.TYPE, new Testee()),
