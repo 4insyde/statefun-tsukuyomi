@@ -2,6 +2,7 @@ package com.github.f1xman.statefun.tsukuyomi.core.validation;
 
 import com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope;
 import com.github.f1xman.statefun.tsukuyomi.core.dispatcher.TsukuyomiApi;
+import org.apache.flink.statefun.sdk.java.TypeName;
 import org.apache.flink.statefun.sdk.java.types.Types;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,7 +14,8 @@ import static org.mockito.BDDMockito.then;
 @ExtendWith(MockitoExtension.class)
 class SendMessageInteractorTest {
 
-    static final String FOO_BAR = "foo/bar";
+    static final TypeName FOO_BAR = TypeName.typeNameFromString("foo/bar");
+    static final TypeName FOO_BAZ = TypeName.typeNameFromString("foo/baz");
 
     @Mock
     TsukuyomiApi mockedTsukuyomiApi;
@@ -30,8 +32,8 @@ class SendMessageInteractorTest {
 
     private Envelope envelope() {
         return Envelope.builder()
-                .from(Envelope.NodeAddress.of(FOO_BAR, "foobar"))
-                .to(Envelope.NodeAddress.of("foo/baz", "foobaz"))
+                .from(FOO_BAR, "foobar")
+                .toFunction(FOO_BAZ, "foobaz")
                 .data(Types.stringType(), "foobarbaz")
                 .build();
     }

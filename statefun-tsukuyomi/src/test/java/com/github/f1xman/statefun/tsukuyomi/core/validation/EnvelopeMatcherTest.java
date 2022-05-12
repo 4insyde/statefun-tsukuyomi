@@ -26,7 +26,7 @@ class EnvelopeMatcherTest {
     @Test
     void throwsAssertionErrorIfIndexesDoesNotMatch() {
         Envelope envelope1 = envelope1();
-        EnvelopeMatcher matcher = EnvelopeMatcher.of(List.of(EnvelopeCriterion.toFunction(0, envelope1)));
+        EnvelopeMatcher matcher = EnvelopeMatcher.of(List.of(EnvelopeCriterion.ofOrdered(0, envelope1)));
         InvocationReport invocationReport = InvocationReport.of(List.of(envelope0(), envelope1));
         given(tsukuyomi.getInvocationReport())
                 .willReturn(Optional.of(invocationReport));
@@ -45,8 +45,8 @@ class EnvelopeMatcherTest {
     void throwsAssertionErrorIfUnorderedEnvelopeIsMissingWhileTheSameOrderedEnvelopeIsPresent() {
         Envelope envelope1 = envelope1();
         EnvelopeMatcher matcher = EnvelopeMatcher.of(List.of(
-                EnvelopeCriterion.toFunction(envelope1),
-                EnvelopeCriterion.toFunction(0, envelope1))
+                EnvelopeCriterion.of(envelope1),
+                EnvelopeCriterion.ofOrdered(0, envelope1))
         );
         InvocationReport invocationReport = InvocationReport.of(List.of(envelope1));
         given(tsukuyomi.getInvocationReport())
@@ -66,8 +66,8 @@ class EnvelopeMatcherTest {
     void throwsNothingWhenCriteriaMatched() {
         Envelope envelope = envelope0();
         EnvelopeMatcher matcher = EnvelopeMatcher.of(List.of(
-                EnvelopeCriterion.toFunction(0, envelope),
-                EnvelopeCriterion.toFunction(envelope)
+                EnvelopeCriterion.ofOrdered(0, envelope),
+                EnvelopeCriterion.of(envelope)
         ));
         InvocationReport invocationReport = InvocationReport.of(List.of(envelope, envelope));
         given(tsukuyomi.getInvocationReport())
@@ -80,7 +80,7 @@ class EnvelopeMatcherTest {
     private Envelope envelope0() {
         return Envelope.builder()
                 .from(TypeName.typeNameFromString("foo/bar"), "0")
-                .to(TypeName.typeNameFromString("foo/baz"), "foobaz")
+                .toFunction(TypeName.typeNameFromString("foo/baz"), "foobaz")
                 .data(Types.stringType(), "foobarbaz")
                 .build();
     }
@@ -88,7 +88,7 @@ class EnvelopeMatcherTest {
     private Envelope envelope1() {
         return Envelope.builder()
                 .from(TypeName.typeNameFromString("foo/bar"), "1")
-                .to(TypeName.typeNameFromString("foo/baz"), "foobaz")
+                .toFunction(TypeName.typeNameFromString("foo/baz"), "foobaz")
                 .data(Types.stringType(), "foobarbaz")
                 .build();
     }

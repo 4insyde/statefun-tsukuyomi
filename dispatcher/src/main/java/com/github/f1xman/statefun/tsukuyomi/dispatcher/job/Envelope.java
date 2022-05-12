@@ -77,14 +77,11 @@ public class Envelope {
         String type;
         @JsonProperty("id")
         String id;
-
-        public static NodeAddress of(String typeName) {
-            String[] parts = typeName.split(";");
-            return new NodeAddress(parts[0], parts[1]);
-        }
+        @JsonProperty("nodeType")
+        Type nodeType;
 
         public static NodeAddress ofType(String namespace, String name) {
-            return new NodeAddress(namespace + "/" + name, null);
+            return new NodeAddress(namespace + "/" + name, null, Type.EGRESS);
         }
 
         public Address toAddress() {
@@ -92,6 +89,10 @@ public class Envelope {
             String namespace = parts[0];
             String type = parts[1];
             return new Address(new FunctionType(namespace, type), id);
+        }
+
+        public enum Type {
+            EGRESS, FUNCTION
         }
 
     }

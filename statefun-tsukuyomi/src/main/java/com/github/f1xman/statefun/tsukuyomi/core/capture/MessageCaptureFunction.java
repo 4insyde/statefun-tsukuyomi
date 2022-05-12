@@ -29,7 +29,7 @@ class MessageCaptureFunction implements StatefulFunction {
         log.info("Captured outgoing message {} from function {} to function {}", message.valueTypeName(), caller, self);
         Envelope envelope = Envelope.builder()
                 .from(caller.type(), caller.id())
-                .to(self.type(), self.id())
+                .toFunction(self.type(), self.id())
                 .data(Envelope.Data.of(
                         message.valueTypeName().asTypeNameString(),
                         Base64.getEncoder().encodeToString(message.rawValue().toByteArray())

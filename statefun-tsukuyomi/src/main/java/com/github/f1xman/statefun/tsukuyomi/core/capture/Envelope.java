@@ -2,6 +2,7 @@ package com.github.f1xman.statefun.tsukuyomi.core.capture;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.github.f1xman.statefun.tsukuyomi.core.validation.Target;
 import com.github.f1xman.statefun.tsukuyomi.util.SerDe;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -59,7 +60,7 @@ public class Envelope implements Serializable {
         String value = Base64.getEncoder().encodeToString(message.rawValue().toByteArray());
         return Envelope.builder()
                 .from(from.type(), from.id())
-                .to(message.targetAddress().type(), message.targetAddress().id())
+                .toFunction(message.targetAddress().type(), message.targetAddress().id())
                 .data(Data.of(type, value))
                 .build();
     }
@@ -110,7 +111,7 @@ public class Envelope implements Serializable {
             if (id.isEmpty()) {
                 throw new IllegalArgumentException("id cannot be empty");
             }
-            from = NodeAddress.of(typeName.asTypeNameString(), id);
+            from = NodeAddress.of(typeName.asTypeNameString(), id, NodeAddress.Type.FUNCTION);
             return this;
         }
 
@@ -119,16 +120,16 @@ public class Envelope implements Serializable {
             return this;
         }
 
-        public EnvelopeBuilder to(@NonNull TypeName typeName, @NonNull String id) {
+        public EnvelopeBuilder toFunction(@NonNull TypeName typeName, @NonNull String id) {
             if (id.isEmpty()) {
                 throw new IllegalArgumentException("id cannot be empty");
             }
-            to = NodeAddress.of(typeName.asTypeNameString(), id);
+            to = NodeAddress.of(typeName.asTypeNameString(), id, NodeAddress.Type.FUNCTION);
             return this;
         }
 
         public EnvelopeBuilder toEgress(TypeName typeName) {
-            to = NodeAddress.of(typeName.asTypeNameString(), null);
+            to = NodeAddress.of(typeName.asTypeNameString(), null, NodeAddress.Type.EGRESS);
             return this;
         }
 
@@ -167,7 +168,19 @@ public class Envelope implements Serializable {
         String type;
         @JsonProperty("id")
         String id;
+        @JsonProperty("nodeType")
+        Type nodeType;
 
+        public Target toTarget() {
+            return Target.of(
+                    TypeName.typeNameFromString(type),
+                    Target.Type.valueOf(nodeType.name())
+            );
+        }
+
+        public enum Type {
+            FUNCTION, EGRESS
+        }
     }
 
     @RequiredArgsConstructor(staticName = "of", onConstructor_ = @JsonCreator)

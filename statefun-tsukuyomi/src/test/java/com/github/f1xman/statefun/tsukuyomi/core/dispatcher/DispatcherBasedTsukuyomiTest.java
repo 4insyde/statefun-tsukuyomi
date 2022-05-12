@@ -31,13 +31,13 @@ class DispatcherBasedTsukuyomiTest {
         DispatcherBasedTsukuyomi tsukuyomi = DispatcherBasedTsukuyomi.of(mockedClient, null, () -> true);
         Envelope envelope = Envelope.builder()
                 .from(TypeName.typeNameFromString("foo/from"), "from")
-                .to(TypeName.typeNameFromString("foo/to"), "to")
+                .toFunction(TypeName.typeNameFromString("foo/to"), "to")
                 .data(Types.stringType(), "foobar")
                 .build();
         InvocationReport invocationReport = InvocationReport.of(List.of(envelope));
         Envelope reportEnvelope = Envelope.builder()
                 .from(TypeName.typeNameFromString("foo/from"), "from")
-                .to(TypeName.typeNameFromString("foo/to"), "to")
+                .toFunction(TypeName.typeNameFromString("foo/to"), "to")
                 .data(InvocationReport.TYPE, invocationReport)
                 .build();
         given(mockedClient.getReceived()).willReturn(List.of(reportEnvelope), List.of(reportEnvelope, envelope));
@@ -53,7 +53,7 @@ class DispatcherBasedTsukuyomiTest {
         DispatcherBasedTsukuyomi tsukuyomi = DispatcherBasedTsukuyomi.of(mockedClient, null, () -> true);
         Envelope envelope = Envelope.builder()
                 .from(TypeName.typeNameFromString("foo/from"), "from")
-                .to(TypeName.typeNameFromString("foo/to"), "to")
+                .toFunction(TypeName.typeNameFromString("foo/to"), "to")
                 .data(Types.stringType(), "foobar")
                 .build();
         List<Envelope> expected = List.of(envelope);

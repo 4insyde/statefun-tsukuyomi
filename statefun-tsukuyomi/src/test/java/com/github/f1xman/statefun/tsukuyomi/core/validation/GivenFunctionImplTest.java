@@ -70,8 +70,8 @@ class GivenFunctionImplTest {
                 .build();
 
         givenFunction.start(
-                EnvelopeCriterion.toFunction(envelopeToAnotherFunction()),
-                EnvelopeCriterion.toEgress(envelopeToEgress())
+                EnvelopeCriterion.of(envelopeToAnotherFunction()),
+                EnvelopeCriterion.of(envelopeToEgress())
         );
 
         then(mockedTsukuyomiManager).should().start(expectedStatefunModule);
@@ -117,7 +117,7 @@ class GivenFunctionImplTest {
         givenEnvelopesReceived(envelope);
 
         assertThatThrownBy(
-                () -> givenFunction.expect(EnvelopeCriterion.toFunction(INCORRECT_ORDER, envelope)))
+                () -> givenFunction.expect(EnvelopeCriterion.ofOrdered(INCORRECT_ORDER, envelope)))
                 .isInstanceOf(AssertionError.class);
     }
 
@@ -132,7 +132,7 @@ class GivenFunctionImplTest {
         givenEnvelopesReceived(envelope);
 
         assertThatNoException()
-                .isThrownBy(() -> givenFunction.expect(EnvelopeCriterion.toFunction(CORRECT_ORDER, envelope)));
+                .isThrownBy(() -> givenFunction.expect(EnvelopeCriterion.ofOrdered(CORRECT_ORDER, envelope)));
     }
 
     @Test
@@ -146,8 +146,8 @@ class GivenFunctionImplTest {
         givenEnvelopesReceived(envelope);
 
         assertThatThrownBy(() -> givenFunction.expect(
-                EnvelopeCriterion.toFunction(CORRECT_ORDER, envelope),
-                EnvelopeCriterion.toFunction(envelope)
+                EnvelopeCriterion.ofOrdered(CORRECT_ORDER, envelope),
+                EnvelopeCriterion.of(envelope)
         )).isInstanceOf(AssertionError.class);
     }
 
@@ -174,28 +174,28 @@ class GivenFunctionImplTest {
 
     private Envelope envelope() {
         return Envelope.builder()
-                .to(FooBar.TYPE_NAME, ID)
+                .toFunction(FooBar.TYPE_NAME, ID)
                 .data(Types.stringType(), "foobarbaz")
                 .build();
     }
 
     private Envelope envelope1() {
         return Envelope.builder()
-                .to(FooBar.TYPE_NAME, ID)
+                .toFunction(FooBar.TYPE_NAME, ID)
                 .data(Types.stringType(), "barbarbar")
                 .build();
     }
 
     private Envelope envelopeToAnotherFunction() {
         return Envelope.builder()
-                .to(ANOTHER_TYPE_NAME, ID)
+                .toFunction(ANOTHER_TYPE_NAME, ID)
                 .data(Types.stringType(), "foobarbaz")
                 .build();
     }
 
     private Envelope envelopeToEgress() {
         return Envelope.builder()
-                .to(EGRESS_TYPE_NAME, ID)
+                .toEgress(EGRESS_TYPE_NAME)
                 .data(Types.stringType(), "foobarbaz")
                 .build();
     }

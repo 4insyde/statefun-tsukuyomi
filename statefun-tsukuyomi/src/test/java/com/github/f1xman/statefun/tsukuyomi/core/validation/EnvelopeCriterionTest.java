@@ -13,32 +13,32 @@ class EnvelopeCriterionTest {
 
     @Test
     void isOrderedReturnsTrueIfCriterionIsOrdered() {
-        EnvelopeCriterion criterion = EnvelopeCriterion.toFunction(0, envelope());
+        EnvelopeCriterion criterion = EnvelopeCriterion.ofOrdered(0, envelope());
 
         assertThat(criterion.isOrdered()).isTrue();
     }
 
     @Test
     void isOrderedReturnsFalseIfCriterionIsUnordered() {
-        EnvelopeCriterion criterion = EnvelopeCriterion.toFunction(envelope());
+        EnvelopeCriterion criterion = EnvelopeCriterion.of(envelope());
 
         assertThat(criterion.isOrdered()).isFalse();
     }
 
     @Test
     void returnsTargetWithTypeNameOfToAndGivenType() {
-        EnvelopeCriterion criterion = EnvelopeCriterion.toEgress(envelope());
+        EnvelopeCriterion criterion = EnvelopeCriterion.of(envelope());
 
         Target target = criterion.getTarget();
 
         assertThat(target.getTypeName()).isEqualTo(TO_TYPE_NAME);
-        assertThat(target.getType()).isEqualTo(Target.Type.EGRESS);
+        assertThat(target.getType()).isEqualTo(Target.Type.FUNCTION);
     }
 
     private Envelope envelope() {
         return Envelope.builder()
                 .from(TypeName.typeNameFromString("foo/bar"), "foobar")
-                .to(TO_TYPE_NAME, "foobaz")
+                .toFunction(TO_TYPE_NAME, "foobaz")
                 .data(Types.stringType(), "foobarbaz")
                 .build();
     }

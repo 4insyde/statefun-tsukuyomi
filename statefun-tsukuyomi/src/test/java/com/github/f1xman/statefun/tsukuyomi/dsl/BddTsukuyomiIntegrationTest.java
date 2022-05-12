@@ -56,7 +56,7 @@ class BddTsukuyomiIntegrationTest {
                 // Then expect it sends the following messages
                 expectMessageInExactOrder(expectedToFunction),
                 expectMessageInExactOrder(expectedToSelf),
-                expectEgressMessageInExactOrder(expectedToEgress),
+                expectMessageInExactOrder(expectedToEgress),
                 expectMessageInExactOrder(expectedToFunctionDelayed),
                 // and has the following state value after invocation
                 expectState(Testee.FOO, is("foo"))
@@ -81,7 +81,7 @@ class BddTsukuyomiIntegrationTest {
                 testee,
                 receives(envelope)
         ).then(
-                expectEgressMessageInAnyOrder(expectedToEgress),
+                expectMessageInAnyOrder(expectedToEgress),
                 expectMessageInAnyOrder(expectedToSelf),
                 expectMessageInAnyOrder(expectedToFunction),
                 expectMessageInAnyOrder(expectedToFunctionDelayed),
@@ -99,7 +99,7 @@ class BddTsukuyomiIntegrationTest {
     private Envelope outgoingEnvelopeToFunction() {
         return Envelope.builder()
                 .from(Testee.TYPE, FUNCTION_ID)
-                .to(COLLABORATOR_2, FUNCTION_ID)
+                .toFunction(COLLABORATOR_2, FUNCTION_ID)
                 .data(Types.stringType(), HELLO + BAR)
                 .build();
     }
@@ -107,7 +107,7 @@ class BddTsukuyomiIntegrationTest {
     private Envelope delayedEnvelopeToFunction() {
         return Envelope.builder()
                 .from(Testee.TYPE, FUNCTION_ID)
-                .to(COLLABORATOR_2, FUNCTION_ID)
+                .toFunction(COLLABORATOR_2, FUNCTION_ID)
                 .data(Types.stringType(), HELLO + BAR)
                 .delay(DELAY)
                 .build();
@@ -116,7 +116,7 @@ class BddTsukuyomiIntegrationTest {
     private Envelope outgoingEnvelopeToSelf() {
         return Envelope.builder()
                 .from(Testee.TYPE, FUNCTION_ID)
-                .to(Testee.TYPE, FUNCTION_ID)
+                .toFunction(Testee.TYPE, FUNCTION_ID)
                 .data(Types.stringType(), HELLO + BAR)
                 .build();
     }
@@ -124,7 +124,7 @@ class BddTsukuyomiIntegrationTest {
     private Envelope incomingEnvelope() {
         return Envelope.builder()
                 .from(COLLABORATOR_1, FUNCTION_ID)
-                .to(Testee.TYPE, FUNCTION_ID)
+                .toFunction(Testee.TYPE, FUNCTION_ID)
                 .data(Types.stringType(), HELLO)
                 .build();
     }

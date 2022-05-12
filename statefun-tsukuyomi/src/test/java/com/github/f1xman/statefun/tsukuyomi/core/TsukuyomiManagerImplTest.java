@@ -53,12 +53,12 @@ class TsukuyomiManagerImplTest {
             TsukuyomiApi client = tsukuyomiManager.start(statefunModule);
             Envelope envelope = Envelope.builder()
                     .from(COLLABORATOR, FUNCTION_ID)
-                    .to(Testee.TYPE, FUNCTION_ID)
+                    .toFunction(Testee.TYPE, FUNCTION_ID)
                     .data(Types.stringType(), HELLO)
                     .build();
             Envelope expectedToFunction = envelope.toBuilder()
                     .from(Testee.TYPE, FUNCTION_ID)
-                    .to(COLLABORATOR, FUNCTION_ID)
+                    .toFunction(COLLABORATOR, FUNCTION_ID)
                     .build();
             Envelope expectedToEgress = envelope.toBuilder()
                     .from(null)
@@ -90,7 +90,7 @@ class TsukuyomiManagerImplTest {
             TsukuyomiApi client = tsukuyomiManager.start(statefunModule);
             Envelope envelope = Envelope.builder()
                     .from(COLLABORATOR, FUNCTION_ID)
-                    .to(Testee.TYPE, FUNCTION_ID)
+                    .toFunction(Testee.TYPE, FUNCTION_ID)
                     .data(Types.stringType(), HELLO)
                     .build();
 

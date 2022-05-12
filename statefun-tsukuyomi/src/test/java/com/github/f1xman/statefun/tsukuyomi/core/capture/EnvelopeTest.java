@@ -1,5 +1,6 @@
 package com.github.f1xman.statefun.tsukuyomi.core.capture;
 
+import com.github.f1xman.statefun.tsukuyomi.core.validation.Target;
 import org.apache.flink.statefun.sdk.java.TypeName;
 import org.apache.flink.statefun.sdk.java.types.Type;
 import org.apache.flink.statefun.sdk.java.types.TypeSerializer;
@@ -10,6 +11,7 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 
 import java.util.Base64;
 
+import static com.github.f1xman.statefun.tsukuyomi.core.capture.Envelope.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -17,7 +19,7 @@ class EnvelopeTest {
 
     @Test
     void throwsExceptionIfToIsNull() {
-        assertThatThrownBy(() -> Envelope.builder()
+        assertThatThrownBy(() -> builder()
                 .data(Types.stringType(), "Foo")
                 .build()
         ).isInstanceOf(IllegalArgumentException.class);
@@ -25,27 +27,27 @@ class EnvelopeTest {
 
     @Test
     void throwsExceptionIfDataIsNull() {
-        assertThatThrownBy(() -> Envelope.builder()
+        assertThatThrownBy(() -> builder()
                 .data(null)
-                .to(TypeName.typeNameFromString("foo/bar"), "baz")
+                .toFunction(TypeName.typeNameFromString("foo/bar"), "baz")
                 .build()
         ).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void throwsExceptionIfFromTypenameIsNull() {
-        assertThatThrownBy(() -> Envelope.builder()
+        assertThatThrownBy(() -> builder()
                 .from(null, "id")
                 .data(Types.stringType(), "foo")
-                .to(TypeName.typeNameFromString("foo/too"), "id")
+                .toFunction(TypeName.typeNameFromString("foo/too"), "id")
                 .build()
         ).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void throwsExceptionIfToTypenameIsNull() {
-        assertThatThrownBy(() -> Envelope.builder()
-                .to(null, "id")
+        assertThatThrownBy(() -> builder()
+                .toFunction(null, "id")
                 .from(TypeName.typeNameFromString("foo/from"), "id")
                 .data(Types.stringType(), "foo")
                 .build()
@@ -55,9 +57,9 @@ class EnvelopeTest {
     @ParameterizedTest
     @NullAndEmptySource
     void throwsExceptionIfFromIdIsNullOrEmpty(String id) {
-        assertThatThrownBy(() -> Envelope.builder()
+        assertThatThrownBy(() -> builder()
                 .from(TypeName.typeNameFromString("foo/from"), id)
-                .to(TypeName.typeNameFromString("foo/to"), "id")
+                .toFunction(TypeName.typeNameFromString("foo/to"), "id")
                 .data(Types.stringType(), "foo")
                 .build()
         ).isInstanceOf(IllegalArgumentException.class);
@@ -66,8 +68,8 @@ class EnvelopeTest {
     @ParameterizedTest
     @NullAndEmptySource
     void throwsExceptionIfToIdIsNullOrEmpty(String id) {
-        assertThatThrownBy(() -> Envelope.builder()
-                .to(TypeName.typeNameFromString("foo/to"), id)
+        assertThatThrownBy(() -> builder()
+                .toFunction(TypeName.typeNameFromString("foo/to"), id)
                 .from(TypeName.typeNameFromString("foo/from"), "id")
                 .data(Types.stringType(), "foo")
                 .build()
@@ -85,8 +87,8 @@ class EnvelopeTest {
 
     @Test
     void toStringHasDeserializedValueIfTypeIsKnown() {
-        Envelope envelope = Envelope.builder()
-                .to(TypeName.typeNameFromString("foo/to"), "id")
+        Envelope envelope = builder()
+                .toFunction(TypeName.typeNameFromString("foo/to"), "id")
                 .data(Types.stringType(), "Foo")
                 .build();
 
@@ -97,12 +99,12 @@ class EnvelopeTest {
 
     @Test
     void toStringHasBase64ValueIfTypeIsUnknown() {
-        Envelope.resetRenderers();
+        resetRenderers();
         byte[] bytes = Types.stringType().typeSerializer().serialize("Foo").toByteArray();
         String base64Value = Base64.getEncoder().encodeToString(bytes);
-        Envelope envelope = Envelope.builder()
-                .to(TypeName.typeNameFromString("foo/to"), "id")
-                .data(Envelope.Data.of(Types.stringType().typeName().asTypeNameString(), base64Value))
+        Envelope envelope = builder()
+                .toFunction(TypeName.typeNameFromString("foo/to"), "id")
+                .data(Data.of(Types.stringType().typeName().asTypeNameString(), base64Value))
                 .build();
 
         String actual = envelope.getData().toString();
@@ -112,8 +114,8 @@ class EnvelopeTest {
 
     @Test
     void deserializesData() {
-        Envelope envelope = Envelope.builder()
-                .to(TypeName.typeNameFromString("foo/to"), "id")
+        Envelope envelope = builder()
+                .toFunction(TypeName.typeNameFromString("foo/to"), "id")
                 .data(Types.stringType(), "Foo")
                 .build();
 
@@ -124,21 +126,31 @@ class EnvelopeTest {
 
     @Test
     void returnsTrueIfTypeEquals() {
-        Envelope envelope = Envelope.builder()
-                .to(TypeName.typeNameFromString("foo/to"), "id")
+        Envelope envelope = builder()
+                .toFunction(TypeName.typeNameFromString("foo/to"), "id")
                 .data(Types.stringType(), "Foo")
                 .build();
 
         assertThat(envelope.is(Types.stringType())).isTrue();
     }
 
+    @Test
+    void createsTargetFromNode() {
+        NodeAddress nodeAddress = NodeAddress.of("foo/bar", "baz", NodeAddress.Type.FUNCTION);
+
+        Target target = nodeAddress.toTarget();
+
+        assertThat(target.getType()).isEqualTo(Target.Type.FUNCTION);
+        assertThat(target.getTypeName()).isEqualTo(TypeName.typeNameFromString("foo/bar"));
+    }
+
     private Envelope buildEnvelopeViaPureSetters() {
         Type<String> stringType = Types.stringType();
         TypeSerializer<String> serializer = stringType.typeSerializer();
-        return Envelope.builder()
+        return builder()
                 .from(TypeName.typeNameFromString("foo/bar"), "foobar")
-                .to(TypeName.typeNameFromString("foo/baz"), "foobaz")
-                .data(Envelope.Data.of(
+                .toFunction(TypeName.typeNameFromString("foo/baz"), "foobaz")
+                .data(Data.of(
                         stringType.typeName().asTypeNameString(),
                         Base64.getEncoder().encodeToString(serializer.serialize("foobarbaz").toByteArray())
                 ))
@@ -146,9 +158,9 @@ class EnvelopeTest {
     }
 
     private Envelope buildEnvelopeViaShortcuts() {
-        return Envelope.builder()
+        return builder()
                 .from(TypeName.typeNameFromString("foo/bar"), "foobar")
-                .to(TypeName.typeNameFromString("foo/baz"), "foobaz")
+                .toFunction(TypeName.typeNameFromString("foo/baz"), "foobaz")
                 .data(Types.stringType(), "foobarbaz")
                 .build();
     }

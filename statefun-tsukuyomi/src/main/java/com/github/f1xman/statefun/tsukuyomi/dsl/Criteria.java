@@ -28,15 +28,7 @@ public class Criteria {
             throw new NullExpectedEnvelopeException(
                     "Expected envelope cannot be null. Use Envelope.builder() to build a message");
         }
-        return order -> EnvelopeCriterion.toFunction(order, expected);
-    }
-
-    public static CriterionFactory expectEgressMessageInExactOrder(Envelope expected) {
-        if (expected == null) {
-            throw new NullExpectedEnvelopeException(
-                    "Expected envelope to egress cannot be null. Use Envelope.builder() to build a message");
-        }
-        return order -> EnvelopeCriterion.toEgress(order, expected);
+        return order -> EnvelopeCriterion.ofOrdered(order, expected);
     }
 
     public static CriterionFactory expectMessageInAnyOrder(Envelope expected) {
@@ -44,14 +36,7 @@ public class Criteria {
             throw new NullExpectedEnvelopeException(
                     "Expected envelope cannot be null. Use Envelope.builder() to build a message");
         }
-        return order -> EnvelopeCriterion.toFunction(expected);
+        return order -> EnvelopeCriterion.of(expected);
     }
 
-    public static CriterionFactory expectEgressMessageInAnyOrder(Envelope expected) {
-        if (expected == null) {
-            throw new NullExpectedEnvelopeException(
-                    "Expected envelope to egress cannot be null. Use Envelope.builder() to build a message");
-        }
-        return order -> EnvelopeCriterion.toEgress(expected);
-    }
 }

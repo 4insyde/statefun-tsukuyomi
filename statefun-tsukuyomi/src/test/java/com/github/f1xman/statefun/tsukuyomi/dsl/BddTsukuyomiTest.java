@@ -120,7 +120,7 @@ class BddTsukuyomiTest {
     private Envelope incomingEnvelope() {
         return Envelope.builder()
                 .from(COLLABORATOR_1, FUNCTION_ID)
-                .to(Testee.TYPE, FUNCTION_ID)
+                .toFunction(Testee.TYPE, FUNCTION_ID)
                 .data(Types.stringType(), HELLO)
                 .build();
     }

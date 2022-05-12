@@ -39,7 +39,7 @@ class MessageCaptureFunctionTest {
                 .build();
         Envelope envelope = Envelope.builder()
                 .from(FROM.type(), FROM.id())
-                .to(TO.type(), TO.id())
+                .toFunction(TO.type(), TO.id())
                 .data(Greeting.TYPE, greeting)
                 .build();
         EgressMessage expected = EgressMessageBuilder.forEgress(Egresses.CAPTURED_MESSAGES)

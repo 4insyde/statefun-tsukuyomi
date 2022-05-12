@@ -33,7 +33,7 @@ class SocketDispatcherClientTest {
         Assertions.assertTimeoutPreemptively(Duration.ofSeconds(5), () -> {
             Envelope expected = Envelope.builder()
                     .from(TypeName.typeNameFromString("foo/from"), "id")
-                    .to(TypeName.typeNameFromString("foo/to"), "id")
+                    .toFunction(TypeName.typeNameFromString("foo/to"), "id")
                     .data(Types.stringType(), "foo")
                     .build();
             @Cleanup
@@ -54,12 +54,12 @@ class SocketDispatcherClientTest {
     void receivesEnvelopesInOrder() throws IOException {
         Envelope expectedEnvelopeFoo = Envelope.builder()
                 .from(TypeName.typeNameFromString("foo/from"), "id")
-                .to(TypeName.typeNameFromString("foo/to"), "id")
+                .toFunction(TypeName.typeNameFromString("foo/to"), "id")
                 .data(Types.stringType(), "foo")
                 .build();
         Envelope expectedEnvelopeBar = Envelope.builder()
                 .from(TypeName.typeNameFromString("bar/from"), "id")
-                .to(TypeName.typeNameFromString("bar/to"), "id")
+                .toFunction(TypeName.typeNameFromString("bar/to"), "id")
                 .data(Types.stringType(), "foo")
                 .build();
         Envelope[] expected = {expectedEnvelopeBar, expectedEnvelopeFoo};

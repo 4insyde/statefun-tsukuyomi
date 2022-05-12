@@ -34,7 +34,7 @@ class InvocationReportTest {
     private Envelope envelope() {
         return Envelope.builder()
                 .from(TypeName.typeNameFromString("foo/bar"), "foobar")
-                .to(TypeName.typeNameFromString("foo/baz"), "foobaz")
+                .toFunction(TypeName.typeNameFromString("foo/baz"), "foobaz")
                 .data(Types.stringType(), "foobarbaz")
                 .build();
     }

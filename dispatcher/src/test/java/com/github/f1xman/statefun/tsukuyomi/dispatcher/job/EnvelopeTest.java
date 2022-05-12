@@ -14,8 +14,8 @@ class EnvelopeTest {
     @Test
     void serializes() throws JsonProcessingException {
         Envelope envelope = new Envelope(
-                new Envelope.NodeAddress("foo/from", "bar"),
-                new Envelope.NodeAddress("foo/to", "baz"),
+                new Envelope.NodeAddress("foo/from", "bar", Envelope.NodeAddress.Type.FUNCTION),
+                new Envelope.NodeAddress("foo/to", "baz", Envelope.NodeAddress.Type.FUNCTION),
                 new Envelope.Data("foo/data", "foobarbaz"),
                 Duration.ofHours(1)
         );
@@ -29,8 +29,8 @@ class EnvelopeTest {
     @Test
     void deserializes() throws JsonProcessingException {
         Envelope expected = new Envelope(
-                new Envelope.NodeAddress("foo/from", "bar"),
-                new Envelope.NodeAddress("foo/to", "baz"),
+                new Envelope.NodeAddress("foo/from", "bar", Envelope.NodeAddress.Type.FUNCTION),
+                new Envelope.NodeAddress("foo/to", "baz", Envelope.NodeAddress.Type.FUNCTION),
                 new Envelope.Data("foo/data", "foobarbaz"),
                 Duration.ofHours(1)
         );

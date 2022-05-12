@@ -282,7 +282,7 @@ class ReportableContextImplTest {
     private Envelope envelope() {
         return Envelope.builder()
                 .from(SELF.type(), SELF.id())
-                .to(TARGET.type(), TARGET.id())
+                .toFunction(TARGET.type(), TARGET.id())
                 .data(Types.stringType(), VALUE)
                 .build();
     }
@@ -297,7 +297,7 @@ class ReportableContextImplTest {
     private Envelope delayedEnvelope() {
         return Envelope.builder()
                 .from(SELF.type(), SELF.id())
-                .to(TARGET.type(), TARGET.id())
+                .toFunction(TARGET.type(), TARGET.id())
                 .data(Types.stringType(), VALUE)
                 .delay(DELAY)
                 .build();
