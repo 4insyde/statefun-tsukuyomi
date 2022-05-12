@@ -35,9 +35,9 @@ GivenFunction testee = given(
 ### Verification of outgoing messages
 ```java
 then(
-    expectMessageInExactOrder(expectedToFunction),
-    expectEgressMessageInExactOrder(expectedToEgress),
-    expectMessageInAnyOrder(expectedToSelf)
+    sendsInOrder(expectedToFunction),
+    sendsInOrder(expectedToEgress),
+    sendsInAnyOrder(expectedToSelf)
 );
 ```
 ### Verification of message order
@@ -50,17 +50,17 @@ require it due to the async nature of event-driven applications.
 ```java
 then(
     // Verifies the target function receives this message first
-    expectMessageInExactOrder(expectedToFunction),
+    sendsInOrder(expectedToFunction),
     // Does not care about the order
-    expectEgressMessageInAnyOrder(expectedToEgress),
+    sendsInAnyOrder(expectedToEgress),
     // Verifies the target function then receives this message
-    expectMessageInExactOrder(expectedToFunction),
+    sendsInOrder(expectedToFunction),
 );
 ```
 ### Verification of state after interaction
 ```java
 .then(
-    expectState(Testee.FOO, is("foo")) // Hamcrest matchers supported
+    state(Testee.FOO, is("foo")) // Hamcrest matchers supported
 );
 ```
 ## Installation
@@ -100,10 +100,15 @@ static class Testee implements StatefulFunction {
                 .withValue(value)
                 .build();
         context.send(toFunction);
+        Message toSelf = MessageBuilder.forAddress(context.self())
+                .withValue(value)
+                .build();
+        context.send(toSelf);
         EgressMessage toEgress = EgressMessageBuilder.forEgress(EGRESS)
                 .withValue(value)
                 .build();
         context.send(toEgress);
+        context.sendAfter(Duration.ofSeconds(1), toFunction);
         return context.done();
     }
 }
@@ -118,13 +123,6 @@ Who receives this message. Destination can be either function or egress.
 #### Data (Mandatory)
 A message content.
 ```java
-private Envelope outgoingEnvelopeToSelf() {
-    return Envelope.builder()
-        .from(Testee.TYPE, FUNCTION_ID)
-        .to(Testee.TYPE, FUNCTION_ID)
-        .data(Types.stringType(), HELLO + BAR)
-        .build();
-}
 private Envelope outgoingEnvelopeToEgress() {
     return Envelope.builder()
         .toEgress(EGRESS)
@@ -135,7 +133,24 @@ private Envelope outgoingEnvelopeToEgress() {
 private Envelope outgoingEnvelopeToFunction() {
     return Envelope.builder()
         .from(Testee.TYPE, FUNCTION_ID)
-        .to(COLLABORATOR_2, FUNCTION_ID)
+        .toFunction(COLLABORATOR_2, FUNCTION_ID)
+        .data(Types.stringType(), HELLO + BAR)
+        .build();
+}
+
+private Envelope delayedEnvelopeToFunction() {
+    return Envelope.builder()
+        .from(Testee.TYPE, FUNCTION_ID)
+        .toFunction(COLLABORATOR_2, FUNCTION_ID)
+        .data(Types.stringType(), HELLO + BAR)
+        .delay(DELAY)
+        .build();
+}
+
+private Envelope outgoingEnvelopeToSelf() {
+    return Envelope.builder()
+        .from(Testee.TYPE, FUNCTION_ID)
+        .toFunction(Testee.TYPE, FUNCTION_ID)
         .data(Types.stringType(), HELLO + BAR)
         .build();
 }
@@ -143,7 +158,7 @@ private Envelope outgoingEnvelopeToFunction() {
 private Envelope incomingEnvelope() {
     return Envelope.builder()
         .from(COLLABORATOR_1, FUNCTION_ID)
-        .to(Testee.TYPE, FUNCTION_ID)
+        .toFunction(Testee.TYPE, FUNCTION_ID)
         .data(Types.stringType(), HELLO)
         .build();
 }
@@ -153,13 +168,14 @@ private Envelope incomingEnvelope() {
 
 ```java
 @Test
-@Timeout(60)
-void exchangesMessages() {
+@Timeout(30)
+void verifiesThatTheFunctionSendsMessagesInOrderTheyExpected() {
     // Define your envelopes
     Envelope envelope = incomingEnvelope();
     Envelope expectedToFunction = outgoingEnvelopeToFunction();
     Envelope expectedToEgress = outgoingEnvelopeToEgress();
-    Envelope expectedToSelf = outgoingEnvelopeToSelf().toBuilder().build();
+    Envelope expectedToSelf = outgoingEnvelopeToSelf();
+    Envelope expectedToFunctionDelayed = delayedEnvelopeToFunction();
     // Define function under test and its initial state
     GivenFunction testee = given(
         function(Testee.TYPE, new Testee()),
@@ -173,11 +189,12 @@ void exchangesMessages() {
         receives(envelope)
     ).then(
         // Then expect it sends the following messages
-        expectMessageInExactOrder(expectedToFunction),
-        expectEgressMessageInExactOrder(expectedToEgress),
-        expectMessageInExactOrder(expectedToSelf),
+        sendsInOrder(expectedToFunction),
+        sendsInOrder(expectedToSelf),
+        sendsInOrder(expectedToEgress),
+        sendsInOrder(expectedToFunctionDelayed),
         // and has the following state value after invocation
-        expectState(Testee.FOO, is("foo"))
+        state(Testee.FOO, is("foo"))
     );
 }
 ```
