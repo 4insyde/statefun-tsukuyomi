@@ -39,7 +39,7 @@ GivenFunction testee = given(
 then(
     sendsInOrder(expectedToFunction),
     sendsInOrder(expectedToEgress),
-    sendsInAnyOrder(expectedToSelf)
+    sends(expectedToSelf)
 );
 ```
 ### Verification of message order
@@ -51,7 +51,7 @@ then(
     // Verifies that function sends this message first.
     sendsInOrder(expectedToFunction),
     // Verifies that the function sends this message in any order.
-    sendsInAnyOrder(expectedToEgress),
+    sends(expectedToEgress),
     // Verifies that the function sends this message third.
     sendsInOrder(expectedToFunction),
 );

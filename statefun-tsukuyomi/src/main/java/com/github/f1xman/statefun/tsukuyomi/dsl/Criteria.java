@@ -31,7 +31,7 @@ public class Criteria {
         return order -> EnvelopeCriterion.ofOrdered(order, expected);
     }
 
-    public static CriterionFactory sendsInAnyOrder(Envelope expected) {
+    public static CriterionFactory sends(Envelope expected) {
         if (expected == null) {
             throw new NullExpectedEnvelopeException(
                     "Expected envelope cannot be null. Use Envelope.builder() to build a message");

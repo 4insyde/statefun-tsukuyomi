@@ -81,10 +81,10 @@ class BddTsukuyomiIntegrationTest {
                 testee,
                 receives(envelope)
         ).then(
-                sendsInAnyOrder(expectedToEgress),
-                sendsInAnyOrder(expectedToSelf),
-                sendsInAnyOrder(expectedToFunction),
-                sendsInAnyOrder(expectedToFunctionDelayed),
+                sends(expectedToEgress),
+                sends(expectedToSelf),
+                sends(expectedToFunction),
+                sends(expectedToFunctionDelayed),
                 state(Testee.FOO, is("foo"))
         );
     }
