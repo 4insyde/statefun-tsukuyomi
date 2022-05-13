@@ -41,19 +41,16 @@ then(
 );
 ```
 ### Verification of message order
-When a function sends multiple messages to the **same destination** (e.g. the same egress, or another function of the same 
-type and id), it might be essential to ensure that messages have a specific order. For instance, CREATE operation goes 
-before the UPDATE or DELETE. Statefun Tsukuyomi validates that the order of outgoing messages is the same as you declare
-it in a then(..) block.
-**Statefun Tsukuyomi does not verify the order of messages with different destinations** since real-life use cases rarely 
-require it due to the async nature of event-driven applications.
+Statefun Tsukuyomi supports verification of outgoing messages in two modes: **in order** and **in any order**. 
+In any order mode verifies whether the function under test sends the message. In order mode verifies 
+that the function sends the message in a particular order.
 ```java
 then(
-    // Verifies the target function receives this message first
+    // Verifies that function sends this message first.
     sendsInOrder(expectedToFunction),
-    // Does not care about the order
+    // Verifies that the function sends this message in any order.
     sendsInAnyOrder(expectedToEgress),
-    // Verifies the target function then receives this message
+    // Verifies that the function sends this message third.
     sendsInOrder(expectedToFunction),
 );
 ```
@@ -143,7 +140,7 @@ private Envelope delayedEnvelopeToFunction() {
         .from(Testee.TYPE, FUNCTION_ID)
         .toFunction(COLLABORATOR_2, FUNCTION_ID)
         .data(Types.stringType(), HELLO + BAR)
-        .delay(DELAY)
+        .delay(Duration.ofHours(1))
         .build();
 }
 
