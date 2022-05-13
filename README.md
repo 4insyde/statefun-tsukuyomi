@@ -1,6 +1,6 @@
 # statefun-tsukuyomi
 
-Integration test utility for Flink Stateful Functions.
+Statefun Tsukuyomi is a library for Java that enables narrowed integration testing of Flink Stateful Functions applications.
 
 ## What's Tsukuyomi?
 
