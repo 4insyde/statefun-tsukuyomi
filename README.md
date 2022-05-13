@@ -116,7 +116,7 @@ static class Testee implements StatefulFunction {
 ```
 
 ### Create envelopes
-Envelope is an object that describes a Message. Envelope has three main parts:
+Envelope describes a Message. Envelope has three main parts:
 #### From (Optional)
 Who sends this message. Do not set if message sender is an ingress.
 #### To (Mandatory)
