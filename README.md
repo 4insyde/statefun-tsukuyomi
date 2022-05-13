@@ -52,7 +52,9 @@ then(
     sendsInOrder(expectedToFunction),
     // Verifies that the function sends this message in any order.
     sends(expectedToEgress),
-    // Verifies that the function sends this message third.
+    // Verifies that the function sends this message in any order.
+    sends(expectedToEgress),
+    // Verifies that the function sends this message last.
     sendsInOrder(expectedToFunction),
 );
 ```
