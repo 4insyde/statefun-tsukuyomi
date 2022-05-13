@@ -23,6 +23,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static lombok.AccessLevel.PRIVATE;
 
+/**
+ * Envelope describes a message.
+ */
 @RequiredArgsConstructor(onConstructor_ = @JsonCreator)
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 @Builder(toBuilder = true)
@@ -47,24 +50,50 @@ public class Envelope implements Serializable {
     @JsonProperty("delay")
     Duration delay;
 
+    /**
+     * Parse Envelope from JSON.
+     *
+     * @param bytes Envelope serialized to JSON as bytes
+     * @return parsed Envelope
+     */
     public static Envelope fromJson(byte[] bytes) {
         return SerDe.deserialize(bytes, Envelope.class);
     }
 
+    /**
+     * Parse Envelope from JSON.
+     *
+     * @param json Envelope serialized to JSON as String
+     * @return parsed Envelope
+     */
     public static Envelope fromJson(String json) {
         return SerDe.deserialize(json, Envelope.class);
     }
 
+    /**
+     * Create Envelope from Message
+     *
+     * @param from    Who sends the message
+     * @param message The message to send
+     * @return new Envelope
+     */
     public static Envelope fromMessage(Address from, Message message) {
         String type = message.valueTypeName().asTypeNameString();
         String value = Base64.getEncoder().encodeToString(message.rawValue().toByteArray());
+        Address to = message.targetAddress();
         return Envelope.builder()
                 .from(from.type(), from.id())
-                .toFunction(message.targetAddress().type(), message.targetAddress().id())
+                .toFunction(to.type(), to.id())
                 .data(Data.of(type, value))
                 .build();
     }
 
+    /**
+     * Create Envelope from EgressMessage
+     *
+     * @param message The message to send
+     * @return new Envelope
+     */
     public static Envelope fromMessage(EgressMessage message) {
         String type = message.egressMessageValueType().asTypeNameString();
         String value = Base64.getEncoder().encodeToString(message.egressMessageValueBytes().toByteArray());
@@ -78,19 +107,38 @@ public class Envelope implements Serializable {
         renderersByType.clear();
     }
 
+    /**
+     * Serialize to JSON as bytes
+     * @return json bytes
+     */
     public byte[] toJson() {
         return SerDe.serialize(this);
     }
 
+    /**
+     * Serialize to JSON as string
+     * @return json string
+     */
     public String toJsonAsString() {
         return SerDe.serializeAsString(this);
     }
 
-    public <T> T extractData(Type<T> type) {
+    /**
+     * Extract value of the message
+     * @param type Type of the value
+     * @return extracted value
+     * @param <T> class of the value
+     */
+    public <T> T extractValue(Type<T> type) {
         byte[] bytes = Base64.getDecoder().decode(data.value);
         return type.typeSerializer().deserialize(Slices.wrap(bytes));
     }
 
+    /**
+     * Determine whether the value is of the given type.
+     * @param type Type to test
+     * @return True if the value is of the given type or false otherwise
+     */
     public boolean is(Type<?> type) {
         return data.type.equals(type.typeName().asTypeNameString());
     }

@@ -119,7 +119,7 @@ class EnvelopeTest {
                 .data(Types.stringType(), "Foo")
                 .build();
 
-        String actual = envelope.extractData(Types.stringType());
+        String actual = envelope.extractValue(Types.stringType());
 
         assertThat(actual).isEqualTo("Foo");
     }

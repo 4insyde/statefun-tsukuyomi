@@ -55,7 +55,7 @@ public class DispatcherBasedTsukuyomi implements TsukuyomiApi {
     public Optional<InvocationReport> getInvocationReport() {
         return new ArrayList<>(client.getReceived()).stream()
                 .filter(e -> e.is(InvocationReport.TYPE))
-                .map(e -> e.extractData(InvocationReport.TYPE))
+                .map(e -> e.extractValue(InvocationReport.TYPE))
                 .findAny();
     }
 }
