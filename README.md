@@ -4,7 +4,7 @@
 
 Statefun Tsukuyomi is a library for Java that enables narrowed integration testing of Flink Stateful Functions applications.
 
-## What's Tsukuyomi?
+## What does Tsukuyomi mean?
 
 Since you're observing this repo, you probably know what's Statefun. But what is Tsukuyomi? I borrowed the word from the fantastic world of "Naruto" where Tsukuyomi means a
 powerful ninja technique. It traps the opponent into an illusion that the opponent cannot identify.
