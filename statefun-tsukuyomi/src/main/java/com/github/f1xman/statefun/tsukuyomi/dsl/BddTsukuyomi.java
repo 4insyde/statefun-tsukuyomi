@@ -21,6 +21,12 @@ import static lombok.AccessLevel.PRIVATE;
 @NoArgsConstructor(access = PRIVATE)
 public class BddTsukuyomi {
 
+    /**
+     * Defines a function having a specific state
+     * @param function Function type and its instance
+     * @param states State values the function operates including empty ones
+     * @return A testable function
+     */
     public static GivenFunction given(TypedFunction function, StateSetter<?>... states) {
         if (function == null) {
             throw new NullTypedFunctionException("Use BddTsukuyomi.function(..) to define your function");
@@ -37,6 +43,12 @@ public class BddTsukuyomi {
         return GivenFunctionImpl.of(function, states, new TsukuyomiManagerImpl());
     }
 
+    /**
+     * Associates a function instance with its type
+     * @param type Type of the function
+     * @param instance Instance of the function
+     * @return TypedFunction
+     */
     public static TypedFunction function(TypeName type, StatefulFunction instance) {
         if (type == null) {
             throw new NullFunctionTypeNameException("Function under test must have a TypeName");
@@ -47,6 +59,13 @@ public class BddTsukuyomi {
         return TypedFunctionImpl.of(type, instance);
     }
 
+    /**
+     * Defines function state
+     * @param spec ValueSpec
+     * @param value Initial value
+     * @return StateSetter for given spec-value association
+     * @param <T> Class of value
+     */
     public static <T> StateSetter<T> withState(ValueSpec<T> spec, StateValue<T> value) {
         if (spec == null) {
             throw new NullValueSpecException("ValueSpec cannot be null");
@@ -57,6 +76,12 @@ public class BddTsukuyomi {
         return StateSetterImpl.of(spec, value.get());
     }
 
+    /**
+     * Interacts with the function
+     * @param givenFunction A function to interact with
+     * @param interactor {@link #receives(Envelope)}
+     * @return A {@link Then} instance that enables verification
+     */
     public static Then when(GivenFunction givenFunction, Interactor interactor) {
         if (givenFunction == null) {
             throw new NullGivenFunctionException(
@@ -69,6 +94,11 @@ public class BddTsukuyomi {
         return Then.of(givenFunction, interactor);
     }
 
+    /**
+     * Sends a message to a function under test
+     * @param envelope describes a message to send
+     * @return Instance of {@link Interactor} that sends a message to the function under test
+     */
     public static Interactor receives(Envelope envelope) {
         if (envelope == null) {
             throw new NullIncomingEnvelopeException(
@@ -84,6 +114,10 @@ public class BddTsukuyomi {
         GivenFunction function;
         Interactor interactor;
 
+        /**
+         * Verifies side effects of a function under test
+         * @param criterionFactories Required side effects {@link Criteria}
+         */
         void then(CriterionFactory... criterionFactories) {
             if (criterionFactories == null) {
                 throw new NullExpectationsException(
