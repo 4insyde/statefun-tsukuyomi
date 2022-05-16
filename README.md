@@ -73,9 +73,11 @@ then(
 </repository>
 ```
 ### Add dependency
+
 ```xml
+
 <dependency>
-    <groupId>com.github.f1xman.statefun.tsukuyomi</groupId>
+    <groupId>com.github.insyde.statefun.tsukuyomi</groupId>
     <artifactId>statefun-tsukuyomi</artifactId>
     <version>v0.1.0</version>
 </dependency>
