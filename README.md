@@ -77,7 +77,7 @@ then(
 ```xml
 
 <dependency>
-    <groupId>com.github.insyde.statefun.tsukuyomi</groupId>
+    <groupId>group.insyde.statefun.tsukuyomi</groupId>
     <artifactId>statefun-tsukuyomi</artifactId>
     <version>v0.1.0</version>
 </dependency>

@@ -89,7 +89,7 @@
                             <transformers>
                                 <transformer implementation=
                                                      "org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.github.insyde.statefun.tsukuyomi.dispatcher.Runner</mainClass>
+                                    <mainClass>group.insyde.statefun.tsukuyomi.dispatcher.Runner</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
