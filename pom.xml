@@ -6,8 +6,37 @@
 
     <groupId>group.insyde.statefun.tsukuyomi</groupId>
     <artifactId>statefun-tsukuyomi-parent</artifactId>
+    <version>0.2.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <version>v0.1.0</version>
+
+    <name>${project.groupId}:${project.artifactId}</name>
+    <description>Statefun Tsukuyomi is a library for Java that enables narrowed integration testing of Flink Stateful
+        Functions applications.
+    </description>
+    <url>https://github.com/4insyde/statefun-tsukuyomi</url>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>http://www.opensource.org/licenses/mit-license.php</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Tymur Yarosh</name>
+            <email>ti.yarosh@gmail.com</email>
+            <organization>INSYDE Group</organization>
+            <organizationUrl>https://github.com/4insyde</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git@github.com:4insyde/statefun-tsukuyomi.git</connection>
+        <developerConnection>scm:git:git@github.com:4insyde/statefun-tsukuyomi.git</developerConnection>
+        <url>https://github.com/4insyde/statefun-tsukuyomi</url>
+    </scm>
+
     <modules>
         <module>dispatcher</module>
         <module>statefun-tsukuyomi</module>
