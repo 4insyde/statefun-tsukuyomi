@@ -1,11 +1,11 @@
 # This workflow will build a package using Maven and then publish it to GitHub packages when a release is created
 # For more information see: https://github.com/actions/setup-java/blob/main/docs/advanced-usage.md#apache-maven-with-a-settings-path
 
-name: Maven Publish
+name: Maven Build & Publish
 
 on:
-  release:
-    types: [ published ]
+  push:
+    branches: [ master ]
 
 jobs:
   build:
@@ -17,6 +17,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
       - name: Set up JDK 11
         uses: actions/setup-java@v3
         with:
@@ -28,20 +29,28 @@ jobs:
           gpg-private-key: ${{ secrets.OSSRH_GPG_SECRET_KEY }}
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
           cache: maven
+
       - name: Compile Dispatcher
         run: mvn -pl dispatcher compile
+
       - name: Run Dispatcher unit tests
         run: mvn -pl dispatcher test
+
       - name: Package Dispatcher
         run: mvn -pl dispatcher package -DskipTests
+
       - name: Build Dispatcher Docker image
         run: mvn -pl dispatcher docker:build
+
       - name: Compile Tsukuyomi
         run: mvn -pl statefun-tsukuyomi compile
+
       - name: Run Tsukuyomi unit tests
         run: mvn -P unit-only -pl statefun-tsukuyomi test
+
       - name: Run Tsukuyomi integration tests
         run: mvn -P integration-only -pl statefun-tsukuyomi test
+
       - name: Prepare Docker properties
         id: prep
         run: |
@@ -49,18 +58,22 @@ jobs:
           VERSION=$(mvn exec:exec -Dexec.executable='echo' -Dexec.args='${project.version}' --non-recursive -q)
           TAG=${DOCKER_IMAGE}:${VERSION}
           echo ::set-output name=tag::${TAG}
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@master
         with:
           platforms: all
+
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@master
+
       - name: Login to DockerHub
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
+
       - name: Push Dispatcher Docker image
         uses: docker/build-push-action@v2
         with:
@@ -70,6 +83,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.prep.outputs.tag }}
+
       - id: publish-to-central
         name: Publish to Central Repository
         env:
