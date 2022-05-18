@@ -2,7 +2,7 @@
 
 ![](poster.png)
 
-Statefun Tsukuyomi is a library for Java that enables narrowed integration testing of Flink Stateful Functions applications.
+Statefun Tsukuyomi is a library for Java that enables narrow integration testing of Flink Stateful Functions applications.
 
 ## What does Tsukuyomi mean?
 
@@ -65,13 +65,7 @@ then(
 );
 ```
 ## Installation
-## Add repository
-```xml
-<repository>
-  <id>statefun-tsukuyomi</id>
-  <url>https://maven.pkg.github.com/f1xmAn/statefun-tsukuyomi</url>
-</repository>
-```
+Make sure you have Docker installed.
 ### Add dependency
 
 ```xml
@@ -79,7 +73,7 @@ then(
 <dependency>
     <groupId>group.insyde.statefun.tsukuyomi</groupId>
     <artifactId>statefun-tsukuyomi</artifactId>
-    <version>v0.1.0</version>
+    <version>0.2.0</version>
 </dependency>
 ```
 ## Usage
