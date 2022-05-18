@@ -65,10 +65,6 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.prep.outputs.tag }}
-      - name: Publish to GitHub Packages Apache Maven
-        run: mvn -pl statefun-tsukuyomi deploy -s $GITHUB_WORKSPACE/settings.xml
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
       - id: install-secret-key
         name: Install gpg secret key
         run: |
