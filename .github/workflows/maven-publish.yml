@@ -77,6 +77,7 @@ jobs:
           MAVEN_CENTRAL_TOKEN: ${{ secrets.OSSRH_TOKEN }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}
         run: |
+          cat /home/runner/.m2/settings.xml && \
           mvn \
             -pl statefun-tsukuyomi \
             -P release \
