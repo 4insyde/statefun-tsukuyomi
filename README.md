@@ -1,6 +1,7 @@
 # statefun-tsukuyomi
 
 ![](poster.png)
+[![Maven Central](https://img.shields.io/maven-central/v/group.insyde/statefun-tsukuyomi.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22group.insyde%22%20AND%20a:%22statefun-tsukuyomi%22)
 
 Statefun Tsukuyomi is a library for Java that enables narrow integration testing of Flink Stateful Functions applications.
 
@@ -58,14 +59,18 @@ then(
 ## Installation
 Make sure you have Docker installed.
 ### Add dependency
-
+#### Maven
 ```xml
-
 <dependency>
-    <groupId>group.insyde.statefun.tsukuyomi</groupId>
+    <groupId>group.insyde</groupId>
     <artifactId>statefun-tsukuyomi</artifactId>
     <version>0.2.0</version>
+    <scope>test</scope>
 </dependency>
+```
+#### Gradle
+```groovy
+testImplementation 'group.insyde:statefun-tsukuyomi:0.2.0'
 ```
 ## Usage
 
@@ -187,10 +192,18 @@ void verifiesThatTheFunctionSendsMessagesInOrderTheyExpected() {
 }
 ```
 ## What does Tsukuyomi mean?
-
 Since you're observing this repo, you probably know what's Statefun. But what is Tsukuyomi? I borrowed the word from the fantastic world of "Naruto" where Tsukuyomi means a
 powerful ninja technique. It traps the opponent into an illusion that the opponent cannot identify.
 
 This project does the same with the function under test — it puts the function into the fake environment with egresses and
 other functions. Those fake components capture function state and messages to provide the developer with a clean and
 nice verification API.
+
+## Snapshot repository
+```xml
+<repository>
+    <id>ossrh-snapshots</id>
+    <name>OSSRH Snapshots</name>
+    <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
+</repository>
+```
