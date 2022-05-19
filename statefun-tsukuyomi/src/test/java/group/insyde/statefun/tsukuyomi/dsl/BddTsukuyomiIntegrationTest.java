@@ -2,7 +2,6 @@ package group.insyde.statefun.tsukuyomi.dsl;
 
 import group.insyde.statefun.tsukuyomi.core.capture.Envelope;
 import group.insyde.statefun.tsukuyomi.core.validation.GivenFunction;
-import group.insyde.statefun.tsukuyomi.testutil.IntegrationTest;
 import group.insyde.statefun.tsukuyomi.core.capture.StateValue;
 import org.apache.flink.statefun.sdk.java.*;
 import org.apache.flink.statefun.sdk.java.message.EgressMessage;
@@ -20,7 +19,6 @@ import static group.insyde.statefun.tsukuyomi.dsl.BddTsukuyomi.*;
 import static group.insyde.statefun.tsukuyomi.dsl.Criteria.*;
 import static org.hamcrest.Matchers.is;
 
-@IntegrationTest
 class BddTsukuyomiIntegrationTest {
 
     static final TypeName COLLABORATOR_1 = TypeName.typeNameFromString("foo/collaborator-1");

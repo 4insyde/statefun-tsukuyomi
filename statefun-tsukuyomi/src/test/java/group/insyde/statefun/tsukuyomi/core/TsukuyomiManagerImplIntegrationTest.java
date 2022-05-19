@@ -5,7 +5,6 @@ import group.insyde.statefun.tsukuyomi.core.capture.FunctionDefinition;
 import group.insyde.statefun.tsukuyomi.core.capture.StatefunModule;
 import group.insyde.statefun.tsukuyomi.core.dispatcher.TsukuyomiApi;
 import group.insyde.statefun.tsukuyomi.core.validation.TsukuyomiManagerImpl;
-import group.insyde.statefun.tsukuyomi.testutil.IntegrationTest;
 import group.insyde.statefun.tsukuyomi.testutil.ServerUtils;
 import org.apache.flink.statefun.sdk.java.Context;
 import org.apache.flink.statefun.sdk.java.StatefulFunction;
@@ -26,8 +25,7 @@ import java.util.concurrent.CompletableFuture;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-@IntegrationTest
-class TsukuyomiManagerImplTest {
+class TsukuyomiManagerImplIntegrationTest {
 
     static final TypeName COLLABORATOR = TypeName.typeNameFromString("foo/collaborator");
     static final TypeName EGRESS = TypeName.typeNameFromString("foo/egress");
