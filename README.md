@@ -160,6 +160,10 @@ private Envelope incomingEnvelope() {
 ### Run test
 
 ```java
+// static imports are
+// import static group.insyde.statefun.tsukuyomi.dsl.BddTsukuyomi.*;
+// import static group.insyde.statefun.tsukuyomi.dsl.Criteria.*;
+
 @Test
 @Timeout(30)
 void verifiesThatTheFunctionSendsMessagesInOrderTheyExpected() {
