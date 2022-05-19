@@ -9,7 +9,36 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>dispatcher</artifactId>
+    <groupId>group.insyde</groupId>
+    <artifactId>statefun-tsukuyomi-dispatcher</artifactId>
+    <version>0.3.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>${project.groupId}:${project.artifactId}</name>
+    <description>Flink job that runs inside a Docker container and dispatches statefun-tsukuyomi messages</description>
+    <url>https://github.com/4insyde/statefun-tsukuyomi</url>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>http://www.opensource.org/licenses/mit-license.php</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Tymur Yarosh</name>
+            <email>ti.yarosh@gmail.com</email>
+            <organization>INSYDE Group</organization>
+            <organizationUrl>https://github.com/4insyde</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git@github.com:4insyde/statefun-tsukuyomi.git</connection>
+        <developerConnection>scm:git:git@github.com:4insyde/statefun-tsukuyomi.git</developerConnection>
+        <url>https://github.com/4insyde/statefun-tsukuyomi</url>
+    </scm>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
@@ -18,6 +47,13 @@
         <flink.version>1.14.4</flink.version>
         <docker-maven-plugin.version>0.39.1</docker-maven-plugin.version>
     </properties>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <dependencies>
         <!-- flink stateful functions -->
@@ -111,7 +147,7 @@
                     <filter>${*}</filter>
                     <images>
                         <image>
-                            <name>f1xman/statefun-tsukuyomi-dispatcher:${project.version}</name>
+                            <name>f1xman/${project.artifactId}:${project.version}</name>
                             <build>
                                 <from>openjdk:11</from>
                                 <assembly>
@@ -119,14 +155,16 @@
                                     <inline>
                                         <files>
                                             <file>
-                                                <source>${project.build.directory}/${project.name}-${project.version}-shaded.jar</source>
-                                                <destName>${project.name}.jar</destName>
+                                                <source>
+                                                    ${project.build.directory}/${project.artifactId}-${project.version}-shaded.jar
+                                                </source>
+                                                <destName>${project.artifactId}.jar</destName>
                                             </file>
                                         </files>
                                     </inline>
                                 </assembly>
                                 <cmd>
-                                    <shell>java -jar /opt/statefun-tsukuyomi/${project.name}.jar</shell>
+                                    <shell>java -jar /opt/statefun-tsukuyomi/${project.artifactId}.jar</shell>
                                 </cmd>
                             </build>
                         </image>
