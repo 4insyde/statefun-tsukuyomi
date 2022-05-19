@@ -26,17 +26,8 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Compile Dispatcher
-        run: mvn -pl dispatcher compile
-
-      - name: Run Dispatcher unit tests
-        run: mvn -pl dispatcher test
-
       - name: Package Dispatcher
-        run: mvn -pl dispatcher package -DskipTests
-
-      - name: Build Dispatcher Docker image
-        run: mvn -pl dispatcher docker:build
+        run: mvn -pl dispatcher package
 
       - name: Compile Tsukuyomi
         run: mvn -pl statefun-tsukuyomi compile
