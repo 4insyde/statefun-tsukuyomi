@@ -50,7 +50,6 @@
         <mockito.version>2.21.0</mockito.version>
         <version>${project.version}</version>
         <javatuples.version>1.2</javatuples.version>
-        <delombok.output>target/generated-sources/delombok</delombok.output>
     </properties>
 
     <distributionManagement>

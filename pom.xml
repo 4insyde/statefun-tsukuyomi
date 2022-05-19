@@ -54,6 +54,7 @@
         <undertow.version>2.2.16.Final</undertow.version>
         <logback-classic.version>1.2.11</logback-classic.version>
         <integration.test.pattern>**/*IntegrationTest</integration.test.pattern>
+        <delombok.output>target/generated-sources/delombok</delombok.output>
     </properties>
 
     <distributionManagement>
