@@ -64,13 +64,13 @@ Make sure you have Docker installed.
 <dependency>
     <groupId>group.insyde</groupId>
     <artifactId>statefun-tsukuyomi</artifactId>
-    <version>0.2.0</version>
+    <version>0.3.0</version>
     <scope>test</scope>
 </dependency>
 ```
 #### Gradle
 ```groovy
-testImplementation 'group.insyde:statefun-tsukuyomi:0.2.0'
+testImplementation 'group.insyde:statefun-tsukuyomi:0.3.0'
 ```
 ## Usage
 
