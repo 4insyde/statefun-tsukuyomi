@@ -119,7 +119,7 @@ public class BddTsukuyomi {
          * Verifies side effects of a function under test
          * @param criterionFactories Required side effects {@link Criteria}
          */
-        void then(CriterionFactory... criterionFactories) {
+        public void then(CriterionFactory... criterionFactories) {
             if (criterionFactories == null) {
                 throw new NullExpectationsException(
                         "Nothing to verify. Define your expectations using Criteria.*() in a then(..) block");
