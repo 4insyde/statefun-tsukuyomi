@@ -105,7 +105,6 @@
                         <goals>
                             <goal>build</goal>
                         </goals>
-                        <phase>package</phase>
                     </execution>
                 </executions>
                 <configuration>
@@ -113,6 +112,23 @@
                     <images>
                         <image>
                             <name>f1xman/statefun-tsukuyomi-dispatcher:${project.version}</name>
+                            <build>
+                                <from>openjdk:11</from>
+                                <assembly>
+                                    <targetDir>/opt/statefun-tsukuyomi</targetDir>
+                                    <inline>
+                                        <files>
+                                            <file>
+                                                <source>${project.build.directory}/${project.name}-${project.version}-shaded.jar</source>
+                                                <destName>${project.name}.jar</destName>
+                                            </file>
+                                        </files>
+                                    </inline>
+                                </assembly>
+                                <cmd>
+                                    <shell>java -jar /opt/statefun-tsukuyomi/${project.name}.jar</shell>
+                                </cmd>
+                            </build>
                         </image>
                     </images>
                 </configuration>
