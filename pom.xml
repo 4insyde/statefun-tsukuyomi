@@ -6,7 +6,7 @@
 
     <groupId>group.insyde</groupId>
     <artifactId>statefun-tsukuyomi-parent</artifactId>
-    <version>0.3.0</version>
+    <version>0.4.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>${project.groupId}:${project.artifactId}</name>
